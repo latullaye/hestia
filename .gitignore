@@ -1,0 +1,12 @@
+node_modules/
+dist/
+dev-dist/
+.env
+.env.*
+!.env.example
+*.local
+.DS_Store
+# Family data never goes in the repository (see docs/SETUP.md)
+supabase/seed/*.private.sql
+supabase/.temp/
+supabase/.branches/
