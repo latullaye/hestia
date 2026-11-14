@@ -1,5 +1,5 @@
 // Everything that is not a daily screen: birthdays, the activity log, settings, the kiosk view.
-import { Cake, ChevronRight, History, Inbox as InboxIcon, MonitorSmartphone, Settings } from "lucide-react";
+import { Cake, ChevronRight, Gift, History, Inbox as InboxIcon, MonitorSmartphone, Settings } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Empty, Segmented, SyncPill } from "../components/ui";
@@ -9,11 +9,12 @@ import { supabase } from "../lib/supabase";
 import { inboxOf } from "./Inbox";
 
 export function More() {
-  const { me } = useSession();
+  const { me, isAdult } = useSession();
   const { badge } = inboxOf(useTable("events"), useTable("notifications"), me);
   const links: { to: string; icon: JSX.Element; label: string; count?: number }[] = [
     { to: "/inbox", icon: <InboxIcon />, label: "Boîte de réception", count: badge },
-    { to: "/birthdays", icon: <Cake />, label: "Anniversaires de l'année" }, { to: "/journal", icon: <History />, label: "Journal et statistiques" },
+    { to: "/birthdays", icon: <Cake />, label: "Anniversaires de l'année" },
+    ...(isAdult ? [{ to: "/gifts", icon: <Gift />, label: "Cadeaux" }] : []), { to: "/journal", icon: <History />, label: "Journal et statistiques" },
     { to: "/kiosk", icon: <MonitorSmartphone />, label: "Vue kiosque" }, { to: "/settings", icon: <Settings />, label: "Réglages" },
   ];
   return (

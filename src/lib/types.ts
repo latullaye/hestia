@@ -22,19 +22,25 @@ export type Dish = Sync & { name: string; tags: string[]; courses: string[]; sou
 export type MealSlot = "breakfast" | "lunch" | "dinner";
 export type MealKind = "home" | "leftovers" | "restaurant" | "takeout" | "other";
 export type Meal = Sync & { date: string; slot: MealSlot; member_ids: string[]; dish_id: string | null; label: string | null; kind: MealKind; cook_ids: string[]; note: string | null };
-export type ShoppingList = Sync & { name: string; emoji: string | null; sort_order: number; show_on_kiosk: boolean };
+export type ShoppingList = Sync & { name: string; emoji: string | null; sort_order: number; show_on_kiosk: boolean; url?: string | null };
 export type ShoppingSection = Sync & { list_id: string; name: string; emoji: string | null; sort_order: number };
 export type ShoppingItem = Sync & { list_id: string; section_id: string | null; name: string; note: string | null; needed: boolean; needed_at?: string | null; purchased_at: string | null; purchase_count?: number; sort_order: number };
 export type TimeOfDay = "morning" | "afternoon" | "evening" | "anytime";
 export type Chore = Sync & { title: string; emoji: string | null; description: string | null; assignee_ids: string[]; assignment: "fixed" | "rotate"; schedule: Schedule; time_of_day: TimeOfDay; start_date: string; end_date: string | null; active: boolean; sort_order: number };
 export type Occurrence = Sync & { chore_id: string | null; title: string; emoji: string | null; due_date: string; due_until: string | null; time_of_day: TimeOfDay; assignee_ids: string[]; status: "todo" | "done" | "skipped"; done_by: string | null; done_at: string | null; note: string | null; created_by?: string | null };
+export type GiftPerson = Sync & { name: string; birthday_id: string | null; member_id: string | null; for_birthday: boolean; for_christmas: boolean; note: string | null };
+export type Occasion = "birthday" | "christmas";
+export type Gift = Sync & {
+  person_id: string; title: string; note: string | null; url: string | null; occasion: Occasion | null; year: number | null;
+  bought_at: string | null; bought_by: string | null; wish_id: string | null; created_by?: string | null;
+};
 export type Notification = { id: string; member_id: string; kind: string; title: string; body: string | null; url: string | null; data: Record<string, any>; read_at: string | null; created_at: string; updated_at?: string };
 
 export type Tables = {
   members: Member; settings: Setting; events: CalEvent; event_comments: EventComment; birthdays: Birthday; countdowns: Countdown; dishes: Dish;
   meal_plan: Meal; shopping_lists: ShoppingList; shopping_sections: ShoppingSection; shopping_items: ShoppingItem; chores: Chore;
-  chore_occurrences: Occurrence; notifications: Notification;
+  chore_occurrences: Occurrence; notifications: Notification; gift_people: GiftPerson; gifts: Gift;
 };
 export type TableName = keyof Tables;
 export const TABLES: TableName[] = ["members", "settings", "events", "event_comments", "birthdays", "countdowns", "dishes", "meal_plan", "shopping_lists",
-  "shopping_sections", "shopping_items", "chores", "chore_occurrences", "notifications"];
+  "shopping_sections", "shopping_items", "chores", "chore_occurrences", "notifications", "gift_people", "gifts"];

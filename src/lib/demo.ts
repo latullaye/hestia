@@ -58,6 +58,7 @@ export function demoTables(): Partial<{ [T in keyof Tables]: Tables[T][] }> {
   const lists: Tables["shopping_lists"][] = [
     { id: "l-1", name: "Épicerie", emoji: "shopping-cart", sort_order: 1, show_on_kiosk: true }, { id: "l-2", name: "Costco", emoji: "store", sort_order: 2, show_on_kiosk: true },
     { id: "l-3", name: "Pharmacie", emoji: "pill", sort_order: 3, show_on_kiosk: true },
+    { id: "l-4", name: "En ligne", emoji: "package", sort_order: 4, show_on_kiosk: false, url: "https://example.com/ma-liste" },
   ];
   const sectionNames: [string, string][] = [["Fruits & légumes", "salad"], ["Boulangerie", "croissant"], ["Viandes & poissons", "beef"], ["Produits laitiers & œufs", "milk"], ["Garde-manger", "wheat"], ["Produits congelés", "snowflake"], ["Ménage & hygiène", "spray-can"]];
   const sections: Tables["shopping_sections"][] = lists.slice(0, 2).flatMap((l) => sectionNames.map(([name, emoji], i) => ({ id: `${l.id}-s${i}`, list_id: l.id, name, emoji, sort_order: i + 1 })));
@@ -117,7 +118,25 @@ export function demoTables(): Partial<{ [T in keyof Tables]: Tables[T][] }> {
     { id: "n-2", member_id: alex, kind: "approval_decision", title: "Sam a approuvé", body: "Party de bureau\nVas-y, je garde Léo.", url: "#/inbox", data: {}, read_at: at(-1, "21:00"), created_at: at(-1, "20:10") },
   ];
   const event_comments: Tables["event_comments"][] = [{ id: "ec-1", event_id: events[1].id, author_id: sam, body: "Tu rentres pour le bain ?", created_at: at(0, "08:00") }];
-  return { members, settings, events, event_comments, birthdays, countdowns, dishes, meal_plan, shopping_lists: lists, shopping_sections: sections, shopping_items, chores, chore_occurrences, notifications };
+  const bdId = (name: string) => birthdays.find((b) => b.name === name)?.id ?? null;
+  const person = (pid: string, name: string, member: string | null, extra: Partial<Tables["gift_people"]> = {}): Tables["gift_people"] =>
+    ({ id: pid, name, birthday_id: bdId(name), member_id: member, for_birthday: true, for_christmas: true, note: null, ...extra });
+  const gift_people = [person("g-alex", "Alex", alex), person("g-sam", "Sam", sam), person("g-noah", "Noah", null, { for_christmas: false }),
+    person("g-jo", "Mamie Jo", null, { for_birthday: false }), person("g-leo", "Léo", null)];
+  const xmas = today.slice(5) <= "12-25" ? Number(today.slice(0, 4)) : Number(today.slice(0, 4)) + 1;
+  const gift = (pid: string, title: string, by: string, extra: Partial<Tables["gifts"]> = {}): Tables["gifts"] =>
+    ({ id: id("g"), person_id: pid, title, note: null, url: null, occasion: null, year: null, bought_at: null, bought_by: null, wish_id: null, created_by: by, ...extra });
+  const samWish = gift("g-sam", "Roman de science-fiction", sam);
+  const gifts = [
+    gift("g-noah", "Livre sur les dinosaures", alex, { occasion: "birthday", year: Number(d(4).slice(0, 4)), bought_at: at(-2, "15:00"), bought_by: alex }),
+    gift("g-noah", "Puzzle 100 pièces", sam, { occasion: "birthday", year: Number(d(4).slice(0, 4)) }),
+    gift("g-noah", "Lampe de poche", alex),
+    samWish, gift("g-sam", "Écharpe en laine", alex, { occasion: "christmas", year: xmas, note: "gris clair" }),
+    gift("g-sam", samWish.title, alex, { occasion: "christmas", year: xmas, wish_id: samWish.id }),
+    gift("g-alex", "Casque audio", alex, { note: "sans fil" }),
+    gift("g-jo", "Cadre photo", sam, { occasion: "christmas", year: xmas }), gift("g-jo", "Plaid", alex),
+  ];
+  return { members, settings, events, event_comments, birthdays, countdowns, dishes, meal_plan, shopping_lists: lists, shopping_sections: sections, shopping_items, chores, chore_occurrences, notifications, gift_people, gifts };
 }
 
 export function demoWeather(): Weather {

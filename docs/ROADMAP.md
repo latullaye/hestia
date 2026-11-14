@@ -3,7 +3,7 @@
 ## Ce qui existe (v0.1)
 
 Calendrier relié à Google Agenda avec approbations, repas et plats, courses par rayon, tâches régulières et ponctuelles,
-anniversaires, décomptes, kiosque, interphone, connecteur MCP, notifications push, journal, hors-ligne, mode démo.
+anniversaires, cadeaux, décomptes, kiosque, interphone, connecteur MCP, notifications push, journal, hors-ligne, mode démo.
 Détail : [FEATURES.md](FEATURES.md).
 
 ## État du déploiement
@@ -15,6 +15,7 @@ Détail : [FEATURES.md](FEATURES.md).
 
 | Idée | Notes pour qui s'y met |
 |---|---|
+| **Cadeaux pour Claude** (MCP, interphone) | Pas d'outil encore : chaque outil devra filtrer selon `c.actor` comme `private.gift_visible` (le serveur des outils lit tout), et rien côté kiosque, où l'on ne sait pas qui parle. |
 | **Vue mois** dans l'agenda et sur le kiosque | `eventsOn` par jour existe ; il manque la grille. |
 | **Transcription côté serveur** pour l'interphone | Pour les appareils sans reconnaissance vocale (Fire, iPad installé). `intercom` accepterait un audio ; il faut un service de transcription et sa clé. L'API de Claude ne prend pas l'audio. |
 | **Mot d'éveil** sur le kiosque (« Hestia… ») | Écoute continue : à étudier (vie privée, batterie, fiabilité du navigateur). |

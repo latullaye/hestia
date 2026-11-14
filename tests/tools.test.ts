@@ -73,6 +73,11 @@ describe("shopping", () => {
     expect(text).toContain("Fromager, Maraîcher");
     expect(await ok(c, "courses_ajouter", { articles: [{ nom: "Comté", rayon: "fromager" }], liste: "marché" })).toContain("Marché, Fromager");
   });
+  it("gives a list the link of the store's own list, and removes it", async () => {
+    expect(await ok(c, "courses_liste_enregistrer", { nom: "Marché", lien: "https://example.com/liste" })).toContain("Lien : https://example.com/liste");
+    expect(await ok(c, "courses_liste_enregistrer", { nom: "Marché", lien: "" })).not.toContain("Lien");
+    expect((await runTool("courses_liste_enregistrer", { nom: "Marché", lien: "pas un lien" }, c)).error).toBe(true);
+  });
 });
 
 describe("meals", () => {

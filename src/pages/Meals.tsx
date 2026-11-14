@@ -79,7 +79,6 @@ export function Meals() {
         </div>
       </>}
       {sheet && <MealSheet {...sheet} onClose={() => setSheet(null)} />}
-      {drag.ghost}
       {dish && <DishSheet dish={dish === "new" ? undefined : dish} onClose={() => setDish(null)} />}
     </div>
   );

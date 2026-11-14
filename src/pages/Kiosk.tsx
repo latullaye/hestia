@@ -16,9 +16,12 @@ import { useHousehold, useMembers, useNow, useTable } from "../lib/hooks";
 import { useMealDrag } from "../lib/mealDrag";
 import { useSession } from "../lib/session";
 import { store } from "../lib/store";
-import type { MealSlot, ShoppingItem } from "../lib/types";
+import type { CalEvent, MealSlot, ShoppingItem } from "../lib/types";
 import { describe, useWeather } from "../lib/weather";
 import { buy } from "./Shopping";
+
+// The hours the week columns stand for: earlier events sit at the top, later ones at the bottom
+const DAY_START = 7, DAY_END = 22;
 
 const WxIcon = ({ code }: { code: number }) => { const { Icon } = describe(code); return <Icon className="e" />; };
 
@@ -35,7 +38,7 @@ export function Kiosk() {
   const [offset, setOffset] = useState(0); // weeks from the current one
   const [eventId, setEventId] = useState<string | null>(null);
   const [meal, setMeal] = useState<{ date: string; slot: MealSlot } | null>(null);
-  const drag = useMealDrag();
+  const drag = useMealDrag({ instant: true });
   const [item, setItem] = useState<ShoppingItem | null>(null);
   const [intercom, setIntercom] = useState(false);
 
@@ -57,73 +60,90 @@ export function Kiosk() {
     return (
       <button className="m" {...drag.target(date, slot)} onClick={() => { if (!drag.justDropped()) setMeal({ date, slot }); }}>
         <b>{SLOT_LABEL[slot]}</b>
-        <span>{ms.length ? ms.map((m) => (
-          <span key={m.id} {...drag.item(m, mealName(m, dishMap) || "Plat")} className={`meal ${drag.item(m, "").className}`}><Glyph name={KIND_ICON[m.kind]} />{mealName(m, dishMap) || "?"}{m.member_ids.length ? <> <Avatars ids={m.member_ids} members={members} size="sm" /></> : null}
-            {m.cook_ids.length ? <> <Glyph name="chef-hat" /><Avatars ids={m.cook_ids} members={members} size="sm" /></> : null}</span>
-        )) : <span className="muted">—</span>}</span>
+        {ms.length ? ms.map((m) => {
+          const name = mealName(m, dishMap) || "Plat à choisir";
+          const it = drag.item(m, name);
+          return (
+            <span key={m.id} {...it} className={`meal ${it.className}`}><Glyph name={KIND_ICON[m.kind]} />{name}
+              {m.member_ids.length ? <> <Avatars ids={m.member_ids} members={members} size="sm" /></> : null}
+              {m.cook_ids.length ? <> <Glyph name="chef-hat" /><Avatars ids={m.cook_ids} members={members} size="sm" /></> : null}</span>
+          );
+        }) : <span className="muted add">+</span>}
+      </button>
+    );
+  };
+  // Events sit roughly where they fall in the day: the free height is shared out in proportion to the hours between them
+  const dayBody = (d: string, evs: CalEvent[]) => {
+    const out: JSX.Element[] = [];
+    let cursor = DAY_START;
+    for (const e of evs.filter((x) => !x.all_day)) {
+      const t = partsIn(Date.parse(e.starts_at), tz), h = t.day < d ? DAY_START : Math.min(DAY_END, Math.max(DAY_START, Number(t.time.slice(0, 2)) + Number(t.time.slice(3)) / 60));
+      out.push(<span key={`gap-${e.id}`} className="kgap" style={{ flexGrow: Math.max(0, h - cursor) }} />);
+      out.push(eventCard(e));
+      cursor = Math.max(cursor, h);
+    }
+    out.push(<span key="gap-end" className="kgap" style={{ flexGrow: Math.max(0.5, DAY_END - cursor) }} />);
+    return out;
+  };
+  const eventCard = (e: CalEvent) => {
+    const alone = uncared(e, members.all);
+    return (
+      <button key={e.id} className={`kevent ${e.status} ${e.kind} ${alone.length ? "alert" : ""}`} onClick={() => setEventId(e.id)}>
+        <span className="t">{e.status === "pending" && <Glyph name="hourglass" />}{e.all_day ? "Journée" : startTime(e, tz)}</span>
+        <span className="n">{e.title}</span>
+        {(e.participant_ids.length > 0 || alone.length > 0) && <span className="w"><Avatars ids={e.participant_ids} members={members} size="sm" />
+          {e.caregiver_ids.length > 0 && <span className="care">avec <Avatars ids={e.caregiver_ids} members={members} size="sm" /></span>}
+          {alone.length > 0 && <span className="tag warn">avec qui ?</span>}</span>}
       </button>
     );
   };
 
   return (
     <div className="kiosk">
-      <div className="kiosk-main">
-        <div className="kiosk-head">
-          <span className="clock">{Number(local.time.slice(0, 2))} h {local.time.slice(3)}</span>
-          <span className="date grow">{cap(fmtDay(today, { weekday: "long", month: "long" }))}</span>
-          <div className="kwho" title="Qui est là ?">
-            <UserRound size={18} className="muted" />
-            {members.family.filter((m) => !m.needs_caregiver).map((m) => (
-              <button key={m.id} className={acting?.id === m.id ? "on" : ""} onClick={() => setActing(acting?.id === m.id ? null : m)} aria-label={m.name}><Avatar member={m} /></button>
-            ))}
-          </div>
-          <SyncPill />
-          <button className="icon-btn" onClick={() => setOffset(offset - 1)} aria-label="Semaine précédente"><ChevronLeft /></button>
-          {offset !== 0 && <button className="btn small" onClick={() => setOffset(0)}>Aujourd'hui</button>}
-          <button className="icon-btn" onClick={() => setOffset(offset + 1)} aria-label="Semaine suivante"><ChevronRight /></button>
+      <div className="kiosk-head">
+        <span className="clock">{Number(local.time.slice(0, 2))} h {local.time.slice(3)}</span>
+        <span className="date">{cap(fmtDay(today, { weekday: "long", month: "long" }))}</span>
+        {weather && w && (
+          <span className="kweather"><w.Icon className="e" /><span className="big">{Math.round(weather.current.temperature)}°</span>
+            <span className="small"><b>{w.text}</b><br /><span className="muted">Ressenti {Math.round(weather.current.feels)}° · {place.label}</span></span></span>
+        )}
+        <span className="grow" />
+        <div className="kwho" title="Qui est là ?">
+          <UserRound size={18} className="muted" />
+          {members.family.filter((m) => !m.needs_caregiver).map((m) => (
+            <button key={m.id} className={acting?.id === m.id ? "on" : ""} onClick={() => setActing(acting?.id === m.id ? null : m)} aria-label={m.name}><Avatar member={m} /></button>
+          ))}
         </div>
-        <div className="kiosk-week">
-          {days.map((d) => {
-            const wx = weather?.days.find((x) => x.date === d), bds = birthdaysOn(birthdays, d), evs = eventsOn(events, d, tz);
-            const todo = d === today ? [] : occurrencesOn(occurrences, d, tz, today).filter((o) => !o.chore_id || !everyDay.has(o.chore_id));
-            return (
-              <div key={d} className={`kday ${d === today ? "today" : ""} ${d < today ? "past" : ""}`}>
-                <div className="kday-head">
-                  <div><div className="dow">{fmtDay(d, { day: undefined, month: undefined })}</div><div className="dom">{Number(d.slice(8))}</div></div>
-                  {wx && <div className="wx"><WxIcon code={wx.code} />{Math.round(wx.max)}° / {Math.round(wx.min)}°</div>}
-                </div>
-                <div className="kday-body">
-                  {bds.map((b) => <div key={b.id} className="kbday"><Glyph name={BIRTHDAY_ICON[b.kind]} />{b.name}{b.year && b.kind !== "memorial" ? ` · ${Number(d.slice(0, 4)) - b.year} ans` : ""}</div>)}
-                  {evs.map((e) => {
-                    const alone = uncared(e, members.all);
-                    return (
-                      <button key={e.id} className={`kevent ${e.status} ${e.kind} ${alone.length ? "alert" : ""}`} onClick={() => setEventId(e.id)}>
-                        <span className="t">{e.status === "pending" && <Glyph name="hourglass" />}{e.all_day ? "Journée" : startTime(e, tz)}</span>
-                        <span className="n">{e.title}</span>
-                        {(e.participant_ids.length > 0 || alone.length > 0) && <span className="w"><Avatars ids={e.participant_ids} members={members} size="sm" />
-                          {e.caregiver_ids.length > 0 && <span className="care">avec <Avatars ids={e.caregiver_ids} members={members} size="sm" /></span>}
-                          {alone.length > 0 && <span className="tag warn">avec qui ?</span>}</span>}
-                      </button>
-                    );
-                  })}
-                  {!evs.length && !bds.length && <span className="muted small" style={{ padding: "2px 4px" }}>—</span>}
-                  {todo.length > 0 && <div className="kday-chores"><Glyph name="list-checks" />{todo.map((o) => o.title).join(" · ")}</div>}
-                </div>
-                <div className="kday-meals">{mealRow(d, "lunch")}{mealRow(d, "dinner")}</div>
-              </div>
-            );
-          })}
-        </div>
+        <SyncPill />
+        <button className="icon-btn" onClick={() => setOffset(offset - 1)} aria-label="Semaine précédente"><ChevronLeft /></button>
+        {offset !== 0 && <button className="btn small" onClick={() => setOffset(0)}>Aujourd'hui</button>}
+        <button className="icon-btn" onClick={() => setOffset(offset + 1)} aria-label="Semaine suivante"><ChevronRight /></button>
       </div>
 
-      <div className="kiosk-side">
-        {weather && w && (
-          <div className="kcard">
-            <div className="kweather"><w.Icon className="e" /><span className="big">{Math.round(weather.current.temperature)}°</span>
-              <span className="small"><b>{w.text}</b><br /><span className="muted">Ressenti {Math.round(weather.current.feels)}° · {place.label}</span></span></div>
-          </div>
-        )}
-        <div className="kcard scroll" style={{ flexGrow: 1.2 }}>
+      <div className="kiosk-week">
+        {days.map((d) => {
+          const wx = weather?.days.find((x) => x.date === d), bds = birthdaysOn(birthdays, d), evs = eventsOn(events, d, tz);
+          const todo = d === today ? [] : occurrencesOn(occurrences, d, tz, today).filter((o) => !o.chore_id || !everyDay.has(o.chore_id));
+          return (
+            <div key={d} className={`kday ${d === today ? "today" : ""} ${d < today ? "past" : ""}`}>
+              <div className="kday-head">
+                <div><div className="dow">{fmtDay(d, { day: undefined, month: undefined })}</div><div className="dom">{Number(d.slice(8))}</div></div>
+                {wx && <div className="wx"><WxIcon code={wx.code} />{Math.round(wx.max)}° / {Math.round(wx.min)}°</div>}
+              </div>
+              <div className="kday-body">
+                {bds.map((b) => <div key={b.id} className="kbday"><Glyph name={BIRTHDAY_ICON[b.kind]} />{b.name}{b.year && b.kind !== "memorial" ? ` · ${Number(d.slice(0, 4)) - b.year} ans` : ""}</div>)}
+                {evs.filter((e) => e.all_day).map(eventCard)}
+                {dayBody(d, evs)}
+                {todo.length > 0 && <div className="kday-chores"><Glyph name="list-checks" />{todo.map((o) => o.title).join(" · ")}</div>}
+              </div>
+              <div className="kday-meals">{mealRow(d, "lunch")}{mealRow(d, "dinner")}</div>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="kiosk-bottom">
+        <div className="kcard scroll">
           <h3><ListChecks size={15} />Tâches du jour</h3>
           {chores.map((o) => (
             <button key={o.id} className="kline" onClick={() => toggleOccurrence(o, acting?.id ?? null)}>
@@ -132,7 +152,7 @@ export function Kiosk() {
           ))}
           {!chores.length && <span className="muted">Rien à faire.</span>}
         </div>
-        <div className="kcard scroll" style={{ flexGrow: 1.4 }}>
+        <div className="kcard scroll">
           <h3><ShoppingCart size={15} />À acheter</h3>
           {shopping.map(({ l, mine }) => (
             <div key={l.id}><b className="small"><Glyph name={l.emoji} />{l.name}</b>
@@ -140,25 +160,26 @@ export function Kiosk() {
           ))}
           {!shopping.length && <span className="muted">Rien à acheter.</span>}
         </div>
-        {(soon.length > 0 || cds.length > 0) && (
-          <div className="kcard scroll">
-            {soon.length > 0 && <><h3><Glyph name="cake" />Bientôt</h3>{soon.slice(0, 5).map((b) => <div key={b.id} className="kline"><span className="grow">{b.name}{b.age != null ? ` · ${b.age} ans` : ""}</span><span className="tag">{inDays(b.in)}</span></div>)}</>}
-            {cds.map((c) => <div key={c.id} className="kcount"><span className="num">{c.in}</span><span>jour{c.in > 1 ? "s" : ""} avant <b><Glyph name={c.emoji} />{c.title}</b></span></div>)}
-          </div>
-        )}
-        <div className="row">
-          <Link className="icon-btn" to="/calendar" aria-label="Calendrier"><CalendarDays /></Link>
-          <Link className="icon-btn" to="/meals" aria-label="Repas"><CookingPot /></Link>
-          <Link className="icon-btn" to="/shopping" aria-label="Courses"><ShoppingCart /></Link>
-          <Link className="icon-btn" to="/chores" aria-label="Tâches"><ListChecks /></Link>
-          {!isKiosk && <Link className="btn small right" to="/">Quitter</Link>}
+        <div className="kcard scroll">
+          <h3><Glyph name="cake" />Bientôt</h3>
+          {soon.slice(0, 6).map((b) => <div key={b.id} className="kline"><span className="grow">{b.name}{b.age != null ? ` · ${b.age} ans` : ""}</span><span className="tag">{inDays(b.in)}</span></div>)}
+          {cds.map((c) => <div key={c.id} className="kcount"><span className="num">{c.in}</span><span>jour{c.in > 1 ? "s" : ""} avant <b><Glyph name={c.emoji} />{c.title}</b></span></div>)}
+          {!soon.length && !cds.length && <span className="muted">Rien dans les 3 semaines.</span>}
         </div>
-        <button className="kiosk-intercom" onClick={() => setIntercom(true)}><Mic />Interphone</button>
+        <div className="kiosk-actions">
+          <div className="row">
+            <Link className="icon-btn" to="/calendar" aria-label="Calendrier"><CalendarDays /></Link>
+            <Link className="icon-btn" to="/meals" aria-label="Repas"><CookingPot /></Link>
+            <Link className="icon-btn" to="/shopping" aria-label="Courses"><ShoppingCart /></Link>
+            <Link className="icon-btn" to="/chores" aria-label="Tâches"><ListChecks /></Link>
+            {!isKiosk && <Link className="btn small right" to="/">Quitter</Link>}
+          </div>
+          <button className="kiosk-intercom" onClick={() => setIntercom(true)}><Mic />Interphone</button>
+        </div>
       </div>
 
       {eventId && <EventSheet id={eventId} onClose={() => setEventId(null)} />}
       {meal && <MealSheet {...meal} onClose={() => setMeal(null)} />}
-      {drag.ghost}
       {intercom && <IntercomPanel onClose={() => setIntercom(false)} />}
       {item && (
         <Sheet title={item.name} onClose={() => setItem(null)}>
