@@ -194,7 +194,7 @@ textarea.input { min-height: 84px; resize: vertical; line-height: 1.4; }
 .login { min-height: 100%; display: grid; place-items: center; padding: 24px; }
 .login form { width: 100%; max-width: 360px; display: flex; flex-direction: column; gap: 12px; }
 .logo { font-family: var(--font-display); font-weight: 700; font-size: 2.2rem; letter-spacing: -0.02em; color: var(--accent); display: flex; align-items: center; gap: 10px; }
-.logo img { width: 48px; height: 48px; border-radius: 12px; }
+.logo .wordmark { display: block; max-width: 100%; }
 
 /* ---------- Kiosk (landscape tablet in the kitchen) ---------- */
 .kiosk { height: 100dvh; display: grid; grid-template-columns: minmax(0, 1fr) clamp(250px, 24vw, 340px); gap: 12px; padding: calc(10px + var(--safe-top)) 12px 12px; overflow: hidden; font-size: clamp(13px, 1.25vw, 17px); }

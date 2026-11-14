@@ -4,6 +4,7 @@
 import { CalendarDays, CookingPot, House, ListChecks, Menu, MonitorSmartphone, ShoppingCart } from "lucide-react";
 import { useEffect } from "react";
 import { HashRouter, Navigate, NavLink, Outlet, Route, Routes, useLocation, useNavigate } from "react-router-dom";
+import { Wordmark } from "./components/icons";
 import { InstallBanner } from "./components/InstallBanner";
 import { IntercomFab } from "./components/Intercom";
 import { Toaster } from "./components/ui";
@@ -55,7 +56,7 @@ function Shell() {
 
 function Routed() {
   const { loading, signedIn, me, isKiosk, demo } = useSession();
-  if (loading) return <div className="login"><div className="logo">Hestia</div></div>;
+  if (loading) return <div className="login"><div className="logo"><Wordmark /></div></div>;
   if (!signedIn) return <Login />;
   if (!me) return <NotLinked />;
   const home = isKiosk ? <Navigate to="/kiosk" replace /> : <Today />;

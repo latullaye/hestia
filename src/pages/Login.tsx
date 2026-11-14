@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Wordmark } from "../components/icons";
 import { InstallBanner } from "../components/InstallBanner";
 import { useSession } from "../lib/session";
 import { supabase } from "../lib/supabase";
@@ -18,7 +19,7 @@ export function Login() {
       <InstallBanner />
       <div className="login">
         <form onSubmit={submit}>
-          <div className="logo"><img src="icons/icon-192.png" alt="" />Hestia</div>
+          <div className="logo"><Wordmark height={84} /></div>
           <p className="muted">La maison en un coup d'œil.</p>
           <input className="input" type="email" autoComplete="username" placeholder="Courriel" value={email} onChange={(e) => setEmail(e.target.value)} required />
           <input className="input" type="password" autoComplete="current-password" placeholder="Mot de passe" value={password} onChange={(e) => setPassword(e.target.value)} required />
@@ -36,7 +37,7 @@ export function NotLinked() {
   const { email, signOut } = useSession();
   return (
     <div className="login"><div className="col" style={{ maxWidth: 420 }}>
-      <div className="logo">Hestia</div>
+      <div className="logo"><Wordmark /></div>
       <p>Le compte <b>{email}</b> n'est pas encore relié à un membre de la famille.</p>
       <p className="muted small">Un adulte de la famille doit relier ce compte (voir docs/SETUP.md, « Relier les comptes »). Si c'est déjà fait, vérifie ta connexion et réessaie.</p>
       <button className="btn" onClick={() => location.reload()}>Réessayer</button>
