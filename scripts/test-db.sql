@@ -212,6 +212,41 @@ do $$ begin
 end $$;
 rollback;
 
+-- ---------- Gifts: hidden from the person they are for, unless they wrote it; the kiosk sees none ----------
+insert into public.gift_people (id, name, member_id, updated_via) values
+  ('60000000-0000-0000-0000-000000000001', 'Sam', '10000000-0000-0000-0000-000000000002', 'system'),
+  ('60000000-0000-0000-0000-000000000002', 'Mamie', null, 'system');
+set role authenticated;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-0000000000a1', false);
+insert into public.gifts (id, person_id, title, occasion, year, created_by) values
+  ('61000000-0000-0000-0000-000000000001', '60000000-0000-0000-0000-000000000001', 'Surprise pour Sam', 'christmas', 2026, '10000000-0000-0000-0000-000000000002'),
+  ('61000000-0000-0000-0000-000000000002', '60000000-0000-0000-0000-000000000002', 'Écharpe', null, null, null);
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-0000000000a2', false);
+insert into public.gifts (id, person_id, title) values ('61000000-0000-0000-0000-000000000003', '60000000-0000-0000-0000-000000000001', 'Envie de Sam');
+do $$ begin
+  assert (select count(*) from public.gifts) = 2, 'Sam sees the idea for Mamie and their own wish, not the surprise';
+  assert not exists (select 1 from public.gifts where id = '61000000-0000-0000-0000-000000000001'), 'the surprise is hidden from Sam';
+  update public.gifts set title = 'Gâché' where id = '61000000-0000-0000-0000-000000000001';
+end $$;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-0000000000a1', false);
+do $$ begin
+  assert (select count(*) from public.gifts) = 3, 'Alex sees everything about Sam and Mamie';
+  assert (select created_by from public.gifts where id = '61000000-0000-0000-0000-000000000001') = '10000000-0000-0000-0000-000000000001', 'created_by cannot be forged';
+  assert (select title from public.gifts where id = '61000000-0000-0000-0000-000000000001') = 'Surprise pour Sam', 'Sam could not change a hidden present';
+end $$;
+update public.gifts set bought_at = now() where id = '61000000-0000-0000-0000-000000000002';
+do $$ begin
+  assert (select bought_by from public.gifts where id = '61000000-0000-0000-0000-000000000002') = '10000000-0000-0000-0000-000000000001', 'bought_by';
+end $$;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-0000000000a9', false);
+do $$ begin
+  assert (select count(*) from public.gifts) = 0 and (select count(*) from public.gift_people) = 0, 'the kiosk sees no gifts';
+end $$;
+reset role;
+do $$ begin
+  assert (select count(*) from public.activity_log where entity_type in ('gifts', 'gift_people')) = 0, 'gifts never reach the shared log';
+end $$;
+
 -- ---------- A member removed for good: nothing blocks, their name leaves the rows ----------
 -- (rolled back: the tool tests that follow use the same family)
 begin;

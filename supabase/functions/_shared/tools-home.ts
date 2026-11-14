@@ -209,7 +209,7 @@ const mealTools = [
 // Shopping
 // ====================================================================================================================
 export async function shoppingLists(c: Ctx): Promise<Row[]> {
-  return await c.db.all(`select id, name, emoji, sort_order from public.shopping_lists where deleted_at is null order by sort_order, name`);
+  return await c.db.all(`select id, name, emoji, sort_order, url from public.shopping_lists where deleted_at is null order by sort_order, name`);
 }
 export async function shoppingSections(c: Ctx): Promise<Row[]> {
   return await c.db.all(`select id, list_id, name, emoji, sort_order from public.shopping_sections where deleted_at is null order by sort_order, name`);
@@ -358,10 +358,11 @@ const shoppingTools = [
   tool({
     name: "courses_liste_enregistrer",
     title: "Créer ou organiser une liste de courses",
-    description: "Crée une liste (ou retrouve celle qui porte ce nom) et, avec « rayons », fixe ses rayons dans l'ordre où on les parcourt en magasin (les rayons absents de la liste donnée sont gardés, à la suite).",
-    shape: { nom: z.string().min(1), icone: iconArg.optional(), rayons: z.array(z.string().min(1)).optional() },
+    description: "Crée une liste (ou retrouve celle qui porte ce nom) et, avec « rayons », fixe ses rayons dans l'ordre où on les parcourt en magasin (les rayons absents de la liste donnée sont gardés, à la suite). « lien » : l'adresse de la liste chez le magasin (liste Amazon…) ; une chaîne vide l'enlève.",
+    shape: { nom: z.string().min(1), icone: iconArg.optional(), rayons: z.array(z.string().min(1)).optional(), lien: z.string().optional() },
     write: true,
-    run: async ({ nom, icone, rayons }, c) => {
+    run: async ({ nom, icone, rayons, lien }, c) => {
+      if (lien?.trim() && !/^https?:\/\/\S+$/i.test(lien.trim())) fail("Le lien doit commencer par https://.");
       const lists = await shoppingLists(c);
       let l = lists.find((x) => norm(x.name) === norm(nom));
       if (!l) {
@@ -370,6 +371,9 @@ const shoppingTools = [
         l = { id: row.id, name: nom.trim() };
       } else if (icone) {
         await c.db.exec(`update public.shopping_lists set emoji = $2, updated_by = $3::uuid, updated_via = $4 where id = $1::uuid`, [l.id, icone, actorId(c), c.via]);
+      }
+      if (lien != null) {
+        await c.db.exec(`update public.shopping_lists set url = $2, updated_by = $3::uuid, updated_via = $4 where id = $1::uuid`, [l.id, lien.trim() || null, actorId(c), c.via]);
       }
       if (rayons?.length) {
         const mine = (await shoppingSections(c)).filter((s) => s.list_id === l!.id);
@@ -385,7 +389,8 @@ const shoppingTools = [
         }
       }
       const sections = (await shoppingSections(c)).filter((s) => s.list_id === l.id);
-      return `Liste ${l.name} : ${sections.length ? `rayons, dans l'ordre : ${sections.map((s) => s.name).join(", ")}` : "sans rayon"}.`;
+      const url = (await c.db.one(`select url from public.shopping_lists where id = $1::uuid`, [l.id]))?.url;
+      return `Liste ${l.name} : ${sections.length ? `rayons, dans l'ordre : ${sections.map((s) => s.name).join(", ")}` : "sans rayon"}.${url ? ` Lien : ${url}` : ""}`;
     },
   }),
 ];

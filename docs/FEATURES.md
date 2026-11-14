@@ -39,7 +39,7 @@ Ce que fait chaque partie, et les règles qui ne se voient pas à l'écran. À t
 - **Restes** : ce type propose ce qui a été cuisiné à la maison dans les 7 jours avant le repas, ou une saisie libre.
 - **Déplacer un plat** : on le glisse vers un autre repas, dans l'écran *Repas* comme sur le kiosque. À la souris, le
   glissement part tout de suite ; au doigt, il faut garder le plat appuyé un instant (un simple balayage fait défiler la
-  page). Le code est dans `src/lib/mealDrag.tsx`.
+  page ; sur le kiosque, le plat part dès qu'on bouge). Le code est dans `src/lib/mealDrag.tsx`.
 - **Nos plats** : nom, ingrédients, recette, tags, favori, **service** (entrée, plat principal, accompagnement, dessert,
   déjeuner, boisson ; plusieurs possibles), **source** (une personne, un livre) et lien. La liste se filtre par service
   et se cherche par nom, tag, source ou ingrédient.
@@ -55,6 +55,8 @@ Ce que fait chaque partie, et les règles qui ne se voient pas à l'écran. À t
 - En magasin : la liste montre ce qui est à acheter, par rayon ; cocher = acheté (journal : qui, quand). Ce qui vient
   d'être coché reste visible, barré, pour se corriger.
 - « Pas besoin » retire de la liste sans noter d'achat.
+- **Lien** (facultatif, Organiser la liste) : l'adresse de la liste chez le magasin (une liste Amazon…). Un bouton en
+  haut de la liste l'ouvre. Claude peut le poser aussi (`courses_liste_enregistrer`, « lien »).
 - Journal › Courses : les articles les plus achetés ; par Claude : la fréquence d'achat d'un article.
 
 ## Tâches ménagères
@@ -75,14 +77,34 @@ Ce que fait chaque partie, et les règles qui ne se voient pas à l'écran. À t
   cadeaux. Les dates « en mémoire » sont à part et ne sont pas annoncées comme des fêtes.
 - Sur le kiosque : le jour même en haut de la colonne ; « Bientôt » pour les 3 semaines à venir.
 
+## Cadeaux
+
+Plus › **Cadeaux** (adultes seulement ; le kiosque ne les voit pas). Écran : `src/pages/Gifts.tsx`, règles : `src/lib/gifts.ts`.
+
+- **Personnes** : celles à qui la famille offre des cadeaux, avec, pour chacune, *son anniversaire*, *Noël* ou les deux.
+  La date d'anniversaire vient de la liste des anniversaires ; « Utilise Hestia » relie la personne à un membre.
+- **Dans les 2 prochains mois** : chaque anniversaire et Noël qui approchent, avec, par personne, les cadeaux prévus (à
+  cocher une fois achetés), ses idées en attente (un toucher les prévoit pour l'occasion) et une ligne pour en ajouter.
+  « Rien de prévu » en ambre quand il reste à trouver.
+- Une fiche par personne : ses idées, ce qui a été prévu et offert les années passées ; une fiche par cadeau : précision,
+  lien, occasion.
+- **Confidentialité** : ce qu'on prévoit pour une personne qui utilise Hestia lui est **caché** (le serveur le filtre :
+  `private.gift_visible`). Ce qu'elle écrit pour elle-même est une **envie**, que les autres voient ; quand l'un d'eux la
+  prévoit ou l'achète, Hestia en fait une copie cachée, et l'envie reste intacte chez elle. Les cadeaux ne passent pas
+  par le journal, que toute la famille lit.
+
 ## Kiosque
 
-- La semaine à venir en 7 colonnes à partir d'aujourd'hui (flèches pour avancer ou reculer ; retour à aujourd'hui après
-  3 minutes). Par jour : météo, anniversaires, événements (avatars des personnes, « avec » l'accompagnateur, `⏳`), tâches
-  particulières du jour, dîner et souper (avec qui cuisine).
+- En haut : l'heure, la date, la météo du moment, « Qui est là ? », la semaine (flèches).
+- La semaine à venir en 7 colonnes sur toute la largeur, à partir d'aujourd'hui (retour à aujourd'hui après 3 minutes).
+  Par jour : météo, anniversaires, événements, tâches particulières du jour, puis **dîner** et **souper** en deux grandes
+  cases. Les événements sont placés **selon l'heure** : le matin en haut, le soir en bas (l'espace libre est partagé en
+  proportion des heures qui les séparent, de 7 h à 22 h ; ils ne se chevauchent jamais).
+- Glisser un plat d'une case repas à une autre le déplace : il suit le doigt dès qu'on bouge (un simple toucher ouvre le
+  repas).
 - Plein écran automatique à l'ouverture (ou au premier toucher) : voir [KIOSK.md](KIOSK.md).
-- À droite : météo du moment, tâches du jour à cocher, à acheter (toucher : acheté ou pas besoin), anniversaires à venir,
-  décomptes, accès aux autres écrans, **Interphone**.
+- En bas : tâches du jour à cocher, à acheter (toucher : acheté ou pas besoin), anniversaires à venir et décomptes, accès
+  aux autres écrans, **Interphone**.
 - L'écran reste allumé ; l'app se met à jour toute seule ; hors ligne, elle montre la dernière copie.
 
 ## Interphone

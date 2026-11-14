@@ -1,6 +1,6 @@
 // Shopping lists. In the store: what is needed, grouped by aisle in walking order, big boxes to tick. At home: add an
 // item (known ones come back with a tap), tidy the aisles.
-import { ArrowDown, ArrowUp, Plus, Settings2, Trash2, Undo2 } from "lucide-react";
+import { ArrowDown, ArrowUp, ExternalLink, Plus, Settings2, Trash2, Undo2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { norm } from "@shared/time.ts";
@@ -56,6 +56,7 @@ export function Shopping() {
         const n = allItems.filter((i) => i.list_id === l.id && i.needed).length;
         return <button key={l.id} className={`chip ${l.id === list.id ? "on" : ""}`} onClick={() => navigate(`/shopping/${l.id}`)}><Glyph name={l.emoji} />{l.name}{n ? ` · ${n}` : ""}</button>;
       })}</div>
+      {list.url && <a className="btn" href={list.url} target="_blank" rel="noreferrer"><ExternalLink />Ouvrir la liste {list.name} ({host(list.url)})</a>}
       <form className="row" onSubmit={(e) => { e.preventDefault(); add(); }}>
         <input className="input grow" placeholder={`Ajouter à ${list.name}…`} value={text} onChange={(e) => setText(e.target.value)} enterKeyHint="done" />
         <button className="btn primary" disabled={!text.trim()}><Plus />Ajouter</button>
@@ -110,6 +111,13 @@ function ItemSheet({ item, lists, sections, onClose }: { item: ShoppingItem; lis
 // The list itself: its name, its aisles in the order of the store, a new list
 function ListSheet({ list, sections, count, onClose }: { list: ShoppingList; sections: ShoppingSection[]; count: number; onClose: () => void }) {
   const [name, setName] = useState(list.name), [emoji, setEmoji] = useState(list.emoji ?? "");
+  const [link, setLink] = useState(list.url ?? ""), [withLink, setWithLink] = useState(!!list.url);
+  const url = withLink && /^https?:\/\/\S+$/i.test(link.trim()) ? link.trim() : null;
+  const close = () => {
+    if (withLink && link.trim() && !url) return toast("Le lien doit commencer par https://");
+    if (name.trim() && (name !== list.name || emoji !== (list.emoji ?? "") || url !== (list.url ?? null))) store.put("shopping_lists", { ...list, name: name.trim(), emoji: emoji.trim() || null, url });
+    onClose();
+  };
   const [section, setSection] = useState(""), [newList, setNewList] = useState("");
   const move = (i: number, by: number) => {
     const order = [...sections];
@@ -118,9 +126,11 @@ function ListSheet({ list, sections, count, onClose }: { list: ShoppingList; sec
     order.forEach((x, k) => { if (x.sort_order !== k + 1) store.put("shopping_sections", { ...x, sort_order: k + 1 }); });
   };
   return (
-    <Sheet title="Organiser la liste" onClose={() => { if (name.trim() && (name !== list.name || emoji !== (list.emoji ?? ""))) store.put("shopping_lists", { ...list, name: name.trim(), emoji: emoji.trim() || null }); onClose(); }}>
+    <Sheet title="Organiser la liste" onClose={close}>
       <Field label="Nom de la liste"><input className="input" value={name} onChange={(e) => setName(e.target.value)} /></Field>
       <Field label="Icône"><IconPicker value={emoji} onChange={(k) => setEmoji(k ?? "")} /></Field>
+      <label className="switch"><input type="checkbox" checked={withLink} onChange={(e) => setWithLink(e.target.checked)} />Lien vers la liste du magasin (Amazon…)</label>
+      {withLink && <input className="input" value={link} onChange={(e) => setLink(e.target.value)} inputMode="url" placeholder="https://…" autoFocus={!list.url} />}
       <span className="label">Rayons, dans l'ordre du magasin</span>
       <div className="card flush list">
         {sections.map((s, i) => (
@@ -140,3 +150,6 @@ function ListSheet({ list, sections, count, onClose }: { list: ShoppingList; sec
     </Sheet>
   );
 }
+
+// "amazon.ca" from "https://www.amazon.ca/hz/wishlist/…"
+const host = (url: string) => { try { return new URL(url).hostname.replace(/^www\./, ""); } catch { return url; } };

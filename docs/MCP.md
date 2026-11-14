@@ -46,7 +46,7 @@ L'adresse donne accès aux données de la famille : la traiter comme un mot de p
 | `courses_ajouter` | Ajoute des articles (un article connu revient dans son rayon). |
 | `courses_cocher` | Acheté, ou finalement pas besoin. |
 | `courses_historique` | Achats d'un article et rythme moyen, ou articles les plus achetés. |
-| `courses_liste_enregistrer` | Crée une liste, ordonne ses rayons. |
+| `courses_liste_enregistrer` | Crée une liste, ordonne ses rayons, pose son lien chez le magasin. |
 | `taches` | Tâches d'un jour, ou des jours suivants, pour tous ou pour une personne. |
 | `tache_cocher` | Fait, à refaire, ou passé pour cette fois. |
 | `tache_ajouter` | Tâche ponctuelle, pour soi ou pour quelqu'un. |

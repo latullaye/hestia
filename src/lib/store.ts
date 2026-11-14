@@ -22,6 +22,7 @@ const SERVER_COLUMNS: Partial<Record<TableName, string[]>> & { all: string[] } =
   dishes: ["name_key"],
   chore_occurrences: ["done_at", "created_by"],
   notifications: ["action_token", "pushed_at", "created_at"],
+  gifts: ["created_by"], // decides who may see the present: set by the server only
   birthdays: ["gcal_recurring_id"],
 };
 const NO_AUTHOR: TableName[] = ["notifications"]; // tables without updated_by / updated_via

@@ -13,6 +13,7 @@ import { SessionProvider, useSession } from "./lib/session";
 import { Birthdays } from "./pages/Birthdays";
 import { Calendar } from "./pages/Calendar";
 import { Chores } from "./pages/Chores";
+import { Gifts } from "./pages/Gifts";
 import { Inbox, inboxOf } from "./pages/Inbox";
 import { Kiosk } from "./pages/Kiosk";
 import { Login, NotLinked } from "./pages/Login";
@@ -73,6 +74,7 @@ function Routed() {
         <Route path="/chores" element={<Chores />} />
         <Route path="/birthdays" element={<Birthdays />} />
         <Route path="/inbox" element={<Inbox />} />
+        <Route path="/gifts" element={<Gifts />} />
         <Route path="/journal" element={<Journal />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/more" element={<More />} />

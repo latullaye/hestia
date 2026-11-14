@@ -11,6 +11,7 @@ installable (PWA) pour les téléphones et l'ordinateur, une vue **kiosque** pou
 | **Courses** | Listes par magasin (Épicerie, Costco…), articles classés par rayon dans l'ordre du magasin. Cocher en magasin note qui a acheté quoi et quand. |
 | **Tâches** | Tâches régulières (tous les soirs, le mercredi soir, le samedi sinon le dimanche, en mai…), à tour de rôle ou non, et tâches ponctuelles données à quelqu'un. |
 | **Anniversaires** | Tableau de l'année, prochains anniversaires, idées de cadeaux, dates « en mémoire » à part. |
+| **Cadeaux** | Pour qui on offre (anniversaire, Noël), les échéances des 2 prochains mois, idées et achats à cocher. Ce qu'on prévoit pour un membre lui reste caché ; ses propres envies, les autres les voient. |
 | **Kiosque** | La semaine d'un coup d'œil, météo de Montréal (Open-Meteo), courses, tâches du jour, anniversaires à venir, décomptes. |
 | **Interphone** | Un bouton, une phrase : Claude agit avec les mêmes outils que le connecteur MCP. |
 | **Claude (MCP)** | Hestia est un connecteur pour Claude : lire et modifier la maison depuis une conversation. |
