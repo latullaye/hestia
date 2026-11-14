@@ -11,17 +11,19 @@ import {
 import { useEffect, useRef } from "react";
 import { ICON_KEYS, iconKey, type IconKey } from "@shared/icons.ts";
 
-// A store's initial in a rounded frame, drawn like the Lucide icons (24 × 24, round strokes, current colour)
+// Store marks, drawn like the Lucide icons (24 × 24, current colour) so they sit among them: they recall a store, in the
+// app's single colour, rather than copy its logo
 type Drawing = (props: { className?: string; "aria-hidden"?: boolean }) => JSX.Element;
-const letter = (paths: string[]): Drawing => (props) => (
-  <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" {...props}>
-    <rect x="3" y="3" width="18" height="18" rx="5" />
-    {paths.map((d) => <path key={d} d={d} />)}
-  </svg>
+const drawing = (strokeWidth: number, body: JSX.Element): Drawing => (props) => (
+  <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" {...props}>{body}</svg>
 );
-const LetterW = letter(["M7 8.5 9.2 15.5 12 10.5 14.8 15.5 17 8.5"]);
-const LetterC = letter(["M15.6 9.2a4.2 4.2 0 1 0 0 5.6"]);
-const LetterA = letter(["M15.5 8.6v6.2", "M15.5 11.7a3 3 0 1 0 0 .01", "M7.3 17.3q4.7 2.2 9.4 0"]);
+const Spark = drawing(2, <>{[0, 60, 120, 180, 240, 300].map((a) => <ellipse key={a} transform={`rotate(${a} 12 12)`} cx="12" cy="5.7" rx="1.75" ry="3.4" fill="currentColor" stroke="none" />)}</>);
+const LetterC = drawing(3.2, <path d="M17.2 7.4a6.6 6.6 0 1 0 0 9.2" />);
+const SmileA = drawing(2, <>
+  <path d="M8.4 6.6c1-.9 2.2-1.3 3.6-1.3 2.2 0 3.6 1.1 3.6 3.3v5.6" />
+  <path d="M15.6 9.6c-1.6-.3-3.1-.3-4.6.1-1.6.4-2.6 1.3-2.6 2.6 0 1.5 1.2 2.3 2.7 2.3 1.9 0 3.5-1.3 4.5-2.9" />
+  <path d="M3.5 17.2c5.2 3.4 11.6 3.4 16.3.4" /><path d="m17.6 16.5 2.3 1-.6 2.4" />
+</>);
 
 const DRAWINGS: Record<IconKey, LucideIcon | Drawing> = {
   home: Home, sparkles: Sparkles, "spray-can": SprayCan, trash: Trash2, recycle: Recycle, sprout: Sprout, leaf: Leaf, tree: TreeDeciduous, flower: Flower2,
@@ -32,7 +34,7 @@ const DRAWINGS: Record<IconKey, LucideIcon | Drawing> = {
   wheat: Wheat, beef: Beef, fish: Fish, egg: Egg, milk: Milk, droplet: Droplet, cup: CupSoda, "ice-cream": IceCreamCone, nut: Nut, baby: Baby, cat: Cat, dog: Dog,
   pill: Pill, stethoscope: Stethoscope, syringe: Syringe, heart: Heart, book: BookOpen, music: Music, dumbbell: Dumbbell, cake: Cake, gift: Gift, party: PartyPopper,
   flame: Flame, star: Star, calendar: Calendar, hourglass: Hourglass, plane: Plane, tent: Tent, umbrella: Umbrella, sun: Sun, "tree-pine": TreePine, monitor: Monitor,
-  "list-checks": ListChecks, "letter-w": LetterW, "letter-c": LetterC, "letter-a": LetterA,
+  "list-checks": ListChecks, spark: Spark, "letter-c": LetterC, "smile-a": SmileA,
 };
 
 // An icon in the flow of the text. Draws nothing for an unknown value.

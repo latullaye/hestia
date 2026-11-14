@@ -50,8 +50,8 @@ Ce que fait chaque partie, et les règles qui ne se voient pas à l'écran. À t
 ## Courses
 
 - Une liste par magasin ; chaque liste a ses **rayons**, ordonnés comme on parcourt le magasin (Organiser la liste).
-- Icône de la liste au choix, dont trois lettres encadrées (W, C, A) pour reconnaître d'un coup d'œil un magasin comme
-  Walmart, Costco ou Amazon (dessins : `src/components/icons.tsx`).
+- Icône de la liste au choix, dont trois marques de magasin au trait, de la couleur de l'app : l'étincelle (Walmart),
+  le C (Costco), le « a » sur sa flèche-sourire (Amazon). Dessins : `src/components/icons.tsx`.
 - Un article reste dans sa liste pour toujours : il est « à acheter » ou non. Ajouter un article connu le remet à acheter,
   dans son rayon ; un nouvel article va dans « Autre » (à ranger d'un toucher sur `…`).
 - En magasin : la liste montre ce qui est à acheter, par rayon ; cocher = acheté (journal : qui, quand). Ce qui vient
