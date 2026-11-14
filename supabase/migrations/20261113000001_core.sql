@@ -221,7 +221,7 @@ grant select on public.activity_log to authenticated;
 -- Functions of "private" are called by the access rules: the signed-in role must be able to run the three checks, nothing else
 grant usage on schema private to authenticated;
 revoke execute on all functions in schema private from public, anon, authenticated;
-grant execute on function private.is_family(), private.is_adult(), private.current_member_id() to authenticated;
+grant execute on function private.is_family(), private.is_adult(), private.current_member_id(), private.tz(), private.today() to authenticated;
 alter default privileges in schema private revoke execute on functions from public;
 
 -- Defaults that say nothing about the family

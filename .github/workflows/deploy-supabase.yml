@@ -1,0 +1,47 @@
+# Applies the database migrations and deploys the Edge Functions at every push to main that touches supabase/.
+# Needs, in the repository's Settings › Secrets and variables › Actions (docs/SETUP.md):
+#   secrets    SUPABASE_ACCESS_TOKEN  (a personal access token of the Supabase account)
+#              SUPABASE_DB_PASSWORD   (the database password of the project)
+#   variable   SUPABASE_PROJECT_REF   (the project's reference, the first part of its address)
+# Without them the job says so and stops without failing.
+name: Deploy Supabase
+on:
+  push:
+    branches: [main]
+    paths: ["supabase/**", ".github/workflows/deploy-supabase.yml"]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: supabase
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+      SUPABASE_PROJECT_REF: ${{ vars.SUPABASE_PROJECT_REF }}
+    steps:
+      - id: ready
+        run: |
+          if [ -n "$SUPABASE_ACCESS_TOKEN" ] && [ -n "$SUPABASE_DB_PASSWORD" ] && [ -n "$SUPABASE_PROJECT_REF" ]; then
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning::Supabase is not deployed: SUPABASE_ACCESS_TOKEN, SUPABASE_DB_PASSWORD (secrets) or SUPABASE_PROJECT_REF (variable) is missing. See docs/SETUP.md."
+          fi
+      - uses: actions/checkout@v4
+        if: steps.ready.outputs.ok == 'true'
+      - uses: supabase/setup-cli@v1
+        if: steps.ready.outputs.ok == 'true'
+        with:
+          version: latest
+      - name: Link the project
+        if: steps.ready.outputs.ok == 'true'
+        run: supabase link --project-ref "$SUPABASE_PROJECT_REF"
+      - name: Apply the migrations
+        if: steps.ready.outputs.ok == 'true'
+        run: supabase db push --include-all
+      - name: Deploy the Edge Functions
+        if: steps.ready.outputs.ok == 'true'
+        run: supabase functions deploy --project-ref "$SUPABASE_PROJECT_REF"

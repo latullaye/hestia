@@ -233,8 +233,8 @@ create trigger z_event_to_gcal after insert or update on public.events
   for each row execute function private.event_to_gcal();
 
 revoke execute on all functions in schema private from public, anon, authenticated;
--- The three access checks, and the default of notifications.action_token
-grant execute on function private.is_family(), private.is_adult(), private.current_member_id(), private.random_token() to authenticated;
+-- The three access checks, and what column defaults need (notifications.action_token, chores.start_date)
+grant execute on function private.is_family(), private.is_adult(), private.current_member_id(), private.random_token(), private.tz(), private.today() to authenticated;
 
 -- ---------- Live updates ----------
 do $$

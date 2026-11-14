@@ -19,7 +19,7 @@ create table public.chores (
   assignment text not null default 'fixed' check (assignment in ('fixed', 'rotate')), -- rotate: each one in turn
   schedule jsonb not null,
   time_of_day text not null default 'anytime' check (time_of_day in ('morning', 'afternoon', 'evening', 'anytime')),
-  start_date date not null default current_date,
+  start_date date not null default private.today(), -- today in the household's time zone, not the server's
   end_date date,
   active boolean not null default true,
   sort_order int not null default 0,
