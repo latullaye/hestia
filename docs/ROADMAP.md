@@ -8,11 +8,8 @@ Détail : [FEATURES.md](FEATURES.md).
 
 ## État du déploiement
 
-- Base : toutes les migrations du dépôt sont appliquées au projet (jusqu'à `20261114012829_plain_notifications.sql`),
-  **sauf** `20261114020000_cleanup.sql` (ménage quotidien
-  des vieux rappels et notifications). Elle partira au prochain passage du flux « Deploy Supabase » ; d'ici là, rien ne
-  casse, les vieilles lignes s'accumulent simplement.
-- Fonctions : à déployer par le flux « Deploy Supabase » ([SETUP.md](SETUP.md), étape 2).
+- Base : toutes les migrations du dépôt sont appliquées au projet.
+- Fonctions : déployées par le flux « Deploy Supabase » ([SETUP.md](SETUP.md), étape 2).
 
 ## Ensuite (par ordre de valeur estimée)
 
