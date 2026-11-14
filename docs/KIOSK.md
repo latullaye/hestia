@@ -25,6 +25,12 @@ Ce qui compte, par ordre d'importance :
 3. Ouvrir Hestia depuis son icône, se connecter avec le compte de la tablette. La vue kiosque s'affiche.
 4. Au premier appui sur **Interphone**, autoriser le micro.
 
+Le kiosque se met **en plein écran** tout seul : tout de suite quand on l'ouvre par un lien (*Plus › Vue kiosque*), ou au
+premier toucher quand la page est chargée directement (les navigateurs n'autorisent le plein écran qu'après un geste).
+Si on en sort (touche Échap, balayage), le toucher suivant y revient. Sur la tablette de la cuisine, le plein écran reste
+quand on passe aux autres écrans ; sur un téléphone ou un ordinateur, quitter le kiosque rend les barres. Sur iPhone, le
+plein écran n'existe pas dans le navigateur : installer l'app. Le code est `fullScreen` dans `src/lib/device.ts`.
+
 ## Qu'elle reste allumée, et sur Hestia
 
 - Hestia demande à l'écran de rester allumé tant qu'elle est affichée. Régler aussi, dans Android : *Affichage › Mise en

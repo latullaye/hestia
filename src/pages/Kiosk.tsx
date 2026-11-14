@@ -11,7 +11,7 @@ import { MealSheet } from "../components/MealSheet";
 import { Avatar, Avatars, CheckBox, Sheet, SyncPill, toast } from "../components/ui";
 import { BIRTHDAY_ICON, KIND_ICON, SLOT_LABEL, addDays, birthdaysOn, cap, countdownsFrom, eventsOn, fmtDay, inDays, mealName, mealsOn, occurrencesOn, partsIn, startTime, uncared, upcomingBirthdays } from "../lib/domain";
 import { demoWeather } from "../lib/demo";
-import { keepAwake } from "../lib/device";
+import { fullScreen, keepAwake } from "../lib/device";
 import { useHousehold, useMembers, useNow, useTable } from "../lib/hooks";
 import { useMealDrag } from "../lib/mealDrag";
 import { useSession } from "../lib/session";
@@ -40,6 +40,7 @@ export function Kiosk() {
   const [intercom, setIntercom] = useState(false);
 
   useEffect(() => keepAwake(), []);
+  useEffect(() => fullScreen(isKiosk), [isKiosk]);
   // Back to this week after a while, so the screen never stays on another week
   useEffect(() => { if (!offset) return; const t = setTimeout(() => setOffset(0), 3 * 60 * 1000); return () => clearTimeout(t); }, [offset]);
 
