@@ -51,13 +51,13 @@ export function IconPicker({ value, onChange }: { value: string | null | undefin
 // and the ember of the icon dots the i. Drawn in the current text colour.
 export function Wordmark({ height = 64 }: { height?: number }) {
   return (
-    <svg className="wordmark" viewBox="14 14 178 70" height={height} role="img" aria-label="Hestia">
+    <svg className="wordmark" viewBox="14 14 204 70" height={height} role="img" aria-label="Hestia">
       <g fill="none" stroke="currentColor" strokeWidth="4.4" strokeLinecap="round" strokeLinejoin="round">
         <path d="M19 43 43.5 23.5Q48 20 52.5 23.5L77 43" /><path d="M34 45V78M62 45V78" />
-        <path d="M34 64C43 52 53 52 62 62C66 66.5 67 75 74 75C82.4 73.2 89.6 66 89.6 58.2C89.6 48 77 48 77 63.6C77 75.6 87.2 80.4 96.8 72C101.6 67.2 105.2 58.8 107.6 51C111.2 58.8 116 69.6 109.4 76.2C105.8 79 101 78 99.2 73.8M113 76.2C117.8 73.2 122.6 64.8 122.6 55.2V40.8V69.6C122.6 78 128.6 79.2 134.6 72C138.2 68.4 143 62.4 143 51.6V69.6C143 78 149 79.2 155 72C164.6 73.2 173 68.4 174.2 55.8C169.4 48 158.6 50.4 158.6 64.8C158.6 76.8 169.4 76.8 174.2 67.2V52.2V69.6C174.2 78 180.2 79.2 185.6 73.2" />
-        <path d="M117.2 52.2H128.6" />
+        <path d="M34 64C43 52 53 52 62 62C66 66.5 68 75 76 75C84.4 73.2 91.6 66 91.6 58.2C91.6 48 79 48 79 63.6C79 75.6 89.2 80.4 98.8 72C109.6 67.2 113.2 58.8 115.6 51C119.2 58.8 124 69.6 117.4 76.2C113.8 79 109 78 107.2 73.8M117.4 76.2C131.8 73.2 136.6 64.8 136.6 55.2V40.8V69.6C136.6 78 142.6 79.2 148.6 72C158.2 68.4 163 62.4 163 51.6V69.6C163 78 169 79.2 175 72C190.6 73.2 199 68.4 200.2 55.8C195.4 48 184.6 50.4 184.6 64.8C184.6 76.8 195.4 76.8 200.2 67.2V52.2V69.6C200.2 78 206.2 79.2 211.6 73.2" />
+        <path d="M131.2 52.2H142.6" />
       </g>
-      <circle cx="143" cy="42" r="3.3" fill="var(--ember, #e9c58f)" />
+      <circle cx="163" cy="42" r="3.3" fill="var(--ember, #e9c58f)" />
     </svg>
   );
 }
