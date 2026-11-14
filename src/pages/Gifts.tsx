@@ -28,6 +28,8 @@ export function Gifts() {
     <div className="page">
       <div className="top"><h1 className="grow">Cadeaux</h1><SyncPill /></div>
 
+      {me && <MyWishes me={me.id} name={me.name} people={people} view={view} onOpen={setGift} />}
+
       <div className="section-title"><h2>Dans les {AHEAD_DAYS / 30} prochains mois</h2></div>
       {due.map((d) => (
         <div key={d.key} className="card flush list">
@@ -116,6 +118,32 @@ function IdeaChips({ ideas, person, me, due, kind }: { ideas: Gift[]; person: Gi
         <Plus size={14} />{g.title}{isWish(g, person) ? <span className="muted"> · envie</span> : null}</button>
     ))}</div>
   );
+}
+
+// My wish list: what I would like to receive. The others see it; what they do with it stays hidden from me.
+function MyWishes({ me, name, people, view, onOpen }: { me: string; name: string; people: GiftPerson[]; view: View; onOpen: (g: Gift) => void }) {
+  const birthdays = useTable("birthdays");
+  const mine = people.find((p) => p.member_id === me);
+  const start = () => {
+    const b = birthdays.find((x) => x.kind === "birthday" && x.name.toLowerCase() === name.toLowerCase());
+    store.put("gift_people", { name, member_id: me, birthday_id: b?.id ?? null, for_birthday: true, for_christmas: true, note: null });
+  };
+  const wishes = mine ? view.ideas(mine.id) : [];
+  return <>
+    <div className="section-title"><h2 className="grow">Mes envies</h2></div>
+    <div className="card col" style={{ gap: 8 }}>
+      {mine ? <>
+        {wishes.length > 0 && <div className="list">{wishes.map((g) => (
+          <button key={g.id} onClick={() => onOpen(g)}><span className="grow">{g.title}{g.note && <span className="small muted"> · {g.note}</span>}</span>{g.url && <ExternalLink size={16} className="muted" />}<ChevronRight size={18} className="muted" /></button>
+        ))}</div>}
+        <AddLine placeholder="Ce qui me ferait plaisir" onAdd={(t) => addGift(mine, t, me)} />
+        <p className="tiny muted">Pour Noël, ton anniversaire ou n'importe quand. Les autres voient tes envies ; ce qu'ils en font, et ce qu'ils te préparent, te reste caché. Toucher une envie pour ajouter une précision ou un lien.</p>
+      </> : <>
+        <p className="small muted">Écris ce qui te ferait plaisir : les autres le verront au moment de chercher un cadeau.</p>
+        <button className="btn" onClick={start}><Plus />Commencer ma liste d'envies</button>
+      </>}
+    </div>
+  </>;
 }
 
 function AddLine({ placeholder, onAdd }: { placeholder: string; onAdd: (title: string) => void }) {

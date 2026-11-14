@@ -212,6 +212,74 @@ do $$ begin
 end $$;
 rollback;
 
+-- ---------- Away: the chores of a stay's days are passed, and come back when it is cancelled ----------
+set role authenticated;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-0000000000a2', false);
+insert into public.chores (id, title, assignee_ids, schedule) values
+  ('40000000-0000-0000-0000-000000000009', 'Plantes', '{10000000-0000-0000-0000-000000000002}', '{"type":"daily"}');
+insert into public.stays (id, place, start_date, end_date) values
+  ('70000000-0000-0000-0000-000000000001', 'Chez Mamie', private.today() + 2, private.today() + 4);
+do $$
+declare o record;
+begin
+  assert (select count(*) from public.chore_occurrences where chore_id = '40000000-0000-0000-0000-000000000009' and status = 'skipped'
+    and stay_id = '70000000-0000-0000-0000-000000000001') = 3, 'three days away, three chores passed';
+  select * into o from public.chore_occurrences where chore_id = '40000000-0000-0000-0000-000000000009' and due_date = private.today() + 1;
+  assert o.status = 'todo', 'the day before stays to do';
+end $$;
+update public.stays set end_date = private.today() + 3 where id = '70000000-0000-0000-0000-000000000001';
+do $$ begin
+  assert (select status from public.chore_occurrences where chore_id = '40000000-0000-0000-0000-000000000009' and due_date = private.today() + 4) = 'todo', 'a shorter stay gives the day back';
+end $$;
+update public.stays set member_ids = '{10000000-0000-0000-0000-000000000001}' where id = '70000000-0000-0000-0000-000000000001';
+do $$ begin
+  assert (select count(*) from public.chore_occurrences where chore_id = '40000000-0000-0000-0000-000000000009' and status = 'skipped') = 0, 'Sam stays home: Sam''s chores stay';
+end $$;
+update public.stays set member_ids = '{}', deleted_at = now() where id = '70000000-0000-0000-0000-000000000001';
+do $$ begin
+  assert (select count(*) from public.chore_occurrences where chore_id = '40000000-0000-0000-0000-000000000009' and status = 'skipped') = 0, 'a cancelled stay passes nothing';
+end $$;
+
+-- ---------- A stay only planned passes nothing; the other adult is told ----------
+set role authenticated;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-0000000000a2', false);
+insert into public.stays (id, place, start_date, end_date, status, note) values
+  ('70000000-0000-0000-0000-000000000002', 'Chez Mamie', private.today() + 2, private.today() + 3, 'planned', 'sa fête');
+do $$ begin
+  assert (select count(*) from public.chore_occurrences where chore_id = '40000000-0000-0000-0000-000000000009' and status = 'skipped') = 0, 'planned: nothing passed';
+end $$;
+update public.stays set status = 'confirmed' where id = '70000000-0000-0000-0000-000000000002';
+do $$ begin
+  assert (select count(*) from public.chore_occurrences where chore_id = '40000000-0000-0000-0000-000000000009' and status = 'skipped') = 2, 'confirmed: two days passed';
+end $$;
+update public.stays set deleted_at = now() where id = '70000000-0000-0000-0000-000000000002';
+reset role;
+do $$ begin
+  assert (select count(*) from public.notifications where kind = 'stay' and member_id = '10000000-0000-0000-0000-000000000001'
+    and data ->> 'stay_id' = '70000000-0000-0000-0000-000000000002') = 3, 'Alex told: proposed, confirmed, cancelled';
+  assert (select count(*) from public.notifications where kind = 'stay' and member_id = '10000000-0000-0000-0000-000000000002') = 0, 'the author is not told';
+  assert exists (select 1 from public.notifications where kind = 'stay' and title = 'Sam propose : Chez Mamie' and body like '% · à confirmer · sa fête'), 'proposal text';
+end $$;
+
+-- ---------- On the way home: the others are told, again when the time moves by 5 minutes or more ----------
+insert into public.arrivals (id, member_id, from_label, left_at, eta, notify_ids) values
+  ('71000000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000001', 'du bureau', now(), now() + interval '30 minutes',
+   '{10000000-0000-0000-0000-000000000001,10000000-0000-0000-0000-000000000002}');
+do $$ begin
+  assert (select member_id from public.arrivals where id = '71000000-0000-0000-0000-000000000001') = '10000000-0000-0000-0000-000000000002', 'who comes is who writes';
+end $$;
+reset role;
+do $$ begin
+  assert (select count(*) from public.notifications where kind = 'arrival') = 1, 'one person told (not the one coming)';
+  assert (select body from public.notifications where kind = 'arrival') like 'Part du bureau · arrivée vers % (30 min)', 'body: ' || (select body from public.notifications where kind = 'arrival');
+end $$;
+update public.arrivals set eta = eta + interval '2 minutes' where id = '71000000-0000-0000-0000-000000000001';
+update public.arrivals set eta = eta + interval '10 minutes' where id = '71000000-0000-0000-0000-000000000001';
+do $$ begin
+  assert (select count(*) from public.notifications where kind = 'arrival') = 2, 'only the real change is told';
+  assert (select title from public.notifications where kind = 'arrival' order by created_at desc, id limit 1) like '% plus tard', 'later';
+end $$;
+
 -- ---------- Gifts: hidden from the person they are for, unless they wrote it; the kiosk sees none ----------
 insert into public.gift_people (id, name, member_id, updated_via) values
   ('60000000-0000-0000-0000-000000000001', 'Sam', '10000000-0000-0000-0000-000000000002', 'system'),

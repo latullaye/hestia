@@ -43,6 +43,7 @@ export default defineConfig({
           { src: "icons/icon-maskable-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
         ],
         shortcuts: [
+          { name: "Je rentre", short_name: "Je rentre", description: "Prévenir que je rentre et à quelle heure", url: "./#/leaving", icons: [{ src: "icons/icon-192.png", sizes: "192x192" }] },
           { name: "Courses", url: "./#/shopping", icons: [{ src: "icons/icon-192.png", sizes: "192x192" }] },
           { name: "Tâches", url: "./#/chores", icons: [{ src: "icons/icon-192.png", sizes: "192x192" }] },
           { name: "Kiosque", url: "./#/kiosk", icons: [{ src: "icons/icon-192.png", sizes: "192x192" }] },

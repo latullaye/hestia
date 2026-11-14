@@ -16,6 +16,7 @@ import { Chores } from "./pages/Chores";
 import { Gifts } from "./pages/Gifts";
 import { Inbox, inboxOf } from "./pages/Inbox";
 import { Kiosk } from "./pages/Kiosk";
+import { Leaving } from "./pages/Leaving";
 import { Login, NotLinked } from "./pages/Login";
 import { Meals } from "./pages/Meals";
 import { Journal, More } from "./pages/More";
@@ -75,6 +76,7 @@ function Routed() {
         <Route path="/birthdays" element={<Birthdays />} />
         <Route path="/inbox" element={<Inbox />} />
         <Route path="/gifts" element={<Gifts />} />
+        <Route path="/leaving" element={<Leaving />} />
         <Route path="/journal" element={<Journal />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/more" element={<More />} />

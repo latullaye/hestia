@@ -27,7 +27,13 @@ export type ShoppingSection = Sync & { list_id: string; name: string; emoji: str
 export type ShoppingItem = Sync & { list_id: string; section_id: string | null; name: string; note: string | null; needed: boolean; needed_at?: string | null; purchased_at: string | null; purchase_count?: number; sort_order: number };
 export type TimeOfDay = "morning" | "afternoon" | "evening" | "anytime";
 export type Chore = Sync & { title: string; emoji: string | null; description: string | null; assignee_ids: string[]; assignment: "fixed" | "rotate"; schedule: Schedule; time_of_day: TimeOfDay; start_date: string; end_date: string | null; active: boolean; sort_order: number };
-export type Occurrence = Sync & { chore_id: string | null; title: string; emoji: string | null; due_date: string; due_until: string | null; time_of_day: TimeOfDay; assignee_ids: string[]; status: "todo" | "done" | "skipped"; done_by: string | null; done_at: string | null; note: string | null; created_by?: string | null };
+export type Occurrence = Sync & { chore_id: string | null; title: string; emoji: string | null; due_date: string; due_until: string | null; time_of_day: TimeOfDay; assignee_ids: string[]; status: "todo" | "done" | "skipped"; done_by: string | null; done_at: string | null; note: string | null; created_by?: string | null; stay_id?: string | null };
+export type Arrival = Sync & { member_id: string; from_label: string | null; left_at: string; eta: string; notify_ids: string[]; arrived_at: string | null };
+export type Transport = "car" | "bus" | "train" | "plane" | "other";
+export type Stay = Sync & {
+  kind: "visit" | "vacation"; status: "planned" | "confirmed"; place: string; start_date: string; end_date: string; member_ids: string[];
+  transport: Transport | null; carshare: boolean; carshare_booked: boolean; note: string | null;
+};
 export type GiftPerson = Sync & { name: string; birthday_id: string | null; member_id: string | null; for_birthday: boolean; for_christmas: boolean; note: string | null };
 export type Occasion = "birthday" | "christmas";
 export type Gift = Sync & {
@@ -40,8 +46,8 @@ export type Notification = { id: string; member_id: string; kind: string; title:
 export type Tables = {
   members: Member; settings: Setting; events: CalEvent; event_comments: EventComment; birthdays: Birthday; countdowns: Countdown; dishes: Dish;
   meal_plan: Meal; shopping_lists: ShoppingList; shopping_sections: ShoppingSection; shopping_items: ShoppingItem; chores: Chore;
-  chore_occurrences: Occurrence; notifications: Notification; gift_people: GiftPerson; gifts: Gift;
+  chore_occurrences: Occurrence; notifications: Notification; gift_people: GiftPerson; gifts: Gift; arrivals: Arrival; stays: Stay;
 };
 export type TableName = keyof Tables;
 export const TABLES: TableName[] = ["members", "settings", "events", "event_comments", "birthdays", "countdowns", "dishes", "meal_plan", "shopping_lists",
-  "shopping_sections", "shopping_items", "chores", "chore_occurrences", "notifications", "gift_people", "gifts"];
+  "shopping_sections", "shopping_items", "chores", "chore_occurrences", "notifications", "gift_people", "gifts", "arrivals", "stays"];
