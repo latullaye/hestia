@@ -1,6 +1,6 @@
 // What the screens show, computed from the local tables. Pure functions.
 import { addDays, daysBetween, fmtDay, instant, partsIn } from "@shared/time.ts";
-import type { Birthday, CalEvent, Countdown, Dish, Meal, Member, Occurrence } from "./types";
+import type { Stay, Birthday, CalEvent, Countdown, Dish, Meal, Member, Occurrence } from "./types";
 
 export { addDays, daysBetween, fmtDay, partsIn, instant };
 
@@ -46,6 +46,19 @@ export function cookedBefore(meals: Meal[], dishes: Map<string, Dish>, date: str
   }
   return [...seen.values()];
 }
+
+// ---------- Away from home ----------
+export const TRANSPORT_LABEL: Record<string, string> = { car: "Voiture", bus: "Bus", train: "Train", plane: "Avion", other: "Autre" };
+export const STAY_ICON: Record<string, string> = { visit: "home", vacation: "plane" };
+// The stay covering a day, if any (the earliest one)
+export const stayOn = (stays: Stay[], day: string) =>
+  stays.filter((s) => !s.deleted_at && s.start_date <= day && day <= s.end_date).sort((a, b) => a.start_date.localeCompare(b.start_date))[0];
+// Everyone (all adults) away: nobody cooks at home, so no meal to plan
+export const allAway = (s: Stay | undefined, adults: Member[]) => !!s && (!s.member_ids.length || adults.every((m) => s.member_ids.includes(m.id)));
+// "À Chelsea", "Chez Mamie Jo", "Vacances · Mexique"
+export const stayLabel = (s: Stay) => (s.kind === "vacation" ? `Vacances · ${s.place}` : /^(chez|au|aux|à|en)\s/i.test(s.place) ? cap(s.place) : `À ${s.place}`);
+// A shared car to book and not booked yet: something to do before leaving
+export const carshareMissing = (s: Stay) => s.transport === "car" && s.carshare && !s.carshare_booked;
 
 // ---------- Chores ----------
 // What is to do on a day: due that day or still open from before; plus what was done that day

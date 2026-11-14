@@ -3,16 +3,17 @@ import { Bell, ChevronRight, Plus } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { toggleOccurrence } from "../components/ChoreSheets";
+import { ArrivalBanners, StayBanner, StaySheet } from "../components/Away";
 import { EventSheet } from "../components/EventSheet";
 import { MealSheet } from "../components/MealSheet";
 import { Glyph } from "../components/icons";
 import { ChoreRow, EventRow } from "../components/rows";
 import { Avatars, SyncPill } from "../components/ui";
-import { BIRTHDAY_ICON, KIND_ICON, SLOT_LABEL, addDays, cap, countdownsFrom, eventDays, eventsOn, fmtDay, inDays, mealName, mealsOn, occurrencesOn, plural, upcomingBirthdays } from "../lib/domain";
+import { BIRTHDAY_ICON, KIND_ICON, SLOT_LABEL, addDays, allAway, stayLabel, stayOn, cap, countdownsFrom, eventDays, eventsOn, fmtDay, inDays, mealName, mealsOn, occurrencesOn, plural, upcomingBirthdays } from "../lib/domain";
 import { useHousehold, useMembers, useTable, useToday } from "../lib/hooks";
 import { demoWeather } from "../lib/demo";
 import { useSession } from "../lib/session";
-import type { MealSlot } from "../lib/types";
+import type { MealSlot, Stay } from "../lib/types";
 import { describe, useWeather } from "../lib/weather";
 import { inboxOf } from "./Inbox";
 
@@ -25,6 +26,8 @@ export function Today() {
   const [eventId, setEventId] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
   const [meal, setMeal] = useState<{ date: string; slot: MealSlot } | null>(null);
+  const [stay, setStay] = useState<Stay | null>(null);
+  const away = stayOn(useTable("stays"), today), noMeals = allAway(away, members.adults);
   const dishMap = useMemo(() => new Map(dishes.map((d) => [d.id, d])), [dishes]);
 
   const todays = eventsOn(events, today, tz, true), tomorrow = eventsOn(events, addDays(today, 1), tz);
@@ -60,6 +63,8 @@ export function Today() {
         <Link className="icon-btn" to="/inbox" aria-label="Boîte de réception"><Bell />{badge > 0 && <span className="dot">{badge}</span>}</Link>
       </div>
 
+      <ArrivalBanners tz={tz} />
+      <StayBanner today={today} onOpen={setStay} />
       {toApprove.map((e) => (
         <button key={e.id} className="card warn row" onClick={() => setEventId(e.id)}>
           <span className="grow"><b><Glyph name="hourglass" />{members.name(e.created_by)} demande ton accord</b><div>{e.title} · {fmtDay(eventDays(e, tz).first)}</div></span><ChevronRight />
@@ -74,7 +79,8 @@ export function Today() {
       </div>
 
       <div className="section-title"><h2 className="grow">Repas</h2><Link className="btn small" to="/meals">Semaine</Link></div>
-      <div className="card flush list">{mealLine("lunch")}{mealLine("dinner")}</div>
+      {noMeals ? <div className="card muted">{stayLabel(away!)} : pas de repas à prévoir.</div>
+        : <div className="card flush list">{mealLine("lunch")}{mealLine("dinner")}</div>}
 
       <div className="section-title"><h2 className="grow">Mes tâches</h2><Link className="btn small" to="/chores">Toutes</Link></div>
       <div className="card flush list">
@@ -98,6 +104,7 @@ export function Today() {
       {eventId && <EventSheet id={eventId} onClose={() => setEventId(null)} />}
       {adding && <EventSheet day={today} onClose={() => setAdding(false)} />}
       {meal && <MealSheet {...meal} onClose={() => setMeal(null)} />}
+      {stay && <StaySheet stay={stay} onClose={() => setStay(null)} />}
     </div>
   );
 }

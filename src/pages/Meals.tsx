@@ -6,7 +6,7 @@ import { norm } from "@shared/time.ts";
 import { Glyph } from "../components/icons";
 import { MealSheet } from "../components/MealSheet";
 import { Avatars, Empty, Field, Segmented, Sheet, SyncPill, toast } from "../components/ui";
-import { KIND_ICON, SLOT_LABEL, addDays, cap, dayTitle, fmtDay, mealName, mealsOn } from "../lib/domain";
+import { KIND_ICON, SLOT_LABEL, addDays, allAway, stayLabel, stayOn, cap, dayTitle, fmtDay, mealName, mealsOn } from "../lib/domain";
 import { useHousehold, useMembers, useTable, useToday } from "../lib/hooks";
 import { useMealDrag } from "../lib/mealDrag";
 import { store } from "../lib/store";
@@ -14,7 +14,7 @@ import type { Dish, MealSlot } from "../lib/types";
 
 export function Meals() {
   const { tz } = useHousehold(), today = useToday(tz), members = useMembers();
-  const meals = useTable("meal_plan"), dishes = useTable("dishes");
+  const meals = useTable("meal_plan"), dishes = useTable("dishes"), stays = useTable("stays");
   const dishMap = useMemo(() => new Map(dishes.map((d) => [d.id, d])), [dishes]);
   const [tab, setTab] = useState<"week" | "dishes">("week");
   const [start, setStart] = useState(today);
@@ -58,7 +58,9 @@ export function Meals() {
         {days.map((d) => (
           <div key={d} className="col" style={{ gap: 6 }}>
             <div className="section-title"><h2>{dayTitle(d, today)}</h2>{dayTitle(d, today) !== cap(fmtDay(d, { weekday: "long", month: "long" })) && <span className="muted small">{fmtDay(d)}</span>}</div>
-            <div className="card flush list">{cell(d, "lunch")}{cell(d, "dinner")}</div>
+            {allAway(stayOn(stays, d), members.adults) && !mealsOn(meals, d).length
+              ? <div className="card muted small">{stayLabel(stayOn(stays, d)!)} : pas de repas à prévoir.</div>
+              : <div className="card flush list">{cell(d, "lunch")}{cell(d, "dinner")}</div>}
           </div>
         ))}
       </>}

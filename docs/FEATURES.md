@@ -79,10 +79,41 @@ Ce que fait chaque partie, et les règles qui ne se voient pas à l'écran. À t
   cadeaux. Les dates « en mémoire » sont à part et ne sont pas annoncées comme des fêtes.
 - Sur le kiosque : le jour même en haut de la colonne ; « Bientôt » pour les 3 semaines à venir.
 
+## Je rentre
+
+Plus › **Je rentre**, ou un appui long sur l'icône de Hestia sur Android (raccourci du manifeste, `vite.config.ts`).
+Écran : `src/pages/Leaving.tsx`.
+
+- Temps de trajet : 30 minutes par défaut, `−5`, `+5`, `+15` ; l'heure d'arrivée se calcule. « Je pars » (du bureau…) et
+  les personnes à prévenir sont retenus sur l'appareil.
+- Envoyer prévient les autres par notification : « Arthur rentre · Part du bureau · arrivée vers 17 h 32 (30 min) ».
+  En route, on peut ajouter ou retirer du temps (un écart de 5 minutes ou plus est envoyé), dire qu'on est à la maison ou
+  annuler.
+- Chez les autres, l'écran d'accueil montre « Arthur arrive vers 17 h 32 » et les minutes qui restent ; le kiosque aussi,
+  en haut. Un compte à rebours dans la notification elle-même n'est pas possible pour une app web (sur iPhone, il faut une
+  app native : « Live Activities ») : c'est l'app et le kiosque qui comptent.
+
+## Absences : séjours et vacances
+
+Agenda › bouton valise. Fiche : `StaySheet` (`src/components/Away.tsx`).
+
+- **Séjour** (dans la famille, chez des amis ; les lieux déjà utilisés se choisissent d'un toucher) ou **Vacances**
+  (destination libre), du… au…, qui part (toute la famille par défaut), comment (voiture, bus, train, avion) et, en
+  voiture, s'il faut réserver une **Communauto** et si c'est fait.
+- Mis en évidence : une ligne en tête de chaque jour de l'agenda, un trait sous les jours de la bande de semaine, un
+  bandeau sur l'écran d'accueil à partir de 7 jours avant (en ambre si la Communauto reste à réserver), les colonnes
+  teintées sur le kiosque.
+- Les **tâches** de ceux qui partent sont passées pendant ces jours (par le serveur : `private.chore_away`), et
+  reviennent si le séjour change ou est annulé.
+- Quand toute la famille part, il n'y a **pas de repas à prévoir** : la semaine des repas et le kiosque l'indiquent à la
+  place du dîner et du souper.
+
 ## Cadeaux
 
 Plus › **Cadeaux** (adultes seulement ; le kiosque ne les voit pas). Écran : `src/pages/Gifts.tsx`, règles : `src/lib/gifts.ts`.
 
+- **Mes envies**, en tête de l'écran : ce qui me ferait plaisir (Noël, anniversaire ou n'importe quand), avec précision et
+  lien. Les autres les voient ; ce qu'ils en font me reste caché.
 - **Personnes** : celles à qui la famille offre des cadeaux, avec, pour chacune, *son anniversaire*, *Noël* ou les deux.
   La date d'anniversaire vient de la liste des anniversaires ; « Utilise Hestia » relie la personne à un membre.
 - **Dans les 2 prochains mois** : chaque anniversaire et Noël qui approchent, avec, par personne, les cadeaux prévus (à

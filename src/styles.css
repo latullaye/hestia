@@ -281,3 +281,27 @@ body.dragging * { cursor: grabbing !important; }
 .gift-kind + .gift-kind { padding-top: 6px; border-top: 1px dashed var(--line); }
 .kday-meals .avatars { vertical-align: middle; }
 .kday-meals .m .meal .avatar { width: 1.35em; height: 1.35em; font-size: 0.75em; }
+
+/* ---------- On the way home, away from home ---------- */
+.arrival { border-color: color-mix(in srgb, var(--accent) 40%, var(--line)); }
+.arrival-count { display: flex; flex-direction: column; align-items: center; min-width: 52px; color: var(--accent); font-family: var(--font-display); line-height: 1; }
+.arrival-count b { font-size: 1.7rem; } .arrival-count small { font-size: 0.72rem; color: var(--muted); }
+.leaving { display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; padding: 22px 16px; }
+.leaving-eta { font-family: var(--font-display); font-weight: 700; font-size: 3rem; line-height: 1; color: var(--accent); }
+.btn.big { min-height: 56px; font-size: 1.05rem; }
+.stay-banner, .stay-row { text-align: left; width: 100%; gap: 10px; }
+.stay-banner.warn, .stay-row.warn { background: var(--warn-soft); border-color: color-mix(in srgb, var(--warn) 35%, var(--line)); }
+.list > .stay-row { background: var(--accent-soft); }
+.list > .stay-row.warn { background: var(--warn-soft); }
+.weekstrip button.away { box-shadow: inset 0 -3px 0 color-mix(in srgb, var(--accent) 45%, transparent); }
+.kday.away .kday-body { background: color-mix(in srgb, var(--accent) 6%, var(--surface)); }
+.kstay { flex: none; margin-bottom: 5px; text-align: left; border-radius: 8px; padding: 3px 7px; font-size: 0.82em; font-weight: 700; background: var(--accent); color: var(--accent-ink); display: flex; align-items: center; gap: 5px; }
+.kstay.warn { background: var(--warn-soft); color: var(--warn); }
+.kday-meals.away .m { justify-content: center; }
+.karrivals { display: flex; gap: 8px; justify-content: flex-end; min-width: 0; overflow: hidden; }
+.kiosk-head .kweather { min-width: 0; flex-shrink: 1; }
+.kiosk-head .kweather .small { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.karrival { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); font-weight: 700; white-space: nowrap; }
+/* Someone on the way home is worth more than the weather's wording */
+.kiosk-head:has(.karrival) .kweather .small { display: none; }
+.karrival { flex: none; }

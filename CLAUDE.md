@@ -68,7 +68,8 @@ docs/                     la documentation
 
 - `private.chore_matches` (SQL) et `matches` (`_shared/schedule.ts`) sont la même règle écrite deux fois : changer les deux,
   et leurs tests (`scripts/test-db.sql`, `tests/shared.test.ts`).
-- Les déclencheurs « avant » s'exécutent par ordre alphabétique : `touch` (auteur, horodatage) puis ceux préfixés `v_`.
+- Les déclencheurs « avant » s'exécutent par ordre alphabétique : `touch` (auteur, horodatage) puis ceux préfixés `v_`
+  (sur `chore_occurrences` : `v_away`, qui passe les tâches des absents, avant `v_chore_occurrence_before`).
 - Une écriture faite par le serveur à la place de Google met `updated_via = 'gcal'` : c'est ce qui évite la boucle
   Hestia → Google → Hestia. Ne pas l'oublier dans un nouveau chemin d'écriture.
 - L'app n'envoie jamais les colonnes que le serveur possède (`SERVER_COLUMNS` dans `src/lib/store.ts`). Une nouvelle colonne

@@ -4,19 +4,20 @@ import { CalendarDays, ChevronLeft, ChevronRight, CookingPot, ListChecks, Mic, S
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { toggleOccurrence } from "../components/ChoreSheets";
+import { ArrivalBanners, StaySheet } from "../components/Away";
 import { EventSheet } from "../components/EventSheet";
 import { Glyph } from "../components/icons";
 import { IntercomPanel } from "../components/Intercom";
 import { MealSheet } from "../components/MealSheet";
 import { Avatar, Avatars, CheckBox, Sheet, SyncPill, toast } from "../components/ui";
-import { BIRTHDAY_ICON, KIND_ICON, SLOT_LABEL, addDays, birthdaysOn, cap, countdownsFrom, eventsOn, fmtDay, inDays, mealName, mealsOn, occurrencesOn, partsIn, startTime, uncared, upcomingBirthdays } from "../lib/domain";
+import { BIRTHDAY_ICON, KIND_ICON, STAY_ICON, SLOT_LABEL, addDays, allAway, carshareMissing, stayLabel, stayOn, birthdaysOn, cap, countdownsFrom, eventsOn, fmtDay, inDays, mealName, mealsOn, occurrencesOn, partsIn, startTime, uncared, upcomingBirthdays } from "../lib/domain";
 import { demoWeather } from "../lib/demo";
 import { fullScreen, keepAwake } from "../lib/device";
 import { useHousehold, useMembers, useNow, useTable } from "../lib/hooks";
 import { useMealDrag } from "../lib/mealDrag";
 import { useSession } from "../lib/session";
 import { store } from "../lib/store";
-import type { CalEvent, MealSlot, ShoppingItem } from "../lib/types";
+import type { CalEvent, MealSlot, ShoppingItem, Stay } from "../lib/types";
 import { describe, useWeather } from "../lib/weather";
 import { buy } from "./Shopping";
 
@@ -30,7 +31,8 @@ export function Kiosk() {
   const now = useNow(20_000), local = partsIn(now, tz), today = local.day;
   const events = useTable("events"), meals = useTable("meal_plan"), dishes = useTable("dishes"), occurrences = useTable("chore_occurrences");
   const items = useTable("shopping_items"), lists = useTable("shopping_lists"), birthdays = useTable("birthdays"), countdowns = useTable("countdowns");
-  const rules = useTable("chores");
+  const rules = useTable("chores"), stays = useTable("stays");
+  const [stay, setStay] = useState<Stay | null>(null);
   // In the week's columns, the chores of every single day would only be noise: they are in "Tâches du jour"
   const everyDay = useMemo(() => new Set(rules.filter((c) => c.schedule.type === "daily" && !c.schedule.every).map((c) => c.id)), [rules]);
   const weather = useWeather(place, tz, demo ? demoWeather() : null);
@@ -107,7 +109,7 @@ export function Kiosk() {
           <span className="kweather"><w.Icon className="e" /><span className="big">{Math.round(weather.current.temperature)}°</span>
             <span className="small"><b>{w.text}</b><br /><span className="muted">Ressenti {Math.round(weather.current.feels)}° · {place.label}</span></span></span>
         )}
-        <span className="grow" />
+        <span className="grow karrivals"><ArrivalBanners tz={tz} compact /></span>
         <div className="kwho" title="Qui est là ?">
           <UserRound size={18} className="muted" />
           {members.family.filter((m) => !m.needs_caregiver).map((m) => (
@@ -123,21 +125,24 @@ export function Kiosk() {
 
       <div className="kiosk-week">
         {days.map((d) => {
-          const wx = weather?.days.find((x) => x.date === d), bds = birthdaysOn(birthdays, d), evs = eventsOn(events, d, tz);
+          const wx = weather?.days.find((x) => x.date === d), bds = birthdaysOn(birthdays, d), evs = eventsOn(events, d, tz), s = stayOn(stays, d);
           const todo = d === today ? [] : occurrencesOn(occurrences, d, tz, today).filter((o) => !o.chore_id || !everyDay.has(o.chore_id));
           return (
-            <div key={d} className={`kday ${d === today ? "today" : ""} ${d < today ? "past" : ""}`}>
+            <div key={d} className={`kday ${d === today ? "today" : ""} ${d < today ? "past" : ""} ${s ? "away" : ""}`}>
               <div className="kday-head">
                 <div><div className="dow">{fmtDay(d, { day: undefined, month: undefined })}</div><div className="dom">{Number(d.slice(8))}</div></div>
                 {wx && <div className="wx"><WxIcon code={wx.code} />{Math.round(wx.max)}° / {Math.round(wx.min)}°</div>}
               </div>
               <div className="kday-body">
+                {s && <button className={`kstay ${carshareMissing(s) ? "warn" : ""}`} onClick={() => setStay(s)}><Glyph name={STAY_ICON[s.kind]} />{stayLabel(s)}</button>}
                 {bds.map((b) => <div key={b.id} className="kbday"><Glyph name={BIRTHDAY_ICON[b.kind]} />{b.name}{b.year && b.kind !== "memorial" ? ` · ${Number(d.slice(0, 4)) - b.year} ans` : ""}</div>)}
                 {evs.filter((e) => e.all_day).map(eventCard)}
                 {dayBody(d, evs)}
                 {todo.length > 0 && <div className="kday-chores"><Glyph name="list-checks" />{todo.map((o) => o.title).join(" · ")}</div>}
               </div>
-              <div className="kday-meals">{mealRow(d, "lunch")}{mealRow(d, "dinner")}</div>
+              {allAway(s, members.adults) && !mealsOn(meals, d).length
+                ? <div className="kday-meals away"><span className="m"><b>Repas</b><span className="muted">{stayLabel(s!)}</span></span></div>
+                : <div className="kday-meals">{mealRow(d, "lunch")}{mealRow(d, "dinner")}</div>}
             </div>
           );
         })}
@@ -180,6 +185,7 @@ export function Kiosk() {
 
       {eventId && <EventSheet id={eventId} onClose={() => setEventId(null)} />}
       {meal && <MealSheet {...meal} onClose={() => setMeal(null)} />}
+      {stay && <StaySheet stay={stay} onClose={() => setStay(null)} />}
       {intercom && <IntercomPanel onClose={() => setIntercom(false)} />}
       {item && (
         <Sheet title={item.name} onClose={() => setItem(null)}>
