@@ -1,5 +1,6 @@
 // Tools: meals and dishes, shopping lists, chores, activity log.
 import { uuids } from "./db.ts";
+import { COURSE_KEYS, courseNames } from "./dishes.ts";
 import { type Schedule, describeSchedule, scheduleError } from "./schedule.ts";
 import {
   type Ctx, type Row, actorId, addDays, dayArg, daysBetween, fail, fmtDay, iconArg, isUuid, list, nameOf, namesOf, norm, people, pick, relDay, today,
@@ -9,9 +10,10 @@ import {
 // ====================================================================================================================
 // Meals
 // ====================================================================================================================
-const SLOTS: Record<string, string> = { breakfast: "Déjeuner", lunch: "Lunch", dinner: "Souper" };
+const SLOTS: Record<string, string> = { breakfast: "Déjeuner", lunch: "Dîner", dinner: "Souper" };
 const KINDS: Record<string, string> = { home: "", leftovers: "restes", restaurant: "resto", takeout: "à emporter", other: "" };
-const slotArg = z.enum(["lunch", "souper", "dejeuner"]).describe("lunch (midi), souper (soir) ou dejeuner (matin)");
+// Québec names: déjeuner (morning), dîner (noon), souper (evening). "lunch" stays accepted for the noon meal.
+const slotArg = z.enum(["diner", "lunch", "souper", "dejeuner"]).describe("diner (le midi ; « lunch » est accepté), souper (le soir) ou dejeuner (le matin)");
 const slotOf = (s: string) => (s === "souper" ? "dinner" : s === "dejeuner" ? "breakfast" : "lunch");
 const kindArg = z.enum(["maison", "restes", "restaurant", "a_emporter", "autre"]);
 const kindOf = (s?: string) => ({ maison: "home", restes: "leftovers", restaurant: "restaurant", a_emporter: "takeout", autre: "other" }[s || "maison"] || "home");
@@ -30,7 +32,7 @@ export function mealLine(c: Ctx, m: Row): string {
   if (m.note) bits.push(m.note);
   return bits.join(" · ");
 }
-// The dishes cooked at home lately, most recent first (what lunches are often made of)
+// The dishes cooked at home lately, most recent first (what the noon meal is often made of)
 export async function recentDishes(c: Ctx, days = 10): Promise<Row[]> {
   return await c.db.all(
     `select distinct on (coalesce(p.label, d.name)) coalesce(p.label, d.name) as name, p.dish_id, p.date
@@ -53,7 +55,7 @@ const mealTools = [
   tool({
     name: "repas",
     title: "Repas prévus",
-    description: "Les repas (lunchs et soupers) sur une période (par défaut : d'hier à dans 7 jours), avec qui cuisine, puis les derniers plats cuisinés (utiles pour les lunchs : on mange souvent les restes).",
+    description: "Les repas (dîners du midi et soupers du soir) sur une période (par défaut : d'hier à dans 7 jours), avec qui cuisine, puis les derniers plats cuisinés (utiles pour les dîners : on mange souvent les restes le midi).",
     shape: { du: z.string().optional().describe("AAAA-MM-JJ"), au: z.string().optional().describe("AAAA-MM-JJ") },
     write: false,
     run: async ({ du, au }, c) => {
@@ -70,37 +72,40 @@ const mealTools = [
   tool({
     name: "plats",
     title: "Plats et recettes",
-    description: "Sans argument : la liste des plats que la famille cuisine (les favoris d'abord). Avec « plat » (id ou nom) : sa fiche complète, ingrédients et recette. « recherche » filtre par mots (nom, tags, ingrédients).",
-    shape: { plat: z.string().optional(), recherche: z.string().optional() },
+    description: "Sans argument : la liste des plats que la famille cuisine (les favoris d'abord). Avec « plat » (id ou nom) : sa fiche complète, ingrédients et recette. « recherche » filtre par mots (nom, tags, ingrédients) ; « service » ne garde que les entrées, les desserts, etc.",
+    shape: { plat: z.string().optional(), recherche: z.string().optional(), service: z.enum(COURSE_KEYS).optional().describe("starter (entrée), main (plat principal), side (accompagnement), dessert, breakfast (déjeuner du matin), drink (boisson)") },
     write: false,
-    run: async ({ plat, recherche }, c) => {
+    run: async ({ plat, recherche, service }, c) => {
       if (plat) {
         const d = await findDish(c, plat) ?? fail(`Plat introuvable : « ${plat} ».`);
         const full = (await c.db.one(`select * from public.dishes where id = $1::uuid`, [d.id]))!;
         const last = await c.db.one(`select max(date) as d, count(*) as n from public.meal_plan where dish_id = $1::uuid and deleted_at is null and date <= $2::date`, [d.id, today(c)]);
-        return [`# ${full.name}${full.favorite ? " ⭐" : ""}`, full.tags?.length ? `Tags : ${full.tags.join(", ")}` : "",
+        return [`# ${full.name}${full.favorite ? " ⭐" : ""}`, full.courses?.length ? `Service : ${courseNames(full.courses).join(", ")}` : "", full.tags?.length ? `Tags : ${full.tags.join(", ")}` : "",
           last?.d ? `Cuisiné ${last.n} fois, la dernière ${relDay(today(c), last.d)}.` : "Jamais planifié.",
           full.ingredients ? `## Ingrédients\n${full.ingredients}` : "", full.recipe ? `## Recette\n${full.recipe}` : "",
-          full.note ? `Note : ${full.note}` : "", full.source_url ? `Source : ${full.source_url}` : "", `[${full.id}]`].filter(Boolean).join("\n\n");
+          full.note ? `Note : ${full.note}` : "", full.source || full.source_url ? `Source : ${[full.source, full.source_url].filter(Boolean).join(" · ")}` : "", `[${full.id}]`].filter(Boolean).join("\n\n");
       }
-      let rows = await c.db.all(`select id, name, tags, favorite, ingredients, (recipe is not null and recipe <> '') as has_recipe from public.dishes
+      let rows = await c.db.all(`select id, name, tags, courses, favorite, ingredients, (recipe is not null and recipe <> '') as has_recipe from public.dishes
         where deleted_at is null and not archived order by favorite desc, name`);
       if (recherche) { const w = norm(recherche).split(" "); rows = rows.filter((r) => w.every((x) => norm(`${r.name} ${(r.tags || []).join(" ")} ${r.ingredients || ""}`).includes(x))); }
+      if (service) rows = rows.filter((r) => (r.courses || []).includes(service));
       if (!rows.length) return recherche ? `Aucun plat pour « ${recherche} ».` : "Aucun plat enregistré pour le moment.";
-      return rows.map((r) => `- ${r.name}${r.favorite ? " ⭐" : ""}${r.tags?.length ? ` (${r.tags.join(", ")})` : ""}${r.has_recipe ? " · recette" : ""}`).join("\n");
+      return rows.map((r) => `- ${r.name}${r.favorite ? " ⭐" : ""}${r.courses?.length || r.tags?.length ? ` (${[...courseNames(r.courses), ...(r.tags || [])].join(", ")})` : ""}${r.has_recipe ? " · recette" : ""}`).join("\n");
     },
   }),
 
   tool({
     name: "plat_enregistrer",
     title: "Ajouter ou modifier un plat",
-    description: "Ajoute un plat à ceux que la famille cuisine, ou complète celui qui porte ce nom : ingrédients et recette en Markdown, tags, note, lien. « archive: true » le sort des choix sans effacer son historique.",
+    description: "Ajoute un plat à ceux que la famille cuisine, ou complète celui qui porte ce nom : ingrédients et recette en Markdown, service (entrée, plat principal, dessert…), tags, source, note, lien. « archive: true » le sort des choix sans effacer son historique.",
     shape: {
       nom: z.string().min(1),
       nouveau_nom: z.string().optional(),
       ingredients: z.string().optional().describe("liste Markdown"),
       recette: z.string().optional().describe("étapes en Markdown"),
       tags: z.array(z.string()).optional().describe("ex. rapide, végé, pâtes"),
+      service: z.array(z.enum(COURSE_KEYS)).optional().describe("starter (entrée), main (plat principal), side (accompagnement), dessert, breakfast (déjeuner du matin), drink (boisson)"),
+      source: z.string().optional().describe("d'où vient la recette : une personne, un livre"),
       note: z.string().optional(),
       url: z.string().optional(),
       favori: z.boolean().optional(),
@@ -115,15 +120,18 @@ const mealTools = [
           `update public.dishes set name = coalesce($2, name), ingredients = coalesce($3, ingredients), recipe = coalesce($4, recipe),
              tags = case when $5::text is null then tags else array(select jsonb_array_elements_text($5::text::jsonb)) end,
              note = coalesce($6, note), source_url = coalesce($7, source_url), favorite = coalesce($8::boolean, favorite),
-             archived = coalesce($9::boolean, archived), updated_by = $10::uuid, updated_via = $11
+             archived = coalesce($9::boolean, archived), updated_by = $10::uuid, updated_via = $11,
+             courses = case when $12::text is null then courses else array(select jsonb_array_elements_text($12::text::jsonb)) end,
+             source = coalesce($13, source)
            where id = $1::uuid`,
-          [d.id, a.nouveau_nom?.trim() || null, a.ingredients ?? null, a.recette ?? null, tags, a.note ?? null, a.url ?? null, a.favori ?? null, a.archive ?? null, actorId(c), c.via]);
+          [d.id, a.nouveau_nom?.trim() || null, a.ingredients ?? null, a.recette ?? null, tags, a.note ?? null, a.url ?? null, a.favori ?? null, a.archive ?? null, actorId(c), c.via, a.service ? JSON.stringify(a.service) : null, a.source ?? null]);
         return `Plat mis à jour : ${a.nouveau_nom?.trim() || d.name}.`;
       }
       await c.db.exec(
-        `insert into public.dishes (name, ingredients, recipe, tags, note, source_url, favorite, archived, updated_by, updated_via)
-         values ($1, $2, $3, coalesce(array(select jsonb_array_elements_text($4::text::jsonb)), '{}'), $5, $6, $7, $8, $9::uuid, $10)`,
-        [(a.nouveau_nom || a.nom).trim(), a.ingredients ?? null, a.recette ?? null, tags ?? "[]", a.note ?? null, a.url ?? null, a.favori ?? false, a.archive ?? false, actorId(c), c.via]);
+        `insert into public.dishes (name, ingredients, recipe, tags, note, source_url, favorite, archived, updated_by, updated_via, courses, source)
+         values ($1, $2, $3, coalesce(array(select jsonb_array_elements_text($4::text::jsonb)), '{}'), $5, $6, $7, $8, $9::uuid, $10,
+           coalesce(array(select jsonb_array_elements_text($11::text::jsonb)), '{}'), $12)`,
+        [(a.nouveau_nom || a.nom).trim(), a.ingredients ?? null, a.recette ?? null, tags ?? "[]", a.note ?? null, a.url ?? null, a.favori ?? false, a.archive ?? false, actorId(c), c.via, JSON.stringify(a.service ?? []), a.source ?? null]);
       return `Plat ajouté : ${(a.nouveau_nom || a.nom).trim()}.`;
     },
   }),
@@ -131,7 +139,7 @@ const mealTools = [
   tool({
     name: "repas_planifier",
     title: "Planifier un repas",
-    description: "Indique ce qu'on mange à un repas : « quoi » est le nom d'un plat de la liste (il est reconnu), ou un texte libre (plat du jour, nom du restaurant). Remplace ce qui était prévu pour ce repas et ces personnes, sauf « ajouter: true ». « pour » : prénoms (vide = tout le monde ; les lunchs sont souvent par personne). « cuisine_par » : qui cuisine (prénoms, ou « nous deux »). On peut aussi ne donner que « cuisine_par » pour décider qui cuisine un soir sans changer le plat. type : maison, restes (d'un plat récent), restaurant, a_emporter.",
+    description: "Indique ce qu'on mange à un repas : « quoi » est le nom d'un plat de la liste (il est reconnu), ou un texte libre (plat du jour, nom du restaurant). Remplace ce qui était prévu pour ce repas et ces personnes, sauf « ajouter: true ». « pour » : prénoms (vide = tout le monde ; les dîners du midi sont souvent par personne). « cuisine_par » : qui cuisine (prénoms, ou « nous deux »). On peut aussi ne donner que « cuisine_par » pour décider qui cuisine un soir sans changer le plat. type : maison, restes (d'un plat récent), restaurant, a_emporter.",
     shape: {
       date: z.string().describe("AAAA-MM-JJ (ou aujourd'hui, demain)"),
       moment: slotArg,

@@ -37,11 +37,12 @@ export function demoTables(): Partial<{ [T in keyof Tables]: Tables[T][] }> {
     { ...ev(6, "00:00", "00:00", "Visite des grands-parents"), all_day: true, start_date: d(6), end_date: d(7), ends_at: at(8, "00:00") },
   ];
   const dishNames = ["Spaghetti carbonara", "Rouleaux de printemps", "Chili végé", "Poulet au beurre", "Saumon teriyaki", "Risotto aux champignons", "Tacos", "Soupe aux lentilles"];
+  const desserts = ["Mousse au chocolat", "Crêpes", "Tarte aux pommes"];
   const dishes: Tables["dishes"][] = dishNames.map((name, i) => ({
-    id: `d-${i}`, name, tags: i % 2 ? ["rapide"] : [], ingredients: i === 0 ? "- 400 g de spaghetti\n- 150 g de guanciale\n- 4 jaunes d'œufs\n- 80 g de pecorino\n- Poivre" : null,
+    id: `d-${i}`, name, tags: i % 2 ? ["rapide"] : [], courses: i === 1 ? ["starter"] : ["main"], source: i === 0 ? "Carnet de famille" : null, ingredients: i === 0 ? "- 400 g de spaghetti\n- 150 g de guanciale\n- 4 jaunes d'œufs\n- 80 g de pecorino\n- Poivre" : null,
     recipe: i === 0 ? "1. Cuire les pâtes al dente.\n2. Faire dorer le guanciale.\n3. Hors du feu, mélanger jaunes et pecorino avec un peu d'eau de cuisson.\n4. Poivrer généreusement." : null,
     source_url: null, note: null, favorite: i < 3, archived: false,
-  }));
+  })).concat(desserts.map((name, i) => ({ id: `d-s${i}`, name, tags: [], courses: i === 1 ? ["breakfast", "dessert"] : ["dessert"], source: null, ingredients: null, recipe: null, source_url: null, note: null, favorite: false, archived: false })));
   const meal = (k: number, slot: "lunch" | "dinner", dish: number | string, extra: Partial<Tables["meal_plan"]> = {}): Tables["meal_plan"] => ({
     id: id("p"), date: d(k), slot, member_ids: [], dish_id: typeof dish === "number" ? `d-${dish}` : null, label: typeof dish === "string" ? dish : null,
     kind: "home", cook_ids: [], note: null, created_at: new Date().toISOString(), ...extra,
@@ -49,7 +50,7 @@ export function demoTables(): Partial<{ [T in keyof Tables]: Tables[T][] }> {
   const meal_plan = [
     meal(-2, "dinner", 3, { cook_ids: [sam] }), meal(-1, "dinner", 2, { cook_ids: [alex] }),
     meal(0, "lunch", 2, { member_ids: [alex], kind: "leftovers" }), meal(0, "lunch", "Salade niçoise", { member_ids: [sam] }),
-    meal(0, "dinner", 0, { cook_ids: [alex] }),
+    meal(0, "dinner", 0, { cook_ids: [alex] }), { ...meal(0, "dinner", "x"), dish_id: "d-s0", label: null },
     meal(1, "lunch", 0, { kind: "leftovers" }), meal(1, "dinner", 1, { cook_ids: [alex, sam] }),
     meal(2, "dinner", "Chez Lola", { kind: "restaurant" }),
     meal(3, "dinner", 4, { cook_ids: [sam] }), meal(4, "dinner", 6, { cook_ids: [alex] }),

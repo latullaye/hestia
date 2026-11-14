@@ -194,7 +194,7 @@ textarea.input { min-height: 84px; resize: vertical; line-height: 1.4; }
 .login { min-height: 100%; display: grid; place-items: center; padding: 24px; }
 .login form { width: 100%; max-width: 360px; display: flex; flex-direction: column; gap: 12px; }
 .logo { font-family: var(--font-display); font-weight: 700; font-size: 2.2rem; letter-spacing: -0.02em; color: var(--accent); display: flex; align-items: center; gap: 10px; }
-.logo img { width: 48px; height: 48px; border-radius: 12px; }
+.logo .wordmark { display: block; max-width: 100%; }
 
 /* ---------- Kiosk (landscape tablet in the kitchen) ---------- */
 .kiosk { height: 100dvh; display: grid; grid-template-columns: minmax(0, 1fr) clamp(250px, 24vw, 340px); gap: 12px; padding: calc(10px + var(--safe-top)) 12px 12px; overflow: hidden; font-size: clamp(13px, 1.25vw, 17px); }
@@ -248,3 +248,14 @@ textarea.input { min-height: 84px; resize: vertical; line-height: 1.4; }
   .kiosk-week { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .kday { min-height: 220px; }
 }
+
+/* ---------- Moving a dish to another meal ---------- */
+.draggable { cursor: grab; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+.draggable.dragged { opacity: 0.35; }
+body.dragging { cursor: grabbing; user-select: none; -webkit-user-select: none; }
+body.dragging * { cursor: grabbing !important; }
+[data-drop][data-over] { background: var(--accent-soft) !important; box-shadow: inset 0 0 0 2px var(--accent); }
+.drag-ghost { position: fixed; z-index: 200; pointer-events: none; transform: translate(-50%, -140%); padding: 7px 13px; border-radius: 999px; background: var(--accent); color: var(--accent-ink);
+  font-weight: 700; font-size: 0.9rem; white-space: nowrap; max-width: 70vw; overflow: hidden; text-overflow: ellipsis; box-shadow: 0 6px 18px rgb(0 0 0 / 0.18); }
+.results > button.on { background: var(--accent-soft); }
+.kday-meals > .m { width: 100%; text-align: left; border-radius: 7px; padding: 1px 3px; }

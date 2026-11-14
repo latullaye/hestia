@@ -100,5 +100,8 @@ C'est une demande ferme de la famille, à respecter dans tout nouvel écran :
   d'aplats vifs, pas de dégradés.
 - **Peu de choses par écran** : cartes blanches à bord fin, beaucoup d'air, une information par ligne. Sur le kiosque,
   tout doit se lire de loin sans rien d'agressif.
+- **Le logo** : une maison dont les murs forment un H, et la barre du H se termine par un point ambre (la braise du foyer).
+  C'est la seule touche de couleur chaude hors de `--warn`. L'icône est `public/icons/icon.svg` (`npm run icons` refait
+  les PNG) ; le nom en lettres liées est le composant `Wordmark` (`src/components/icons.tsx`), où la braise sert de point au i.
 - Deux polices seulement (Ubuntu pour les titres et les chiffres, Atkinson Hyperlegible pour le texte), les variables de
   `src/styles.css` pour toutes les couleurs, et le thème sombre vérifié à chaque ajout.

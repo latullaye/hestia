@@ -7,7 +7,7 @@ installable (PWA) pour les téléphones et l'ordinateur, une vue **kiosque** pou
 | | |
 |---|---|
 | **Calendrier** | Événements de la famille, reliés dans les deux sens à Google Agenda « Family ». Chaque événement dit qui est concerné ; un enfant est toujours accompagné d'un adulte. Une sortie d'un parent passe par une **demande d'approbation** (notification, approuver ou refuser, commentaires). |
-| **Repas** | Lunchs et soupers de la semaine, à partir des plats de la famille (avec recettes), des restes des derniers jours, ou en texte libre (resto). Qui cuisine le soir. Les repas restent dans Hestia, jamais dans Google Agenda. |
+| **Repas** | Dîners et soupers de la semaine (plusieurs plats par repas, déplaçables par glisser-déposer), à partir des plats de la famille (avec recettes), des restes des derniers jours, ou en texte libre (resto). Qui cuisine le soir. Les repas restent dans Hestia, jamais dans Google Agenda. |
 | **Courses** | Listes par magasin (Épicerie, Costco…), articles classés par rayon dans l'ordre du magasin. Cocher en magasin note qui a acheté quoi et quand. |
 | **Tâches** | Tâches régulières (tous les soirs, le mercredi soir, le samedi sinon le dimanche, en mai…), à tour de rôle ou non, et tâches ponctuelles données à quelqu'un. |
 | **Anniversaires** | Tableau de l'année, prochains anniversaires, idées de cadeaux, dates « en mémoire » à part. |

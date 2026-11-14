@@ -83,6 +83,17 @@ describe("meals", () => {
     expect(text).toContain("cuisiné par Alex");
     expect(await ok(c, "plats", { plat: "carbonara" })).toContain("## Recette");
   });
+  it("records what a dish is served as and where it comes from", async () => {
+    await ok(c, "plat_enregistrer", { nom: "Mousse au chocolat", service: ["dessert"], source: "Carnet de famille" });
+    await ok(c, "plat_enregistrer", { nom: "Spaghetti carbonara", service: ["main"] });
+    const card = await ok(c, "plats", { plat: "mousse" });
+    expect(card).toContain("Service : Dessert");
+    expect(card).toContain("Source : Carnet de famille");
+    const desserts = await ok(c, "plats", { service: "dessert" });
+    expect(desserts).toContain("Mousse au chocolat (Dessert)");
+    expect(desserts).not.toContain("carbonara");
+    expect(await ok(c, "plats", { plat: "carbonara" })).toContain("Tags : pâtes, rapide"); // untouched by the second call
+  });
   it("replaces what was planned, keeps who cooks, and accepts free text", async () => {
     const text = await ok(sam, "repas_planifier", { date: "demain", moment: "souper", quoi: "Chez Lola", type: "restaurant" });
     expect(text).toContain("Chez Lola (hors liste) · resto · cuisiné par Alex");
@@ -92,10 +103,10 @@ describe("meals", () => {
   });
   it("plans a lunch per person and changes only the cook", async () => {
     await ok(c, "repas_planifier", { date: today, moment: "lunch", quoi: "Spaghetti carbonara", type: "restes", pour: ["moi"] });
-    await ok(c, "repas_planifier", { date: today, moment: "lunch", quoi: "Salade", pour: ["Sam"] });
+    await ok(c, "repas_planifier", { date: today, moment: "diner", quoi: "Salade", pour: ["Sam"] });
     const text = await ok(c, "repas", { du: today, au: today });
-    expect(text).toContain("Lunch de Alex : Spaghetti carbonara · restes");
-    expect(text).toContain("Lunch de Sam : Salade");
+    expect(text).toContain("Dîner de Alex : Spaghetti carbonara · restes");
+    expect(text).toContain("Dîner de Sam : Salade");
     expect(await ok(c, "repas_planifier", { date: today, moment: "souper", cuisine_par: ["nous deux"] })).toContain("Alex, Sam cuisine");
     expect(await ok(c, "repas_retirer", { date: today, moment: "lunch", pour: ["Sam"] })).toContain("Salade");
   });
