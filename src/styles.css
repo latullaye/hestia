@@ -91,6 +91,7 @@ svg { flex: none; }
 .chip { display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); font-weight: 700; font-size: 0.9rem; color: var(--muted); }
 .chip.on { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
 .chip.small { min-height: 26px; padding: 0 9px; font-size: 0.78rem; }
+.unread-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); flex: none; }
 .tag { display: inline-flex; align-items: center; gap: 4px; padding: 1px 8px; border-radius: 999px; font-size: 0.74rem; font-weight: 700; background: var(--group); color: var(--muted); white-space: nowrap; }
 .tag.warn { background: var(--warn-soft); color: var(--warn); } .tag.danger { background: var(--danger-soft); color: var(--danger); }
 .tag.ok { background: var(--ok-soft); color: var(--ok); } .tag.accent { background: var(--accent-soft); color: var(--accent); }

@@ -94,7 +94,18 @@ Ce que fait chaque partie, et les règles qui ne se voient pas à l'écran. À t
 | Rappel du soir | Qui a encore des tâches |
 | Avant un événement | Les adultes concernés ou accompagnateurs |
 
-Elles sont aussi dans la cloche de l'écran d'accueil.
+### Boîte de réception
+
+La cloche de l'écran d'accueil et **Plus › Boîte de réception** ouvrent le même écran (`src/pages/Inbox.tsx`) :
+
+- **À toi de répondre** : les demandes d'approbation qui attendent ta réponse ;
+- **Tes demandes en attente** : celles que tu as faites et qui n'ont pas encore de réponse ;
+- **Décisions** : les 30 dernières demandes approuvées ou refusées qui te concernent, avec qui a décidé, quand, et son mot ;
+- **Notifications** : les 60 dernières reçues ; un point marque les nouvelles, un toucher ou *Tout marquer lu* les marque lues.
+
+Les demandes et les décisions sont lues dans les événements eux-mêmes : elles restent visibles même quand la notification
+a disparu (les notifications sont effacées après 90 jours). La pastille de l'onglet *Aujourd'hui* compte les demandes à
+décider et les notifications non lues.
 
 ## Journal
 
