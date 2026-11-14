@@ -43,7 +43,7 @@ jobs:
         run: supabase link --project-ref "$SUPABASE_PROJECT_REF"
       - name: Apply the migrations
         if: steps.ready.outputs.ok == 'true'
-        run: supabase db push --include-all
+        run: supabase db push --remote --include-all
       - name: Deploy the Edge Functions
         if: steps.ready.outputs.ok == 'true'
         run: supabase functions deploy --project-ref "$SUPABASE_PROJECT_REF"

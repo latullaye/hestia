@@ -45,7 +45,7 @@ supabase link --project-ref <référence-du-projet>
 ```
 
 ```bash
-supabase db push --include-all
+supabase db push --remote --include-all
 ```
 
 ```bash
