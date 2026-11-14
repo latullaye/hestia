@@ -85,7 +85,8 @@ Plus › **Cadeaux** (adultes seulement ; le kiosque ne les voit pas). Écran : 
   La date d'anniversaire vient de la liste des anniversaires ; « Utilise Hestia » relie la personne à un membre.
 - **Dans les 2 prochains mois** : chaque anniversaire et Noël qui approchent, avec, par personne, les cadeaux prévus (à
   cocher une fois achetés), ses idées en attente (un toucher les prévoit pour l'occasion) et une ligne pour en ajouter.
-  « Rien de prévu » en ambre quand il reste à trouver.
+  « Rien de prévu » en ambre quand il reste à trouver. À Noël, deux groupes par personne : le **gros cadeau** (sous le
+  sapin) et le **bas de Noël** (petites attentions).
 - Une fiche par personne : ses idées, ce qui a été prévu et offert les années passées ; une fiche par cadeau : précision,
   lien, occasion.
 - **Confidentialité** : ce qu'on prévoit pour une personne qui utilise Hestia lui est **caché** (le serveur le filtre :
@@ -102,9 +103,10 @@ Plus › **Cadeaux** (adultes seulement ; le kiosque ne les voit pas). Écran : 
   proportion des heures qui les séparent, de 7 h à 22 h ; ils ne se chevauchent jamais).
 - Glisser un plat d'une case repas à une autre le déplace : il suit le doigt dès qu'on bouge (un simple toucher ouvre le
   repas).
+- Les repas forment une bande continue en bas de chaque colonne, d'une autre teinte que l'agenda.
 - Plein écran automatique à l'ouverture (ou au premier toucher) : voir [KIOSK.md](KIOSK.md).
-- En bas : tâches du jour à cocher, à acheter (toucher : acheté ou pas besoin), anniversaires à venir et décomptes, accès
-  aux autres écrans, **Interphone**.
+- En bas : tâches du jour à cocher, à acheter (toucher : acheté ou pas besoin), anniversaires à venir et décomptes, puis
+  quatre accès (Agenda, Repas, Courses, Tâches) et le bouton **Interphone**. Hors de la tablette, « Quitter » est en haut.
 - L'écran reste allumé ; l'app se met à jour toute seule ; hors ligne, elle montre la dernière copie.
 
 ## Interphone

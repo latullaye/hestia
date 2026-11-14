@@ -32,8 +32,9 @@ export type GiftPerson = Sync & { name: string; birthday_id: string | null; memb
 export type Occasion = "birthday" | "christmas";
 export type Gift = Sync & {
   person_id: string; title: string; note: string | null; url: string | null; occasion: Occasion | null; year: number | null;
-  bought_at: string | null; bought_by: string | null; wish_id: string | null; created_by?: string | null;
+  bought_at: string | null; bought_by: string | null; wish_id: string | null; created_by?: string | null; kind?: GiftKind | null;
 };
+export type GiftKind = "main" | "stocking";
 export type Notification = { id: string; member_id: string; kind: string; title: string; body: string | null; url: string | null; data: Record<string, any>; read_at: string | null; created_at: string; updated_at?: string };
 
 export type Tables = {

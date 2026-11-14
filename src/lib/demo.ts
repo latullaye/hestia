@@ -131,8 +131,9 @@ export function demoTables(): Partial<{ [T in keyof Tables]: Tables[T][] }> {
     gift("g-noah", "Livre sur les dinosaures", alex, { occasion: "birthday", year: Number(d(4).slice(0, 4)), bought_at: at(-2, "15:00"), bought_by: alex }),
     gift("g-noah", "Puzzle 100 pièces", sam, { occasion: "birthday", year: Number(d(4).slice(0, 4)) }),
     gift("g-noah", "Lampe de poche", alex),
-    samWish, gift("g-sam", "Écharpe en laine", alex, { occasion: "christmas", year: xmas, note: "gris clair" }),
-    gift("g-sam", samWish.title, alex, { occasion: "christmas", year: xmas, wish_id: samWish.id }),
+    samWish, gift("g-sam", "Écharpe en laine", alex, { occasion: "christmas", year: xmas, note: "gris clair", kind: "main" }),
+    gift("g-sam", "Chaussettes de laine", alex, { occasion: "christmas", year: xmas, kind: "stocking" }),
+    gift("g-sam", samWish.title, alex, { occasion: "christmas", year: xmas, wish_id: samWish.id, kind: "stocking" }),
     gift("g-alex", "Casque audio", alex, { note: "sans fil" }),
     gift("g-jo", "Cadre photo", sam, { occasion: "christmas", year: xmas }), gift("g-jo", "Plaid", alex),
   ];
