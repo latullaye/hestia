@@ -211,9 +211,9 @@ textarea.input { min-height: 84px; resize: vertical; line-height: 1.4; }
 .kevent.medical { border-left-color: var(--danger); }
 .kevent.alert { outline: 2px solid var(--danger); }
 .kday-meals { border-top: 1px solid var(--line); padding: 6px 8px 7px; display: flex; flex-direction: column; gap: 3px; background: var(--group); width: 100%; text-align: left; font-size: 0.86em; }
-.kday-meals .m { display: flex; gap: 5px; align-items: baseline; }
-.kday-meals .m b { font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); width: 5.4em; flex: none; }
-.kday-meals .m span { min-width: 0; overflow-wrap: anywhere; }
+.kday-meals .m { display: block; line-height: 1.25; }
+.kday-meals .m b { display: block; font-size: 0.68em; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+.kday-meals .m > span { overflow-wrap: break-word; }
 .kday-chores { font-size: 0.78em; color: var(--muted); padding: 0 2px; }
 .kiosk-side { display: flex; flex-direction: column; gap: 10px; min-height: 0; }
 .kcard { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 10px 12px; min-height: 0; display: flex; flex-direction: column; gap: 6px; }
