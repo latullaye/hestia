@@ -198,3 +198,13 @@ do $$ begin
 exception when insufficient_privilege then null;
 end $$;
 reset role;
+
+-- ---------- A member removed for good: nothing blocks, their name leaves the rows ----------
+-- (rolled back: the tool tests that follow use the same family)
+begin;
+delete from public.members where id = '10000000-0000-0000-0000-000000000001';
+do $$ begin
+  assert (select created_by from public.events where id = '30000000-0000-0000-0000-000000000001') is null, 'created_by is emptied';
+  assert (select count(*) from public.activity_log where actor_id = '10000000-0000-0000-0000-000000000001') = 0, 'the log forgets the author, keeps the lines';
+end $$;
+rollback;

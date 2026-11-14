@@ -72,6 +72,11 @@ docs/                     la documentation
   Hestia → Google → Hestia. Ne pas l'oublier dans un nouveau chemin d'écriture.
 - L'app n'envoie jamais les colonnes que le serveur possède (`SERVER_COLUMNS` dans `src/lib/store.ts`). Une nouvelle colonne
   calculée par un déclencheur s'ajoute à cette liste.
+- Une migration qui crée une fonction dans `private` doit finir par les deux lignes `revoke execute on all functions in
+  schema private from public, anon, authenticated;` puis `grant execute on function …` (voir la fin de la migration 05) :
+  Postgres donne `execute` à tout le monde par défaut.
+- Une colonne dont la valeur par défaut appelle une fonction de `private` (ex. `chores.start_date`) exige que
+  `authenticated` puisse exécuter cette fonction.
 - Les quatre `deno.json` des fonctions sont identiques : les garder en phase, et en phase avec les versions de `package.json`.
 - Les fonctions sont déployées avec `verify_jwt = false` et vérifient elles-mêmes l'appelant (`_shared/http.ts`).
 - L'interphone utilise `claude-opus-5-5` par défaut (secret `HESTIA_MODEL` pour changer), effort `low`, avec repli côté

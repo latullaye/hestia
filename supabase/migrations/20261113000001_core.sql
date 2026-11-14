@@ -182,7 +182,8 @@ begin
     end if;
   end if;
   insert into public.activity_log (actor_id, via, action, entity_type, entity_id, label, data)
-  values (new.updated_by, new.updated_via, act, tg_table_name, n ->> 'id', n ->> tg_argv[0], diff);
+  -- (the author is looked up: a member removed for good, which sets these columns to null row by row, must not block)
+  values ((select m.id from public.members m where m.id = new.updated_by), new.updated_via, act, tg_table_name, n ->> 'id', n ->> tg_argv[0], diff);
   return null;
 end $$;
 

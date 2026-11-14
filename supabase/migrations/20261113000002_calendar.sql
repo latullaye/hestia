@@ -55,7 +55,8 @@ begin
     return new;
   end if;
   -- The Google link belongs to the server: an app working from an old copy must not undo it
-  if new.updated_via <> 'gcal' then
+  -- (direct writes only: a write made by another trigger or by a foreign key action goes through)
+  if new.updated_via <> 'gcal' and pg_trigger_depth() = 1 then
     new.gcal_event_id := old.gcal_event_id; new.gcal_etag := old.gcal_etag; new.gcal_recurring := old.gcal_recurring;
     new.gcal_synced_at := old.gcal_synced_at; new.gcal_dirty := old.gcal_dirty; new.source := old.source;
     new.birthday_id := old.birthday_id; new.created_by := old.created_by;
