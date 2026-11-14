@@ -9,6 +9,8 @@ export const ICON_KEYS = [
   // kitchen and food
   "utensils", "cooking-pot", "chef-hat", "fridge", "shopping-cart", "shopping-basket", "shopping-bag", "store", "package", "carrot", "salad", "apple", "croissant",
   "wheat", "beef", "fish", "egg", "milk", "droplet", "cup", "ice-cream", "nut",
+  // stores: a letter in a frame, to tell lists apart at a glance (W, C, A…)
+  "letter-w", "letter-c", "letter-a",
   // family, animals, health
   "baby", "cat", "dog", "pill", "stethoscope", "syringe", "heart", "book", "music", "dumbbell",
   // moments

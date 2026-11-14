@@ -56,7 +56,7 @@ export function demoTables(): Partial<{ [T in keyof Tables]: Tables[T][] }> {
     meal(3, "dinner", 4, { cook_ids: [sam] }), meal(4, "dinner", 6, { cook_ids: [alex] }),
   ];
   const lists: Tables["shopping_lists"][] = [
-    { id: "l-1", name: "Épicerie", emoji: "shopping-cart", sort_order: 1, show_on_kiosk: true }, { id: "l-2", name: "Costco", emoji: "store", sort_order: 2, show_on_kiosk: true },
+    { id: "l-1", name: "Épicerie", emoji: "shopping-cart", sort_order: 1, show_on_kiosk: true }, { id: "l-2", name: "Costco", emoji: "letter-c", sort_order: 2, show_on_kiosk: true },
     { id: "l-3", name: "Pharmacie", emoji: "pill", sort_order: 3, show_on_kiosk: true },
     { id: "l-4", name: "En ligne", emoji: "package", sort_order: 4, show_on_kiosk: false, url: "https://example.com/ma-liste" },
   ];
