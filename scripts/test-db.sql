@@ -237,6 +237,12 @@ end $$;
 update public.gifts set bought_at = now() where id = '61000000-0000-0000-0000-000000000002';
 do $$ begin
   assert (select bought_by from public.gifts where id = '61000000-0000-0000-0000-000000000002') = '10000000-0000-0000-0000-000000000001', 'bought_by';
+  update public.gifts set kind = 'stocking' where id = '61000000-0000-0000-0000-000000000001';
+  begin
+    update public.gifts set kind = 'sack' where id = '61000000-0000-0000-0000-000000000001';
+    assert false, 'an unknown kind of present must be refused';
+  exception when check_violation then null;
+  end;
 end $$;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-0000000000a9', false);
 do $$ begin

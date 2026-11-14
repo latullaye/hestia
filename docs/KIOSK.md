@@ -45,7 +45,7 @@ plein écran n'existe pas dans le navigateur : installer l'app. Le code est `ful
   l'action est notée à son nom. Sans cela, elle est notée au nom du kiosque.
 - Toucher un événement : détail, qui accompagne, approbation, commentaires. Toucher le dîner ou le souper d'un jour : le
   choisir. Glisser un plat vers une autre case repas : le déplacer.
-- Les quatre boutons en bas à droite, au-dessus de l'interphone, ouvrent l'agenda, les repas, les courses et les tâches en plein écran ; l'écran
+- Les quatre boutons en bas à droite (Agenda, Repas, Courses, Tâches), au-dessus de l'interphone, ouvrent l'agenda, les repas, les courses et les tâches en plein écran ; l'écran
   revient au kiosque après 3 minutes sans toucher.
 - Les mises à jour de l'app sont prises toutes seules (vérification chaque heure).
 

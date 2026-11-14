@@ -3,13 +3,13 @@
 import { ChevronRight, ExternalLink, Plus, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Glyph } from "../components/icons";
-import { CheckBox, Empty, Field, Sheet, SyncPill, toast } from "../components/ui";
+import { CheckBox, Empty, Field, Segmented, Sheet, SyncPill, toast } from "../components/ui";
 import { cap, fmtDay, inDays, plural } from "../lib/domain";
-import { AHEAD_DAYS, OCCASION_LABEL, type Due, addGift, birthdayIn, dueSoon, giftView, isWish, planIdea, toggleBought, yearOptions } from "../lib/gifts";
+import { AHEAD_DAYS, KIND_LABEL, OCCASION_LABEL, type Due, addGift, birthdayIn, dueSoon, giftView, isWish, planIdea, toggleBought, yearOptions } from "../lib/gifts";
 import { useHousehold, useMembers, useTable, useToday } from "../lib/hooks";
 import { useSession } from "../lib/session";
 import { store } from "../lib/store";
-import type { Gift, GiftPerson, Occasion } from "../lib/types";
+import type { Gift, GiftKind, GiftPerson, Occasion } from "../lib/types";
 
 type View = ReturnType<typeof giftView>;
 
@@ -82,22 +82,39 @@ function OccasionBlock({ due, person, view, me, many, onOpen }: { due: Due; pers
       )}
       {mine ? (
         <p className="small muted">Ce qu'on te prépare t'est caché. Tes envies : {ideas.length ? ideas.map((g) => g.title).join(", ") : "aucune pour l'instant"}.</p>
-      ) : <>
-        {planned.map((g) => (
-          <div key={g.id} className="gift-line">
-            <button className="tap" onClick={() => toggleBought(g, person, me)} aria-label={g.bought_at ? "Pas encore acheté" : "Acheté"}><CheckBox on={!!g.bought_at} round /></button>
-            <button className="grow gift-title" onClick={() => onOpen(g)}><span className={g.bought_at ? "strike" : ""}>{g.title}</span>{g.note && <span className="small muted"> · {g.note}</span>}</button>
-            {g.url && <a className="icon-btn plain" href={g.url} target="_blank" rel="noreferrer" aria-label="Ouvrir le lien"><ExternalLink /></a>}
-          </div>
-        ))}
+      ) : due.occasion === "christmas" ? (["main", "stocking"] as GiftKind[]).map((k) => (
+        <div key={k} className="gift-kind">
+          <span className="label">{KIND_LABEL[k]}</span>
+          {planned.filter((g) => (g.kind ?? "main") === k).map((g) => <GiftLine key={g.id} gift={g} person={person} me={me} onOpen={onOpen} />)}
+          {k === "main" && ideas.length > 0 && <IdeaChips ideas={ideas} person={person} me={me} due={due} kind={k} />}
+          <AddLine placeholder={k === "main" ? `Gros cadeau pour ${person.name}` : "Pour son bas de Noël"} onAdd={(t) => addGift(person, t, me, due.occasion, due.year, k)} />
+        </div>
+      )) : <>
+        {planned.map((g) => <GiftLine key={g.id} gift={g} person={person} me={me} onOpen={onOpen} />)}
         {!many && !planned.length && <p className="small" style={{ color: "var(--warn)" }}>Rien de prévu pour l'instant.</p>}
-        {ideas.length > 0 && <div className="chips">{ideas.map((g) => (
-          <button key={g.id} className="chip small" onClick={() => { planIdea(g, person, me, due.occasion, due.year); toast(`${g.title} : prévu`); }}>
-            <Plus size={14} />{g.title}{isWish(g, person) ? <span className="muted"> · envie</span> : null}</button>
-        ))}</div>}
+        {ideas.length > 0 && <IdeaChips ideas={ideas} person={person} me={me} due={due} kind={null} />}
         <AddLine placeholder={`Un cadeau pour ${person.name}`} onAdd={(t) => addGift(person, t, me, due.occasion, due.year)} />
       </>}
     </div>
+  );
+}
+
+function GiftLine({ gift: g, person, me, onOpen }: { gift: Gift; person: GiftPerson; me: string | null; onOpen: (g: Gift) => void }) {
+  return (
+    <div className="gift-line">
+      <button className="tap" onClick={() => toggleBought(g, person, me)} aria-label={g.bought_at ? "Pas encore acheté" : "Acheté"}><CheckBox on={!!g.bought_at} round /></button>
+      <button className="grow gift-title" onClick={() => onOpen(g)}><span className={g.bought_at ? "strike" : ""}>{g.title}</span>{g.note && <span className="small muted"> · {g.note}</span>}</button>
+      {g.url && <a className="icon-btn plain" href={g.url} target="_blank" rel="noreferrer" aria-label="Ouvrir le lien"><ExternalLink /></a>}
+    </div>
+  );
+}
+
+function IdeaChips({ ideas, person, me, due, kind }: { ideas: Gift[]; person: GiftPerson; me: string | null; due: Due; kind: GiftKind | null }) {
+  return (
+    <div className="chips">{ideas.map((g) => (
+      <button key={g.id} className="chip small" onClick={() => { planIdea(g, person, me, due.occasion, due.year, false, kind); toast(`${g.title} : prévu`); }}>
+        <Plus size={14} />{g.title}{isWish(g, person) ? <span className="muted"> · envie</span> : null}</button>
+    ))}</div>
   );
 }
 
@@ -156,7 +173,7 @@ function PersonSheet({ person, view, me, onGift, onClose }: { person: GiftPerson
           <span className="label">Prévus et offerts</span>
           <div className="card flush list">{history.map((g) => (
             <button key={g.id} onClick={() => onGift(g)}><span className="grow">{g.title}</span>
-              <span className="small muted">{g.occasion ? `${OCCASION_LABEL[g.occasion]} ${g.year}` : ""}</span>{g.bought_at && <span className="tag accent">Acheté</span>}</button>
+              <span className="small muted">{g.occasion ? `${OCCASION_LABEL[g.occasion]} ${g.year}${g.occasion === "christmas" && g.kind === "stocking" ? " · bas" : ""}` : ""}</span>{g.bought_at && <span className="tag accent">Acheté</span>}</button>
           ))}</div>
         </>}
         {mine && <p className="tiny muted">Ce que les autres te préparent n'apparaît pas ici.</p>}
@@ -171,15 +188,16 @@ function GiftSheet({ gift, person, me, today, onClose }: { gift: Gift; person: G
   const years = yearOptions(today);
   const options: { value: string; label: string }[] = [{ value: "", label: "Idée, sans date" },
     ...years.flatMap((y) => (["birthday", "christmas"] as Occasion[]).map((o) => ({ value: `${o}:${y}`, label: `${OCCASION_LABEL[o]} ${y}` })))];
-  const [f, setF] = useState({ title: gift.title, note: gift.note ?? "", url: gift.url ?? "", when: gift.occasion ? `${gift.occasion}:${gift.year}` : "" });
+  const [f, setF] = useState({ title: gift.title, note: gift.note ?? "", url: gift.url ?? "", when: gift.occasion ? `${gift.occasion}:${gift.year}` : "", kind: (gift.kind ?? "main") as GiftKind });
   const set = (p: Partial<typeof f>) => setF((x) => ({ ...x, ...p }));
   const theirWish = isWish(gift, person) && person.member_id !== me;
   const save = () => {
     if (!f.title.trim()) return toast("Donne un nom au cadeau.");
     const [occasion, year] = f.when ? [f.when.split(":")[0] as Occasion, Number(f.when.split(":")[1])] : [null, null];
     // Someone else's wish is never changed: planning it makes a hidden copy
-    if (theirWish) { if (occasion) planIdea(gift, person, me, occasion, year); onClose(); return; }
-    store.put("gifts", { ...gift, title: f.title.trim(), note: f.note.trim() || null, url: f.url.trim() || null, occasion, year });
+    const kind = occasion === "christmas" ? f.kind : null;
+    if (theirWish) { if (occasion) planIdea(gift, person, me, occasion, year, false, kind); onClose(); return; }
+    store.put("gifts", { ...gift, title: f.title.trim(), note: f.note.trim() || null, url: f.url.trim() || null, occasion, year, kind });
     onClose();
   };
   return (
@@ -194,6 +212,9 @@ function GiftSheet({ gift, person, me, today, onClose }: { gift: Gift; person: G
         <Field label="Pour quand">
           <select className="input" value={f.when} onChange={(e) => set({ when: e.target.value })}>{options.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}</select>
         </Field>
+      )}
+      {f.when.startsWith("christmas") && (
+        <Segmented value={f.kind} onChange={(kind) => set({ kind })} options={(["main", "stocking"] as GiftKind[]).map((k) => ({ value: k, label: KIND_LABEL[k] }))} />
       )}
       {gift.bought_at && <p className="small muted">Acheté le {new Date(gift.bought_at).toLocaleDateString("fr-CA", { dateStyle: "long" })}.</p>}
     </Sheet>

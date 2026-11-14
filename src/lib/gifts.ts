@@ -3,10 +3,12 @@
 // a row never shows before the server has answered, and in the demo.
 import { daysBetween } from "./domain";
 import { store } from "./store";
-import type { Birthday, Gift, GiftPerson, Occasion } from "./types";
+import type { Birthday, Gift, GiftKind, GiftPerson, Occasion } from "./types";
 
 export const OCCASION_LABEL: Record<Occasion, string> = { birthday: "Anniversaire", christmas: "Noël" };
-export const AHEAD_DAYS = 60; // how far ahead the gifts screen looks
+export const AHEAD_DAYS = 60;
+// At Christmas: the big present under the tree, and the small ones for the stocking
+export const KIND_LABEL: Record<GiftKind, string> = { main: "Gros cadeau", stocking: "Bas de Noël" }; // how far ahead the gifts screen looks
 
 export type Due = { key: string; occasion: Occasion; year: number; date: string; in: number; people: GiftPerson[] };
 
@@ -62,13 +64,13 @@ export function giftView(gifts: Gift[], people: GiftPerson[], me: string | null)
 const blank = (person: string, title: string, me: string | null): Partial<Gift> =>
   ({ person_id: person, title, note: null, url: null, occasion: null, year: null, bought_at: null, bought_by: null, wish_id: null, created_by: me });
 
-export function addGift(person: GiftPerson, title: string, me: string | null, occasion: Occasion | null = null, year: number | null = null) {
-  return store.put("gifts", { ...blank(person.id, title.trim(), me), occasion, year });
+export function addGift(person: GiftPerson, title: string, me: string | null, occasion: Occasion | null = null, year: number | null = null, kind: GiftKind | null = null) {
+  return store.put("gifts", { ...blank(person.id, title.trim(), me), occasion, year, kind });
 }
 
 // Keeps an idea for an occasion. Someone else's wish stays as they wrote it: the present is a hidden copy that points to it.
-export function planIdea(idea: Gift, person: GiftPerson, me: string | null, occasion: Occasion | null, year: number | null, bought = false) {
-  const when = bought ? { bought_at: new Date().toISOString(), bought_by: me } : {};
+export function planIdea(idea: Gift, person: GiftPerson, me: string | null, occasion: Occasion | null, year: number | null, bought = false, kind: GiftKind | null = idea.kind ?? null) {
+  const when = { ...(bought ? { bought_at: new Date().toISOString(), bought_by: me } : {}), kind: occasion === "christmas" ? kind ?? "main" : null };
   if (isWish(idea, person) && person.member_id !== me) {
     return store.put("gifts", { ...blank(person.id, idea.title, me), note: idea.note, url: idea.url, occasion, year, wish_id: idea.id, ...when });
   }

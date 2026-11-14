@@ -118,6 +118,7 @@ export function Kiosk() {
         <button className="icon-btn" onClick={() => setOffset(offset - 1)} aria-label="Semaine précédente"><ChevronLeft /></button>
         {offset !== 0 && <button className="btn small" onClick={() => setOffset(0)}>Aujourd'hui</button>}
         <button className="icon-btn" onClick={() => setOffset(offset + 1)} aria-label="Semaine suivante"><ChevronRight /></button>
+        {!isKiosk && <Link className="btn small" to="/">Quitter</Link>}
       </div>
 
       <div className="kiosk-week">
@@ -167,13 +168,12 @@ export function Kiosk() {
           {!soon.length && !cds.length && <span className="muted">Rien dans les 3 semaines.</span>}
         </div>
         <div className="kiosk-actions">
-          <div className="row">
-            <Link className="icon-btn" to="/calendar" aria-label="Calendrier"><CalendarDays /></Link>
-            <Link className="icon-btn" to="/meals" aria-label="Repas"><CookingPot /></Link>
-            <Link className="icon-btn" to="/shopping" aria-label="Courses"><ShoppingCart /></Link>
-            <Link className="icon-btn" to="/chores" aria-label="Tâches"><ListChecks /></Link>
-            {!isKiosk && <Link className="btn small right" to="/">Quitter</Link>}
-          </div>
+          <nav className="knav">
+            <Link to="/calendar"><CalendarDays />Agenda</Link>
+            <Link to="/meals"><CookingPot />Repas</Link>
+            <Link to="/shopping"><ShoppingCart />Courses</Link>
+            <Link to="/chores"><ListChecks />Tâches</Link>
+          </nav>
           <button className="kiosk-intercom" onClick={() => setIntercom(true)}><Mic />Interphone</button>
         </div>
       </div>
