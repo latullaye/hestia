@@ -12,7 +12,7 @@ const shapes = inner.replace(/<rect[^>]*\/>/, "");
 const variants = {
   "icon-192.png": [192, svg], "icon-512.png": [512, svg], "apple-touch-icon.png": [180, svg.replace('rx="112"', 'rx="0"')],
   "icon-maskable-512.png": [512, `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" fill="#1f6f78"/><g transform="translate(64 64) scale(0.75)">${shapes}</g></svg>`],
-  "badge.png": [96, `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M256 60 56 222v206a24 24 0 0 0 24 24h352a24 24 0 0 0 24-24V222z" fill="#fff"/></svg>`],
+  "badge.png": [96, `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><g fill="none" stroke="#fff" stroke-width="44" stroke-linecap="round" stroke-linejoin="round"><path d="M72 250 256 92l184 158"/><path d="M124 222v186a20 20 0 0 0 20 20h224a20 20 0 0 0 20-20V222"/></g></svg>`],
 };
 const browser = await chromium.launch();
 for (const [name, [size, markup]] of Object.entries(variants)) {
