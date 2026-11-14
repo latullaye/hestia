@@ -140,7 +140,7 @@ class Store {
   }
   private outgoing(table: TableName, row: Row): Row {
     const skip = new Set([...SERVER_COLUMNS.all, ...(SERVER_COLUMNS[table] || [])]);
-    return Object.fromEntries(Object.entries(row).filter(([k]) => !skip.has(k)));
+    return Object.fromEntries(Object.entries(row).filter(([k]) => !skip.has(k))) as Row;
   }
 
   // ---------- Sync ----------
