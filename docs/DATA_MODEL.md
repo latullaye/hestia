@@ -28,8 +28,8 @@ débuts ; les quelques emoji encore présents dans les données sont traduits à
 | `event_comments` | Commentaires d'un événement. | Notifie les adultes concernés. |
 | `birthdays` | Anniversaires (`birthday`), dates de couple ou de famille (`anniversary`), souvenirs (`memorial`). | `year` facultatif. `gcal_recurring_id` : la série Google reconnue. |
 | `countdowns` | Décomptes. | `yearly` : revient chaque année. |
-| `dishes` | Plats de la famille. | `ingredients`, `recipe` en Markdown ; `favorite`, `archived`. |
-| `meal_plan` | Un plat à un repas. | `slot` : `lunch`, `dinner` (`breakfast` prévu). `member_ids` vide = tout le monde. `dish_id` ou `label` (texte libre). `kind` : `home`, `leftovers`, `restaurant`, `takeout`, `other`. `cook_ids` : qui cuisine. |
+| `dishes` | Plats de la famille. | `ingredients`, `recipe` en Markdown ; `favorite`, `archived` ; `courses` (`starter`, `main`, `side`, `dessert`, `breakfast`, `drink` ; libellés dans `_shared/dishes.ts`) ; `source` (d'où vient la recette), `source_url` (le lien). |
+| `meal_plan` | Un plat à un repas. | `slot` : `lunch` (affiché « Dîner »), `dinner` (affiché « Souper ») ; `breakfast` prévu. Plusieurs lignes pour le même repas : plusieurs plats. `member_ids` vide = tout le monde. `dish_id` ou `label` (texte libre). `kind` : `home`, `leftovers`, `restaurant`, `takeout`, `other`. `cook_ids` : qui cuisine. |
 | `shopping_lists`, `shopping_sections` | Listes et rayons (ordre du magasin : `sort_order`). | |
 | `shopping_items` | Articles. | Un article reste dans sa liste ; `needed` dit s'il est à acheter. Cocher = `needed = false` + `purchased_at`. `purchase_count` tenu par déclencheur. |
 | `chores` | Règles des tâches régulières. | `schedule` (JSON, ci-dessous), `assignment` : `fixed` ou `rotate`. |

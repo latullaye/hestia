@@ -9,10 +9,11 @@ import { Glyph } from "../components/icons";
 import { IntercomPanel } from "../components/Intercom";
 import { MealSheet } from "../components/MealSheet";
 import { Avatar, Avatars, CheckBox, Sheet, SyncPill, toast } from "../components/ui";
-import { BIRTHDAY_ICON, KIND_ICON, addDays, birthdaysOn, cap, countdownsFrom, eventsOn, fmtDay, inDays, mealName, mealsOn, occurrencesOn, partsIn, startTime, uncared, upcomingBirthdays } from "../lib/domain";
+import { BIRTHDAY_ICON, KIND_ICON, SLOT_LABEL, addDays, birthdaysOn, cap, countdownsFrom, eventsOn, fmtDay, inDays, mealName, mealsOn, occurrencesOn, partsIn, startTime, uncared, upcomingBirthdays } from "../lib/domain";
 import { demoWeather } from "../lib/demo";
 import { keepAwake } from "../lib/device";
 import { useHousehold, useMembers, useNow, useTable } from "../lib/hooks";
+import { useMealDrag } from "../lib/mealDrag";
 import { useSession } from "../lib/session";
 import { store } from "../lib/store";
 import type { MealSlot, ShoppingItem } from "../lib/types";
@@ -34,6 +35,7 @@ export function Kiosk() {
   const [offset, setOffset] = useState(0); // weeks from the current one
   const [eventId, setEventId] = useState<string | null>(null);
   const [meal, setMeal] = useState<{ date: string; slot: MealSlot } | null>(null);
+  const drag = useMealDrag();
   const [item, setItem] = useState<ShoppingItem | null>(null);
   const [intercom, setIntercom] = useState(false);
 
@@ -52,12 +54,13 @@ export function Kiosk() {
   const mealRow = (date: string, slot: MealSlot) => {
     const ms = mealsOn(meals, date, slot);
     return (
-      <span className="m"><b>{slot === "lunch" ? "Lunch" : "Souper"}</b>
+      <button className="m" {...drag.target(date, slot)} onClick={() => { if (!drag.justDropped()) setMeal({ date, slot }); }}>
+        <b>{SLOT_LABEL[slot]}</b>
         <span>{ms.length ? ms.map((m) => (
-          <span key={m.id} className="meal"><Glyph name={KIND_ICON[m.kind]} />{mealName(m, dishMap) || "?"}{m.member_ids.length ? <> <Avatars ids={m.member_ids} members={members} size="sm" /></> : null}
+          <span key={m.id} {...drag.item(m, mealName(m, dishMap) || "Plat")} className={`meal ${drag.item(m, "").className}`}><Glyph name={KIND_ICON[m.kind]} />{mealName(m, dishMap) || "?"}{m.member_ids.length ? <> <Avatars ids={m.member_ids} members={members} size="sm" /></> : null}
             {m.cook_ids.length ? <> <Glyph name="chef-hat" /><Avatars ids={m.cook_ids} members={members} size="sm" /></> : null}</span>
         )) : <span className="muted">—</span>}</span>
-      </span>
+      </button>
     );
   };
 
@@ -105,7 +108,7 @@ export function Kiosk() {
                   {!evs.length && !bds.length && <span className="muted small" style={{ padding: "2px 4px" }}>—</span>}
                   {todo.length > 0 && <div className="kday-chores"><Glyph name="list-checks" />{todo.map((o) => o.title).join(" · ")}</div>}
                 </div>
-                <button className="kday-meals" onClick={() => setMeal({ date: d, slot: "dinner" })}>{mealRow(d, "lunch")}{mealRow(d, "dinner")}</button>
+                <div className="kday-meals">{mealRow(d, "lunch")}{mealRow(d, "dinner")}</div>
               </div>
             );
           })}
@@ -154,6 +157,7 @@ export function Kiosk() {
 
       {eventId && <EventSheet id={eventId} onClose={() => setEventId(null)} />}
       {meal && <MealSheet {...meal} onClose={() => setMeal(null)} />}
+      {drag.ghost}
       {intercom && <IntercomPanel onClose={() => setIntercom(false)} />}
       {item && (
         <Sheet title={item.name} onClose={() => setItem(null)}>

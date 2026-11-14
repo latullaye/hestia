@@ -8,7 +8,7 @@ import { MealSheet } from "../components/MealSheet";
 import { Glyph } from "../components/icons";
 import { ChoreRow, EventRow } from "../components/rows";
 import { Avatars, SyncPill } from "../components/ui";
-import { BIRTHDAY_ICON, KIND_ICON, addDays, cap, countdownsFrom, eventDays, eventsOn, fmtDay, inDays, mealName, mealsOn, occurrencesOn, plural, upcomingBirthdays } from "../lib/domain";
+import { BIRTHDAY_ICON, KIND_ICON, SLOT_LABEL, addDays, cap, countdownsFrom, eventDays, eventsOn, fmtDay, inDays, mealName, mealsOn, occurrencesOn, plural, upcomingBirthdays } from "../lib/domain";
 import { useHousehold, useMembers, useTable, useToday } from "../lib/hooks";
 import { demoWeather } from "../lib/demo";
 import { useSession } from "../lib/session";
@@ -40,8 +40,8 @@ export function Today() {
     const ms = mealsOn(meals, today, slot);
     return (
       <button className="tap" onClick={() => setMeal({ date: today, slot })}>
-        <span className="label" style={{ width: 58 }}>{slot === "lunch" ? "Lunch" : "Souper"}</span>
-        <span className="grow">{ms.length ? ms.map((m) => (
+        <span className="label" style={{ width: 58 }}>{SLOT_LABEL[slot]}</span>
+        <span className="grow col" style={{ gap: 2 }}>{ms.length ? ms.map((m) => (
           <span key={m.id} className="meal-line"><Glyph name={KIND_ICON[m.kind]} />{mealName(m, dishMap) || <span className="muted">Plat à choisir</span>}
             {m.member_ids.length > 0 && <Avatars ids={m.member_ids} members={members} size="sm" />}
             {m.cook_ids.length > 0 && <span className="care"><Glyph name="chef-hat" /><Avatars ids={m.cook_ids} members={members} size="sm" /></span>}</span>

@@ -29,16 +29,18 @@ export const uncared = (e: CalEvent, members: Member[]) =>
 
 // ---------- Meals ----------
 export const mealName = (m: Meal, dishes: Map<string, Dish>) => m.label || (m.dish_id && dishes.get(m.dish_id)?.name) || "";
-export const SLOT_LABEL: Record<string, string> = { breakfast: "Déjeuner", lunch: "Lunch", dinner: "Souper" };
+export const SLOT_LABEL: Record<string, string> = { breakfast: "Déjeuner", lunch: "Dîner", dinner: "Souper" };
 export const KIND_LABEL: Record<string, string> = { home: "Maison", leftovers: "Restes", restaurant: "Resto", takeout: "À emporter", other: "Autre" };
 export const KIND_ICON: Record<string, string | null> = { home: null, leftovers: "recycle", restaurant: "utensils", takeout: "shopping-bag", other: null };
 export const mealsOn = (meals: Meal[], day: string, slot?: string) =>
   meals.filter((m) => m.date === day && (!slot || m.slot === slot)).sort((a, b) => (a.created_at || "").localeCompare(b.created_at || ""));
-// Dishes cooked at home in the last days, most recent first (what lunches are often made of)
-export function recentDishes(meals: Meal[], dishes: Map<string, Dish>, today: string, days = 10) {
+// What was cooked at home in the week before a meal, most recent first: what its leftovers can be made of
+export function cookedBefore(meals: Meal[], dishes: Map<string, Dish>, date: string, slot: string, days = 7) {
+  const order: Record<string, number> = { breakfast: 0, lunch: 1, dinner: 2 };
   const seen = new Map<string, { name: string; dish_id: string | null; date: string }>();
-  for (const m of [...meals].sort((a, b) => b.date.localeCompare(a.date))) {
-    if (m.slot !== "dinner" || m.kind !== "home" || m.date > today || daysBetween(m.date, today) > days) continue;
+  for (const m of [...meals].sort((a, b) => b.date.localeCompare(a.date) || order[b.slot] - order[a.slot])) {
+    const before = m.date < date || (m.date === date && order[m.slot] < order[slot]);
+    if (m.kind !== "home" || !before || daysBetween(m.date, date) > days) continue;
     const name = mealName(m, dishes);
     if (name && !seen.has(name)) seen.set(name, { name, dish_id: m.dish_id, date: m.date });
   }

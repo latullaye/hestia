@@ -8,7 +8,7 @@ Détail : [FEATURES.md](FEATURES.md).
 
 ## État du déploiement
 
-- Base : toutes les migrations du dépôt sont appliquées au projet.
+- Base : toutes les migrations du dépôt sont appliquées au projet (le flux « Deploy Supabase » applique les nouvelles à chaque fusion dans `main`).
 - Fonctions : déployées par le flux « Deploy Supabase » ([SETUP.md](SETUP.md), étape 2).
 
 ## Ensuite (par ordre de valeur estimée)

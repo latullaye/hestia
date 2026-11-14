@@ -29,10 +29,20 @@ Ce que fait chaque partie, et les règles qui ne se voient pas à l'écran. À t
 
 ## Repas
 
-- Deux repas par jour : **lunch** et **souper**. Le souper est en général commun ; le lunch peut être par personne
-  (« Pour qui »).
-- Choix : un plat de **Nos plats** (liste avec ingrédients, recette, tags, favoris), les **restes** d'un souper maison
-  des 10 derniers jours (proposés pour le lunch), ou un **texte libre** (plat du jour, nom du resto).
+- Deux repas par jour : **dîner** (le midi) et **souper** (le soir). Le souper est en général commun ; le dîner peut
+  être par personne (« Pour qui »). Dans la base, ce sont les créneaux `lunch` et `dinner`.
+- **Plusieurs plats par repas** : une entrée, un plat principal, un dessert, ou un plat par personne. La feuille du repas
+  liste ce qui est prévu ; *Ajouter un plat* ou *Autre plat* en ajoute un.
+- **Chercher en écrivant** : dès la première lettre, les plats de **Nos plats** qui correspondent s'affichent ; un toucher
+  choisit le plat. On peut aussi continuer d'écrire et garder le texte tel quel (plat du jour, nom du resto), et cocher
+  *L'ajouter à nos plats* pour le retrouver ensuite.
+- **Restes** : ce type propose ce qui a été cuisiné à la maison dans les 7 jours avant le repas, ou une saisie libre.
+- **Déplacer un plat** : on le glisse vers un autre repas, dans l'écran *Repas* comme sur le kiosque. À la souris, le
+  glissement part tout de suite ; au doigt, il faut garder le plat appuyé un instant (un simple balayage fait défiler la
+  page). Le code est dans `src/lib/mealDrag.tsx`.
+- **Nos plats** : nom, ingrédients, recette, tags, favori, **service** (entrée, plat principal, accompagnement, dessert,
+  déjeuner, boisson ; plusieurs possibles), **source** (une personne, un livre) et lien. La liste se filtre par service
+  et se cherche par nom, tag, source ou ingrédient.
 - Type : maison, restes, resto, à emporter. **Qui cuisine** : un adulte ou les deux ; on peut le décider avant de choisir le plat.
 - Les repas ne vont jamais dans Google Agenda.
 - Les enfants qui ne mangent pas encore à table n'apparaissent pas (seuls les adultes sont proposés dans « Pour qui »).
@@ -69,7 +79,7 @@ Ce que fait chaque partie, et les règles qui ne se voient pas à l'écran. À t
 
 - La semaine à venir en 7 colonnes à partir d'aujourd'hui (flèches pour avancer ou reculer ; retour à aujourd'hui après
   3 minutes). Par jour : météo, anniversaires, événements (avatars des personnes, « avec » l'accompagnateur, `⏳`), tâches
-  particulières du jour, lunch et souper (avec qui cuisine).
+  particulières du jour, dîner et souper (avec qui cuisine).
 - À droite : météo du moment, tâches du jour à cocher, à acheter (toucher : acheté ou pas besoin), anniversaires à venir,
   décomptes, accès aux autres écrans, **Interphone**.
 - L'écran reste allumé ; l'app se met à jour toute seule ; hors ligne, elle montre la dernière copie.

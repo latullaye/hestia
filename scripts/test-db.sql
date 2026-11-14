@@ -199,6 +199,19 @@ exception when insufficient_privilege then null;
 end $$;
 reset role;
 
+-- ---------- Dishes: what they are served as ----------
+begin;
+insert into public.dishes (name, courses, source) values ('Crêpes', '{breakfast,dessert}', 'Carnet de famille');
+do $$ begin
+  assert (select courses from public.dishes where name = 'Crêpes') = '{breakfast,dessert}', 'several courses are kept';
+  begin
+    insert into public.dishes (name, courses) values ('Mystère', '{brunch}');
+    assert false, 'an unknown course must be refused';
+  exception when check_violation then null;
+  end;
+end $$;
+rollback;
+
 -- ---------- A member removed for good: nothing blocks, their name leaves the rows ----------
 -- (rolled back: the tool tests that follow use the same family)
 begin;
