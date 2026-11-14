@@ -46,7 +46,7 @@ jobs:
         run: supabase db push --remote --include-all --yes
       - name: Deploy the Edge Functions
         if: steps.ready.outputs.ok == 'true'
-        run: supabase functions deploy --project-ref "$SUPABASE_PROJECT_REF"
+        run: supabase functions deploy --project-ref "$SUPABASE_PROJECT_REF" --yes
       # Each function writes down its own address on its first call: the database needs it to call them (schedules, triggers)
       - name: Wake the functions
         if: steps.ready.outputs.ok == 'true'
