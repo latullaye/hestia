@@ -1,4 +1,6 @@
 // Weather from Open-Meteo (no key). The last answer is kept on the device: shown at once, and when offline.
+import { CloudDrizzle, CloudFog, CloudHail, CloudLightning, CloudMoon, CloudRain, CloudRainWind, CloudSnow, CloudSun, Cloudy, Moon, Snowflake, Sun, Thermometer,
+  type LucideIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 
 export type Weather = {
@@ -9,20 +11,20 @@ export type Weather = {
 const KEY = "hestia-weather";
 const MAX_AGE = 30 * 60 * 1000;
 
-// WMO weather codes -> an emoji and French words
-export function describe(code: number, isDay = true): { emoji: string; text: string } {
-  if (code === 0) return { emoji: isDay ? "☀️" : "🌙", text: "Dégagé" };
-  if (code === 1) return { emoji: isDay ? "🌤️" : "🌙", text: "Plutôt dégagé" };
-  if (code === 2) return { emoji: "⛅", text: "Partiellement nuageux" };
-  if (code === 3) return { emoji: "☁️", text: "Couvert" };
-  if (code === 45 || code === 48) return { emoji: "🌫️", text: "Brouillard" };
-  if (code >= 51 && code <= 55) return { emoji: "🌦️", text: "Bruine" };
-  if (code === 56 || code === 57 || code === 66 || code === 67) return { emoji: "🧊", text: "Pluie verglaçante" };
-  if (code >= 61 && code <= 65) return { emoji: "🌧️", text: code === 61 ? "Pluie faible" : code === 65 ? "Forte pluie" : "Pluie" };
-  if ((code >= 71 && code <= 77) || code === 85 || code === 86) return { emoji: "🌨️", text: code === 71 ? "Neige faible" : code === 75 || code === 86 ? "Forte neige" : "Neige" };
-  if (code >= 80 && code <= 82) return { emoji: "🌧️", text: "Averses" };
-  if (code >= 95) return { emoji: "⛈️", text: "Orage" };
-  return { emoji: "🌡️", text: "" };
+// WMO weather codes -> a plain line icon (one colour, the text's) and French words
+export function describe(code: number, isDay = true): { Icon: LucideIcon; text: string } {
+  if (code === 0) return { Icon: isDay ? Sun : Moon, text: "Dégagé" };
+  if (code === 1) return { Icon: isDay ? CloudSun : CloudMoon, text: "Plutôt dégagé" };
+  if (code === 2) return { Icon: isDay ? CloudSun : CloudMoon, text: "Partiellement nuageux" };
+  if (code === 3) return { Icon: Cloudy, text: "Couvert" };
+  if (code === 45 || code === 48) return { Icon: CloudFog, text: "Brouillard" };
+  if (code >= 51 && code <= 55) return { Icon: CloudDrizzle, text: "Bruine" };
+  if (code === 56 || code === 57 || code === 66 || code === 67) return { Icon: CloudHail, text: "Pluie verglaçante" };
+  if (code >= 61 && code <= 65) return { Icon: code === 65 ? CloudRainWind : CloudRain, text: code === 61 ? "Pluie faible" : code === 65 ? "Forte pluie" : "Pluie" };
+  if ((code >= 71 && code <= 77) || code === 85 || code === 86) return { Icon: code === 75 || code === 86 ? Snowflake : CloudSnow, text: code === 71 ? "Neige faible" : code === 75 || code === 86 ? "Forte neige" : "Neige" };
+  if (code >= 80 && code <= 82) return { Icon: CloudRain, text: "Averses" };
+  if (code >= 95) return { Icon: CloudLightning, text: "Orage" };
+  return { Icon: Thermometer, text: "" };
 }
 
 async function load(lat: number, lon: number, tz: string): Promise<Weather> {

@@ -200,7 +200,7 @@ textarea.input { min-height: 84px; resize: vertical; line-height: 1.4; }
 .kday-head .dom { font-family: var(--font-display); font-weight: 700; font-size: 1.5em; line-height: 1; }
 .kday.today .dom { color: var(--accent); }
 .kday-head .wx { margin-left: auto; text-align: right; font-size: 0.78em; color: var(--muted); line-height: 1.15; }
-.kday-head .wx .e { font-size: 1.5em; line-height: 1; display: block; }
+.kday-head .wx .e { width: 1.9em; height: 1.9em; display: block; margin-left: auto; stroke-width: 1.6; color: var(--ink); }
 .kday-body { flex: 1; overflow: hidden auto; padding: 6px; display: flex; flex-direction: column; gap: 5px; scrollbar-width: none; }
 .kbday { background: var(--warn-soft); color: var(--warn); border-radius: 8px; padding: 3px 7px; font-size: 0.82em; font-weight: 700; }
 .kevent { text-align: left; border-radius: 9px; padding: 5px 7px; background: var(--accent-soft); border-left: 4px solid var(--accent); display: flex; flex-direction: column; gap: 2px; width: 100%; }
@@ -221,7 +221,7 @@ textarea.input { min-height: 84px; resize: vertical; line-height: 1.4; }
 .kcard h3 { font-size: 0.78em; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-family: var(--font-body); display: flex; align-items: center; gap: 6px; }
 .kweather { display: flex; align-items: center; gap: 10px; }
 .kweather .big { font-family: var(--font-display); font-weight: 700; font-size: 2.6em; line-height: 1; }
-.kweather .e { font-size: 2.6em; line-height: 1; }
+.kweather .e { width: 3em; height: 3em; stroke-width: 1.5; color: var(--accent); }
 .kline { display: flex; align-items: center; gap: 8px; width: 100%; text-align: left; padding: 3px 0; min-height: 30px; }
 .kline .check { width: 22px; height: 22px; border-radius: 7px; }
 .kcount { display: flex; align-items: baseline; gap: 8px; }

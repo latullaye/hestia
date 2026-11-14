@@ -17,7 +17,8 @@ reprendre. Lire d'abord [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), puis [docs
 4. **Toute écriture dit qui et d'où** : `updated_by` (membre) et `updated_via` (`app`, `kiosk`, `intercom`, `mcp`, `gcal`,
    `system`). Le journal (`activity_log`) est écrit par des déclencheurs, jamais par le code applicatif.
 5. **Un changement de schéma = une nouvelle migration** dans `supabase/migrations/` (jamais modifier une migration déjà
-   appliquée en production), avec son test dans `scripts/test-db.sql`.
+   appliquée en production : toutes celles du dépôt le sont, sauf mention dans `docs/ROADMAP.md`), avec son test dans
+   `scripts/test-db.sql`. Le nom du fichier commence par l'horodatage `AAAAMMJJHHMMSS`, plus grand que le dernier.
 6. **Un nouvel outil pour Claude s'écrit une seule fois**, dans `supabase/functions/_shared/tools-*.ts` : il sert au MCP et
    à l'interphone. Avec son test dans `tests/tools.test.ts`.
 7. **La doc suit le code dans le même commit.** Une fonctionnalité sans sa ligne dans `docs/FEATURES.md` n'est pas finie.
@@ -73,7 +74,7 @@ docs/                     la documentation
 - L'app n'envoie jamais les colonnes que le serveur possède (`SERVER_COLUMNS` dans `src/lib/store.ts`). Une nouvelle colonne
   calculée par un déclencheur s'ajoute à cette liste.
 - Une migration qui crée une fonction dans `private` doit finir par les deux lignes `revoke execute on all functions in
-  schema private from public, anon, authenticated;` puis `grant execute on function …` (voir la fin de la migration 05) :
+  schema private from public, anon, authenticated;` puis `grant execute on function …` (voir la fin de `…_notifications_infra.sql`) :
   Postgres donne `execute` à tout le monde par défaut.
 - Une colonne dont la valeur par défaut appelle une fonction de `private` (ex. `chores.start_date`) exige que
   `authenticated` puisse exécuter cette fonction.

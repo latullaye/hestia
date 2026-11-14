@@ -187,31 +187,27 @@ begin
   return null;
 end $$;
 
--- Attaches both triggers and the family-only access rule to a table.
-create or replace function private.setup_synced_table(tbl text, label_column text) returns void
+-- Attaches both triggers and the access rule to a table: the family reads and writes; with adults_write, everyone in the
+-- family reads and only adults change.
+create or replace function private.setup_synced_table(tbl text, label_column text, adults_write boolean default false) returns void
 language plpgsql security definer set search_path = '' as $$
 begin
   execute format('create trigger touch before insert or update on public.%I for each row execute function private.touch()', tbl);
   execute format('create trigger audit after insert or update on public.%I for each row execute function private.audit(%L)', tbl, label_column);
   execute format('create index %I on public.%I (updated_at)', tbl || '_updated_at', tbl);
   execute format('alter table public.%I enable row level security', tbl);
-  execute format('create policy family on public.%I for all to authenticated using ((select private.is_family())) with check ((select private.is_family()))', tbl);
+  if adults_write then
+    execute format('create policy family_read on public.%I for select to authenticated using ((select private.is_family()))', tbl);
+    execute format('create policy adults_write on public.%I for all to authenticated using ((select private.is_adult())) with check ((select private.is_adult()))', tbl);
+  else
+    execute format('create policy family on public.%I for all to authenticated using ((select private.is_family())) with check ((select private.is_family()))', tbl);
+  end if;
   execute format('revoke all on public.%I from anon', tbl);
   execute format('grant select, insert, update, delete on public.%I to authenticated', tbl);
 end $$;
 
-select private.setup_synced_table('members', 'name');
-select private.setup_synced_table('settings', 'id');
-
--- Members and settings: everyone in the family reads, only adults change
-drop policy family on public.members;
-create policy family_read on public.members for select to authenticated using ((select private.is_family()));
-create policy adults_write on public.members for all to authenticated
-  using ((select private.is_adult())) with check ((select private.is_adult()));
-drop policy family on public.settings;
-create policy family_read on public.settings for select to authenticated using ((select private.is_family()));
-create policy adults_write on public.settings for all to authenticated
-  using ((select private.is_adult())) with check ((select private.is_adult()));
+select private.setup_synced_table('members', 'name', true);
+select private.setup_synced_table('settings', 'id', true);
 
 alter table public.activity_log enable row level security;
 create policy family_read on public.activity_log for select to authenticated using ((select private.is_family()));

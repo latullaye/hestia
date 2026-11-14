@@ -18,6 +18,8 @@ import type { MealSlot, ShoppingItem } from "../lib/types";
 import { describe, useWeather } from "../lib/weather";
 import { buy } from "./Shopping";
 
+const WxIcon = ({ code }: { code: number }) => { const { Icon } = describe(code); return <Icon className="e" />; };
+
 export function Kiosk() {
   const { tz, weather: place } = useHousehold(), members = useMembers(), { acting, setActing, demo, isKiosk } = useSession();
   const now = useNow(20_000), local = partsIn(now, tz), today = local.day;
@@ -83,7 +85,7 @@ export function Kiosk() {
               <div key={d} className={`kday ${d === today ? "today" : ""} ${d < today ? "past" : ""}`}>
                 <div className="kday-head">
                   <div><div className="dow">{fmtDay(d, { day: undefined, month: undefined })}</div><div className="dom">{Number(d.slice(8))}</div></div>
-                  {wx && <div className="wx"><span className="e">{describe(wx.code).emoji}</span>{Math.round(wx.max)}° / {Math.round(wx.min)}°</div>}
+                  {wx && <div className="wx"><WxIcon code={wx.code} />{Math.round(wx.max)}° / {Math.round(wx.min)}°</div>}
                 </div>
                 <div className="kday-body">
                   {bds.map((b) => <div key={b.id} className="kbday">{BIRTHDAY_EMOJI[b.kind]} {b.name}{b.year && b.kind !== "memorial" ? ` · ${Number(d.slice(0, 4)) - b.year} ans` : ""}</div>)}
@@ -112,7 +114,7 @@ export function Kiosk() {
       <div className="kiosk-side">
         {weather && w && (
           <div className="kcard">
-            <div className="kweather"><span className="e">{w.emoji}</span><span className="big">{Math.round(weather.current.temperature)}°</span>
+            <div className="kweather"><w.Icon className="e" /><span className="big">{Math.round(weather.current.temperature)}°</span>
               <span className="small"><b>{w.text}</b><br /><span className="muted">Ressenti {Math.round(weather.current.feels)}° · {place.label}</span></span></div>
           </div>
         )}

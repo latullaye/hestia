@@ -56,7 +56,7 @@ export function Today() {
     <div className="page">
       <div className="top">
         <div className="grow"><h1>{cap(fmtDay(today, { weekday: "long", month: "long" }))}</h1>
-          {weather && w && <div className="muted small">{w.emoji} {Math.round(weather.current.temperature)}° · {w.text} · {Math.round(weather.days[0]?.min)}° / {Math.round(weather.days[0]?.max)}° · {place.label}</div>}</div>
+          {weather && w && <div className="muted small row" style={{ gap: 5 }}><w.Icon size={16} /> {Math.round(weather.current.temperature)}° · {w.text} · {Math.round(weather.days[0]?.min)}° / {Math.round(weather.days[0]?.max)}° · {place.label}</div>}</div>
         <SyncPill />
         <button className="icon-btn" onClick={() => setInbox(true)} aria-label="Notifications"><Bell />{unread.length > 0 && <span className="dot">{unread.length}</span>}</button>
       </div>

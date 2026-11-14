@@ -269,7 +269,4 @@ begin
   perform cron.schedule('hestia-chores', '5 8,17 * * *', 'select public.generate_chore_occurrences()');
   perform cron.schedule('hestia-gcal', '*/10 * * * *', $c$select private.call_function('gcal-sync', '{}'::jsonb)$c$);
   perform cron.schedule('hestia-reminders', '*/15 * * * *', $c$select private.call_function('notify', '{"task": "reminders"}'::jsonb)$c$);
-  perform cron.schedule('hestia-cleanup', '30 9 * * *',
-    $c$delete from private.sent where at < now() - interval '14 days';
-       delete from public.notifications where created_at < now() - interval '90 days'$c$);
 end $$;
