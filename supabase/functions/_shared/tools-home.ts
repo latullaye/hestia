@@ -2,7 +2,7 @@
 import { uuids } from "./db.ts";
 import { type Schedule, describeSchedule, scheduleError } from "./schedule.ts";
 import {
-  type Ctx, type Row, actorId, addDays, dayArg, daysBetween, fail, fmtDay, isUuid, list, nameOf, namesOf, norm, people, pick, relDay, today,
+  type Ctx, type Row, actorId, addDays, dayArg, daysBetween, fail, fmtDay, iconArg, isUuid, list, nameOf, namesOf, norm, people, pick, relDay, today,
   tool, z,
 } from "./tools.ts";
 
@@ -231,14 +231,14 @@ const shoppingTools = [
       const out: string[] = [];
       for (const l of lists.filter((x) => !only || x.id === only.id)) {
         const mine = items.filter((i) => i.list_id === l.id);
-        if (!mine.length) { if (only) out.push(`**${l.emoji || ""} ${l.name}** : rien à acheter.`); continue; }
+        if (!mine.length) { if (only) out.push(`**${l.name}** : rien à acheter.`); continue; }
         const lines: string[] = [];
-        const groups = [...sections.filter((s) => s.list_id === l.id), { id: null, name: "Sans rayon", emoji: "" }];
+        const groups = [...sections.filter((s) => s.list_id === l.id), { id: null, name: "Sans rayon" }];
         for (const s of groups) {
           const inSection = mine.filter((i) => i.section_id === s.id);
-          if (inSection.length) lines.push(`${s.emoji || ""} ${s.name} : ${inSection.map((i) => `${i.name}${i.note ? ` (${i.note})` : ""}${i.needed ? "" : " ✓"}`).join(", ")}`.trim());
+          if (inSection.length) lines.push(`${s.name} : ${inSection.map((i) => `${i.name}${i.note ? ` (${i.note})` : ""}${i.needed ? "" : " ✓"}`).join(", ")}`.trim());
         }
-        out.push(`**${l.emoji || ""} ${l.name}** (${mine.filter((i) => i.needed).length} à acheter)\n${lines.map((x) => `- ${x}`).join("\n")}`);
+        out.push(`**${l.name}** (${mine.filter((i) => i.needed).length} à acheter)\n${lines.map((x) => `- ${x}`).join("\n")}`);
       }
       return out.length ? out.join("\n\n") : "Rien à acheter. 🎉";
     },
@@ -351,17 +351,17 @@ const shoppingTools = [
     name: "courses_liste_enregistrer",
     title: "Créer ou organiser une liste de courses",
     description: "Crée une liste (ou retrouve celle qui porte ce nom) et, avec « rayons », fixe ses rayons dans l'ordre où on les parcourt en magasin (les rayons absents de la liste donnée sont gardés, à la suite).",
-    shape: { nom: z.string().min(1), emoji: z.string().optional(), rayons: z.array(z.string().min(1)).optional() },
+    shape: { nom: z.string().min(1), icone: iconArg.optional(), rayons: z.array(z.string().min(1)).optional() },
     write: true,
-    run: async ({ nom, emoji, rayons }, c) => {
+    run: async ({ nom, icone, rayons }, c) => {
       const lists = await shoppingLists(c);
       let l = lists.find((x) => norm(x.name) === norm(nom));
       if (!l) {
         const [row] = await c.db.exec(`insert into public.shopping_lists (name, emoji, sort_order, updated_by, updated_via) values ($1, $2, $3, $4::uuid, $5) returning id`,
-          [nom.trim(), emoji ?? null, lists.length + 1, actorId(c), c.via]);
-        l = { id: row.id, name: nom.trim(), emoji };
-      } else if (emoji) {
-        await c.db.exec(`update public.shopping_lists set emoji = $2, updated_by = $3::uuid, updated_via = $4 where id = $1::uuid`, [l.id, emoji, actorId(c), c.via]);
+          [nom.trim(), icone ?? null, lists.length + 1, actorId(c), c.via]);
+        l = { id: row.id, name: nom.trim() };
+      } else if (icone) {
+        await c.db.exec(`update public.shopping_lists set emoji = $2, updated_by = $3::uuid, updated_via = $4 where id = $1::uuid`, [l.id, icone, actorId(c), c.via]);
       }
       if (rayons?.length) {
         const mine = (await shoppingSections(c)).filter((s) => s.list_id === l!.id);
@@ -402,7 +402,7 @@ export async function occurrencesFor(c: Ctx, day: string, includeDone = true): P
 }
 export function occurrenceLine(c: Ctx, o: Row, day: string): string {
   const late = o.status === "todo" && o.due_date < day ? ` (depuis ${relDay(day, o.due_date)})` : "";
-  return `- ${o.status === "done" ? "✅" : "⬜"} ${o.emoji ? o.emoji + " " : ""}${o.title}${MOMENTS[o.time_of_day] ? ` · ${MOMENTS[o.time_of_day]}` : ""}`
+  return `- ${o.status === "done" ? "✅" : "⬜"} ${o.title}${MOMENTS[o.time_of_day] ? ` · ${MOMENTS[o.time_of_day]}` : ""}`
     + ` · ${namesOf(c, o.assignee_ids, "qui veut")}${late}${o.status === "done" ? ` · fait par ${nameOf(c, o.done_by)}` : ""} [${o.id}]`;
 }
 
@@ -505,7 +505,7 @@ const choreTools = [
     run: async (_a, c) => {
       const rows = await c.db.all(`select id, title, emoji, assignee_ids, assignment, schedule, time_of_day, active, start_date, end_date from public.chores where deleted_at is null order by active desc, sort_order, title`);
       if (!rows.length) return "Aucune tâche régulière pour le moment.";
-      return rows.map((r) => `- ${r.emoji ? r.emoji + " " : ""}**${r.title}** : ${describeSchedule(r.schedule, r.time_of_day)} · ${namesOf(c, r.assignee_ids, "qui veut")}`
+      return rows.map((r) => `- **${r.title}** : ${describeSchedule(r.schedule, r.time_of_day)} · ${namesOf(c, r.assignee_ids, "qui veut")}`
         + `${r.assignment === "rotate" ? " (à tour de rôle)" : ""}${r.active ? "" : " · en pause"} [${r.id}]`).join("\n");
     },
   }),
@@ -517,7 +517,7 @@ const choreTools = [
     shape: {
       regle: z.string().optional().describe("id ou titre d'une règle existante à modifier"),
       titre: z.string().optional(),
-      emoji: z.string().optional(),
+      icone: iconArg.optional(),
       description: z.string().optional(),
       pour: z.array(z.string()).optional().describe("prénoms ; vide ou « tous » = qui veut"),
       tour_de_role: z.boolean().optional(),
@@ -546,7 +546,7 @@ const choreTools = [
           `update public.chores set title = $2, emoji = $3, description = $4, assignee_ids = $5::text::uuid[], assignment = $6, schedule = $7::text::jsonb,
              time_of_day = $8, start_date = coalesce($9::date, start_date), end_date = coalesce($10::date, end_date), active = $11,
              updated_by = $12::uuid, updated_via = $13 where id = $1::uuid`,
-          [hit.id, a.titre?.trim() || hit.title, a.emoji ?? hit.emoji, a.description ?? hit.description, uuids(who), assignment, JSON.stringify(schedule), moment,
+          [hit.id, a.titre?.trim() || hit.title, a.icone ?? hit.emoji, a.description ?? hit.description, uuids(who), assignment, JSON.stringify(schedule), moment,
             a.debut ? dayArg(c, a.debut) : null, a.fin ? dayArg(c, a.fin) : null, a.actif ?? hit.active, actorId(c), c.via]);
         return `Règle mise à jour : ${a.titre?.trim() || hit.title}, ${describeSchedule(schedule, moment)}, ${namesOf(c, who, "qui veut")}${assignment === "rotate" ? " à tour de rôle" : ""}${(a.actif ?? hit.active) ? "" : " (en pause)"}.`;
       }
@@ -555,7 +555,7 @@ const choreTools = [
       await c.db.exec(
         `insert into public.chores (title, emoji, description, assignee_ids, assignment, schedule, time_of_day, start_date, end_date, active, updated_by, updated_via)
          values ($1, $2, $3, $4::text::uuid[], $5, $6::text::jsonb, $7, coalesce($8::date, $9::date), $10::date, $11, $12::uuid, $13)`,
-        [a.titre!.trim(), a.emoji ?? null, a.description ?? null, uuids(who), assignment, JSON.stringify(schedule), moment,
+        [a.titre!.trim(), a.icone ?? null, a.description ?? null, uuids(who), assignment, JSON.stringify(schedule), moment,
           a.debut ? dayArg(c, a.debut) : null, today(c), a.fin ? dayArg(c, a.fin) : null, a.actif ?? true, actorId(c), c.via]);
       return `Règle créée : ${a.titre!.trim()}, ${describeSchedule(schedule, moment)}, ${namesOf(c, who, "qui veut")}${assignment === "rotate" ? " à tour de rôle" : ""}.`;
     },

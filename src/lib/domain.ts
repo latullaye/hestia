@@ -31,7 +31,7 @@ export const uncared = (e: CalEvent, members: Member[]) =>
 export const mealName = (m: Meal, dishes: Map<string, Dish>) => m.label || (m.dish_id && dishes.get(m.dish_id)?.name) || "";
 export const SLOT_LABEL: Record<string, string> = { breakfast: "Déjeuner", lunch: "Lunch", dinner: "Souper" };
 export const KIND_LABEL: Record<string, string> = { home: "Maison", leftovers: "Restes", restaurant: "Resto", takeout: "À emporter", other: "Autre" };
-export const KIND_EMOJI: Record<string, string> = { home: "", leftovers: "♻️", restaurant: "🍽️", takeout: "🥡", other: "" };
+export const KIND_ICON: Record<string, string | null> = { home: null, leftovers: "recycle", restaurant: "utensils", takeout: "shopping-bag", other: null };
 export const mealsOn = (meals: Meal[], day: string, slot?: string) =>
   meals.filter((m) => m.date === day && (!slot || m.slot === slot)).sort((a, b) => (a.created_at || "").localeCompare(b.created_at || ""));
 // Dishes cooked at home in the last days, most recent first (what lunches are often made of)
@@ -77,7 +77,7 @@ export const birthdaysOn = (birthdays: Birthday[], day: string) => {
   const [, m, d] = day.split("-").map(Number);
   return birthdays.filter((b) => b.month === m && b.day === d);
 };
-export const BIRTHDAY_EMOJI: Record<string, string> = { birthday: "🎂", anniversary: "💞", memorial: "🕯️" };
+export const BIRTHDAY_ICON: Record<string, string> = { birthday: "cake", anniversary: "heart", memorial: "flame" };
 
 // ---------- Countdowns ----------
 export function countdownsFrom(countdowns: Countdown[], today: string) {

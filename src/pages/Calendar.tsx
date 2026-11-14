@@ -3,9 +3,10 @@ import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { EventSheet } from "../components/EventSheet";
+import { Glyph } from "../components/icons";
 import { EventRow } from "../components/rows";
 import { SyncPill } from "../components/ui";
-import { BIRTHDAY_EMOJI, addDays, birthdaysOn, cap, dayTitle, eventsOn, fmtDay, partsIn } from "../lib/domain";
+import { BIRTHDAY_ICON, addDays, birthdaysOn, cap, dayTitle, eventsOn, fmtDay, partsIn } from "../lib/domain";
 import { useHousehold, useMembers, useTable, useToday } from "../lib/hooks";
 
 const monday = (day: string) => addDays(day, 1 - partsIn(Date.parse(day + "T12:00:00Z"), "UTC").dow);
@@ -45,7 +46,7 @@ export function Calendar() {
           <div key={d} className="col" style={{ gap: 6 }}>
             <div className="section-title"><h2>{dayTitle(d, today)}</h2>{dayTitle(d, today) !== cap(fmtDay(d, { weekday: "long", month: "long" })) && <span className="muted small">{fmtDay(d)}</span>}</div>
             <div className="card flush list">
-              {bds.map((b) => <div key={b.id}>{BIRTHDAY_EMOJI[b.kind]} <span className="grow">{b.kind === "memorial" ? "En mémoire de " : ""}{b.name}{b.year && b.kind !== "memorial" ? ` · ${Number(d.slice(0, 4)) - b.year} ans` : ""}</span></div>)}
+              {bds.map((b) => <div key={b.id}><Glyph name={BIRTHDAY_ICON[b.kind]} /><span className="grow">{b.kind === "memorial" ? "En mémoire de " : ""}{b.name}{b.year && b.kind !== "memorial" ? ` · ${Number(d.slice(0, 4)) - b.year} ans` : ""}</span></div>)}
               {evs.map((e) => <EventRow key={e.id} event={e} tz={tz} members={members} onOpen={openEvent} />)}
               {!evs.length && !bds.length && <div className="muted">Rien de prévu.</div>}
             </div>

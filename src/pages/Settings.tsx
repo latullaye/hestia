@@ -2,6 +2,7 @@
 // to the outside (Google Calendar, Claude).
 import { Copy, Plus, RefreshCw, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Glyph, IconPicker } from "../components/icons";
 import { Avatar, Field, Segmented, Sheet, SyncPill, toast } from "../components/ui";
 import { APP_VERSION, BUILD_TIME, FUNCTIONS_URL } from "../config";
 import { disablePush, enablePush, isIOS, isStandalone, pushState, type PushState } from "../lib/device";
@@ -16,7 +17,7 @@ export const applyTheme = () => {
   const t = localStorage.getItem("hestia-theme");
   if (t === "light" || t === "dark") document.documentElement.dataset.theme = t; else delete document.documentElement.dataset.theme;
 };
-const COLORS = ["#1f6f78", "#c2603a", "#d39a1c", "#7a5ea8", "#2f8f57", "#b3402e", "#3c78c2", "#5d706d"];
+const COLORS = ["#2f6f73", "#b9765a", "#b89a4e", "#7d6a94", "#6f9a7a", "#a86b6b", "#5f84ad", "#6b7a78"];
 
 export function Settings() {
   const { me, isAdult, demo, email, signOut } = useSession();
@@ -108,7 +109,7 @@ export function Settings() {
 
         <span className="label">Décomptes</span>
         <div className="card flush list">
-          {countdowns.map((c) => { const x = countdownsFrom([c], today)[0]; return <button key={c.id} onClick={() => setCountdown(c)}><span className="grow">{c.emoji} {c.title}<span className="small muted"> · {fmtDay(x?.date ?? c.target_date, { year: "numeric" })}{c.yearly ? " · chaque année" : ""}</span></span>{x && <span className="tag accent">{x.in} j</span>}</button>; })}
+          {countdowns.map((c) => { const x = countdownsFrom([c], today)[0]; return <button key={c.id} onClick={() => setCountdown(c)}><span className="grow"><Glyph name={c.emoji} />{c.title}<span className="small muted"> · {fmtDay(x?.date ?? c.target_date, { year: "numeric" })}{c.yearly ? " · chaque année" : ""}</span></span>{x && <span className="tag accent">{x.in} j</span>}</button>; })}
           <button onClick={() => setCountdown("new")}><Plus size={18} /><span className="grow">Ajouter un décompte</span></button>
         </div>
 
@@ -151,16 +152,15 @@ export function Settings() {
 }
 
 function MemberSheet({ member: m, onClose }: { member: Member; onClose: () => void }) {
-  const [f, setF] = useState({ name: m.name, emoji: m.emoji ?? "", color: m.color, aliases: m.aliases.join(", "), needs: m.needs_caregiver });
+  const [f, setF] = useState({ name: m.name, color: m.color, aliases: m.aliases.join(", "), needs: m.needs_caregiver });
   const save = () => {
     if (!f.name.trim()) return;
-    store.put("members", { ...m, name: f.name.trim(), emoji: f.emoji.trim() || null, color: f.color, aliases: f.aliases.split(",").map((a) => a.trim()).filter(Boolean), needs_caregiver: f.needs });
+    store.put("members", { ...m, name: f.name.trim(), color: f.color, aliases: f.aliases.split(",").map((a) => a.trim()).filter(Boolean), needs_caregiver: f.needs });
     onClose();
   };
   return (
     <Sheet title={m.name} onClose={onClose} footer={<button className="btn primary" onClick={save}>Enregistrer</button>}>
-      <div className="row"><Field label="Icône"><input className="input" style={{ width: 64, textAlign: "center" }} value={f.emoji} onChange={(e) => setF({ ...f, emoji: e.target.value })} placeholder="A" /></Field>
-        <div className="grow"><Field label="Prénom"><input className="input" value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} /></Field></div></div>
+      <Field label="Prénom"><input className="input" value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} /></Field>
       <Field label="Couleur"><div className="chips">{COLORS.map((c) => <button key={c} className="avatar lg" style={{ ["--c" as any]: c, outline: f.color === c ? "3px solid var(--ink)" : "none" }} onClick={() => setF({ ...f, color: c })} aria-label={c} />)}</div></Field>
       <Field label="Autres noms (surnoms, séparés par des virgules)" hint="Servent à reconnaître la personne dans les titres de Google Agenda et à l'interphone."><input className="input" value={f.aliases} onChange={(e) => setF({ ...f, aliases: e.target.value })} /></Field>
       {m.role === "child" && <label className="switch"><input type="checkbox" checked={f.needs} onChange={(e) => setF({ ...f, needs: e.target.checked })} />Toujours accompagné d'un adulte</label>}
@@ -178,8 +178,8 @@ function CountdownSheet({ countdown: c, onClose }: { countdown?: Countdown; onCl
   return (
     <Sheet title={c ? c.title : "Nouveau décompte"} onClose={onClose} footer={<>
       {c && <button className="btn danger" onClick={() => { store.remove("countdowns", c.id); onClose(); }}><Trash2 />Supprimer</button>}<button className="btn primary" onClick={save}>Enregistrer</button></>}>
-      <div className="row"><Field label="Icône"><input className="input" style={{ width: 64, textAlign: "center" }} value={f.emoji} onChange={(e) => setF({ ...f, emoji: e.target.value })} placeholder="🏖️" /></Field>
-        <div className="grow"><Field label="Titre"><input className="input" value={f.title} onChange={(e) => setF({ ...f, title: e.target.value })} placeholder="Vacances" /></Field></div></div>
+      <Field label="Titre"><input className="input" value={f.title} onChange={(e) => setF({ ...f, title: e.target.value })} placeholder="Vacances" /></Field>
+      <Field label="Icône"><IconPicker value={f.emoji} onChange={(k) => setF({ ...f, emoji: k ?? "" })} /></Field>
       <Field label="Date"><input className="input" type="date" value={f.date} onChange={(e) => setF({ ...f, date: e.target.value })} /></Field>
       <label className="switch"><input type="checkbox" checked={f.yearly} onChange={(e) => setF({ ...f, yearly: e.target.checked })} />Revient chaque année</label>
       <label className="switch"><input type="checkbox" checked={f.kiosk} onChange={(e) => setF({ ...f, kiosk: e.target.checked })} />Afficher sur le kiosque</label>

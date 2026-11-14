@@ -2,9 +2,10 @@
 import { ChevronLeft, ChevronRight, Plus, Star, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { norm } from "@shared/time.ts";
+import { Glyph } from "../components/icons";
 import { MealSheet } from "../components/MealSheet";
 import { Avatars, Empty, Field, Segmented, Sheet, SyncPill, toast } from "../components/ui";
-import { KIND_EMOJI, addDays, cap, dayTitle, fmtDay, mealName, mealsOn } from "../lib/domain";
+import { KIND_ICON, addDays, cap, dayTitle, fmtDay, mealName, mealsOn } from "../lib/domain";
 import { useHousehold, useMembers, useTable, useToday } from "../lib/hooks";
 import { store } from "../lib/store";
 import type { Dish, MealSlot } from "../lib/types";
@@ -26,9 +27,9 @@ export function Meals() {
         <span className="label" style={{ width: 58 }}>{slot === "lunch" ? "Lunch" : "Souper"}</span>
         <span className="grow col" style={{ gap: 2 }}>
           {ms.length ? ms.map((m) => (
-            <span key={m.id} className="meal-line">{KIND_EMOJI[m.kind]} {mealName(m, dishMap) || <span className="muted">Plat à choisir</span>}
+            <span key={m.id} className="meal-line"><Glyph name={KIND_ICON[m.kind]} />{mealName(m, dishMap) || <span className="muted">Plat à choisir</span>}
               {m.member_ids.length > 0 && <Avatars ids={m.member_ids} members={members} size="sm" />}
-              {m.cook_ids.length > 0 && <span className="care">👩‍🍳 <Avatars ids={m.cook_ids} members={members} size="sm" /></span>}
+              {m.cook_ids.length > 0 && <span className="care"><Glyph name="chef-hat" /><Avatars ids={m.cook_ids} members={members} size="sm" /></span>}
               {m.note && <span className="small muted">{m.note}</span>}</span>
           )) : <span className="muted">—</span>}
         </span>
@@ -60,7 +61,7 @@ export function Meals() {
           {shown.map((d) => (
             <button key={d.id} onClick={() => setDish(d)}>
               <span className={`grow ${d.archived ? "muted" : ""}`}>{d.name} {d.tags.map((t) => <span key={t} className="tag">{t}</span>)}{d.recipe ? <span className="tag accent">Recette</span> : null}{d.archived ? <span className="tag">Archivé</span> : null}</span>
-              {d.favorite && <Star size={16} fill="currentColor" style={{ color: "var(--warn)" }} />}
+              {d.favorite && <Star size={16} style={{ color: "var(--accent)" }} />}
             </button>
           ))}
           {!shown.length && <Empty>Aucun plat pour le moment. Ajoute ceux que vous cuisinez souvent.</Empty>}
@@ -91,7 +92,7 @@ function DishSheet({ dish, onClose }: { dish?: Dish; onClose: () => void }) {
       <Field label="Recette"><textarea className="input" style={{ minHeight: 140 }} value={f.recipe} onChange={(e) => set({ recipe: e.target.value })} placeholder={"1. …"} /></Field>
       <Field label="Lien"><input className="input" value={f.url} onChange={(e) => set({ url: e.target.value })} inputMode="url" /></Field>
       <Field label="Note"><input className="input" value={f.note} onChange={(e) => set({ note: e.target.value })} /></Field>
-      <label className="switch"><input type="checkbox" checked={f.favorite} onChange={(e) => set({ favorite: e.target.checked })} />Favori ⭐</label>
+      <label className="switch"><input type="checkbox" checked={f.favorite} onChange={(e) => set({ favorite: e.target.checked })} />Favori</label>
       <label className="switch"><input type="checkbox" checked={f.archived} onChange={(e) => set({ archived: e.target.checked })} />Archivé (ne plus le proposer)</label>
     </Sheet>
   );

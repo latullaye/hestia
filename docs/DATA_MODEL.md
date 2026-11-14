@@ -14,6 +14,10 @@ Source de vérité : `supabase/migrations/`. Types côté app : `src/lib/types.t
 
 `private.setup_synced_table(table, colonne_nom)` attache les déclencheurs `touch` et `audit`, l'index et la règle d'accès.
 
+Les colonnes `emoji` (tâches, listes, rayons, décomptes) contiennent le **nom d'une icône** de la liste
+`supabase/functions/_shared/icons.ts` (`cat`, `trash`, `shopping-cart`…), que l'app dessine au trait. Leur nom date des
+débuts ; les quelques emoji encore présents dans les données sont traduits à l'affichage.
+
 ## Tables (`public`)
 
 | Table | Contenu | À savoir |

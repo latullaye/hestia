@@ -3,6 +3,7 @@ import { Plus } from "lucide-react";
 import { useState } from "react";
 import { describeSchedule } from "@shared/schedule.ts";
 import { RuleSheet, TaskSheet, toggleOccurrence } from "../components/ChoreSheets";
+import { Glyph } from "../components/icons";
 import { ChoreRow } from "../components/rows";
 import { Avatars, Empty, Segmented, SyncPill } from "../components/ui";
 import { addDays, cap, dayTitle, fmtDay, occurrencesOn } from "../lib/domain";
@@ -37,7 +38,7 @@ export function Chores() {
               <div className="section-title"><h2>{dayTitle(d, today)}</h2>{dayTitle(d, today) !== cap(fmtDay(d, { weekday: "long", month: "long" })) && <span className="muted small">{fmtDay(d)}</span>}</div>
               <div className="card flush list">
                 {rows.map((o) => <ChoreRow key={o.id} occurrence={o} today={today} members={members} onToggle={d === today ? toggle : () => {}} onOpen={setTask} />)}
-                {!rows.length && <div className="muted">Rien à faire. 🎉</div>}
+                {!rows.length && <div className="muted">Rien à faire.</div>}
               </div>
             </div>
           );
@@ -48,7 +49,7 @@ export function Chores() {
         <div className="card flush list">
           {rules.map((c) => (
             <button key={c.id} onClick={() => setRule(c)}>
-              <span className={`grow ${c.active ? "" : "muted"}`}><b>{c.emoji ? `${c.emoji} ` : ""}{c.title}</b>
+              <span className={`grow ${c.active ? "" : "muted"}`}><b><Glyph name={c.emoji} />{c.title}</b>
                 <div className="small muted">{cap(describeSchedule(c.schedule, c.time_of_day))}{c.assignment === "rotate" ? " · à tour de rôle" : ""}{c.active ? "" : " · en pause"}</div></span>
               <Avatars ids={c.assignee_ids} members={members} />
             </button>

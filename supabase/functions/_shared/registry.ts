@@ -46,7 +46,7 @@ const overview = tool({
       if (r.yearly && d < t) { d = `${t.slice(0, 4)}${d.slice(4)}`; if (d < t) d = `${Number(t.slice(0, 4)) + 1}${d.slice(4)}`; }
       return { ...r, in: daysBetween(t, d) };
     }).filter((r) => r.in >= 0);
-    if (cds.length) out.push(`## Décomptes\n${cds.map((r) => `- ${r.emoji ? r.emoji + " " : ""}${r.title} : ${r.in === 0 ? "c'est aujourd'hui" : `dans ${r.in} jour${r.in > 1 ? "s" : ""}`}`).join("\n")}`);
+    if (cds.length) out.push(`## Décomptes\n${cds.map((r) => `- ${r.title} : ${r.in === 0 ? "c'est aujourd'hui" : `dans ${r.in} jour${r.in > 1 ? "s" : ""}`}`).join("\n")}`);
     return out.join("\n\n");
   },
 });

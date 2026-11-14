@@ -87,3 +87,18 @@ docs/                     la documentation
 
 Code et commentaires en anglais, interface et documentation en français (Québec). Commentaires : le pourquoi, pas le quoi.
 Pas de dépendance ajoutée sans raison : l'app tient en peu de bibliothèques, c'est voulu.
+
+### Style visuel : simple, épuré, apaisant
+
+C'est une demande ferme de la famille, à respecter dans tout nouvel écran :
+
+- **Aucun emoji dans l'interface**, ni dans les notifications. Les pictogrammes sont des icônes au trait, d'une seule
+  couleur (Lucide), dessinées par `Glyph` (`src/components/icons.tsx`) à partir d'un nom de la liste partagée
+  (`supabase/functions/_shared/icons.ts`). Les colonnes `emoji` de la base contiennent ces noms.
+- **Une seule couleur d'accent** (le bleu-vert `--accent`), sur des fonds clairs et neutres. L'ambre (`--warn`) est
+  réservé à ce qui attend (approbation, retard), le rouge doux (`--danger`) à ce qui demande attention. Pas de vert, pas
+  d'aplats vifs, pas de dégradés.
+- **Peu de choses par écran** : cartes blanches à bord fin, beaucoup d'air, une information par ligne. Sur le kiosque,
+  tout doit se lire de loin sans rien d'agressif.
+- Deux polices seulement (Ubuntu pour les titres et les chiffres, Atkinson Hyperlegible pour le texte), les variables de
+  `src/styles.css` pour toutes les couleurs, et le thème sombre vérifié à chaque ajout.

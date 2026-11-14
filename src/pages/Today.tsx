@@ -5,9 +5,10 @@ import { Link } from "react-router-dom";
 import { toggleOccurrence } from "../components/ChoreSheets";
 import { EventSheet } from "../components/EventSheet";
 import { MealSheet } from "../components/MealSheet";
+import { Glyph } from "../components/icons";
 import { ChoreRow, EventRow } from "../components/rows";
 import { Avatars, Sheet, SyncPill } from "../components/ui";
-import { BIRTHDAY_EMOJI, KIND_EMOJI, addDays, cap, countdownsFrom, eventDays, eventsOn, fmtDay, inDays, mealName, mealsOn, occurrencesOn, plural, upcomingBirthdays } from "../lib/domain";
+import { BIRTHDAY_ICON, KIND_ICON, addDays, cap, countdownsFrom, eventDays, eventsOn, fmtDay, inDays, mealName, mealsOn, occurrencesOn, plural, upcomingBirthdays } from "../lib/domain";
 import { useHousehold, useMembers, useTable, useToday } from "../lib/hooks";
 import { demoWeather } from "../lib/demo";
 import { useSession } from "../lib/session";
@@ -43,9 +44,9 @@ export function Today() {
       <button className="tap" onClick={() => setMeal({ date: today, slot })}>
         <span className="label" style={{ width: 58 }}>{slot === "lunch" ? "Lunch" : "Souper"}</span>
         <span className="grow">{ms.length ? ms.map((m) => (
-          <span key={m.id} className="meal-line">{KIND_EMOJI[m.kind]} {mealName(m, dishMap) || <span className="muted">Plat à choisir</span>}
+          <span key={m.id} className="meal-line"><Glyph name={KIND_ICON[m.kind]} />{mealName(m, dishMap) || <span className="muted">Plat à choisir</span>}
             {m.member_ids.length > 0 && <Avatars ids={m.member_ids} members={members} size="sm" />}
-            {m.cook_ids.length > 0 && <span className="care">👩‍🍳 <Avatars ids={m.cook_ids} members={members} size="sm" /></span>}</span>
+            {m.cook_ids.length > 0 && <span className="care"><Glyph name="chef-hat" /><Avatars ids={m.cook_ids} members={members} size="sm" /></span>}</span>
         )) : <span className="muted">À décider</span>}</span>
         <ChevronRight size={18} className="muted" />
       </button>
@@ -56,14 +57,14 @@ export function Today() {
     <div className="page">
       <div className="top">
         <div className="grow"><h1>{cap(fmtDay(today, { weekday: "long", month: "long" }))}</h1>
-          {weather && w && <div className="muted small row" style={{ gap: 5 }}><w.Icon size={16} /> {Math.round(weather.current.temperature)}° · {w.text} · {Math.round(weather.days[0]?.min)}° / {Math.round(weather.days[0]?.max)}° · {place.label}</div>}</div>
+          {weather && w && <div className="muted small row" style={{ gap: 5 }}><w.Icon size={17} /><span>{Math.round(weather.current.temperature)}° · {w.text} · {Math.round(weather.days[0]?.min)}° / {Math.round(weather.days[0]?.max)}°</span></div>}</div>
         <SyncPill />
         <button className="icon-btn" onClick={() => setInbox(true)} aria-label="Notifications"><Bell />{unread.length > 0 && <span className="dot">{unread.length}</span>}</button>
       </div>
 
       {toApprove.map((e) => (
         <button key={e.id} className="card warn row" onClick={() => setEventId(e.id)}>
-          <span className="grow"><b>⏳ {members.name(e.created_by)} demande ton accord</b><div>{e.title} · {fmtDay(eventDays(e, tz).first)}</div></span><ChevronRight />
+          <span className="grow"><b><Glyph name="hourglass" />{members.name(e.created_by)} demande ton accord</b><div>{e.title} · {fmtDay(eventDays(e, tz).first)}</div></span><ChevronRight />
         </button>
       ))}
 
@@ -79,22 +80,22 @@ export function Today() {
 
       <div className="section-title"><h2 className="grow">Mes tâches</h2><Link className="btn small" to="/chores">Toutes</Link></div>
       <div className="card flush list">
-        {mine.length ? mine.map((o) => <ChoreRow key={o.id} occurrence={o} today={today} members={members} onToggle={(x) => toggleOccurrence(x, me?.id ?? null)} />) : <div className="muted">Rien à faire. 🎉</div>}
+        {mine.length ? mine.map((o) => <ChoreRow key={o.id} occurrence={o} today={today} members={members} onToggle={(x) => toggleOccurrence(x, me?.id ?? null)} />) : <div className="muted">Rien à faire.</div>}
         {others.length > 0 && <div className="head label">Les autres</div>}
         {others.map((o) => <ChoreRow key={o.id} occurrence={o} today={today} members={members} onToggle={(x) => toggleOccurrence(x, me?.id ?? null)} />)}
       </div>
 
       {needed.length > 0 && <>
         <div className="section-title"><h2>Courses</h2></div>
-        <div className="card flush list">{needed.map(({ l, n }) => <Link key={l.id} to={`/shopping/${l.id}`} style={{ textDecoration: "none", color: "inherit" }}><span className="grow">{l.emoji} {l.name}</span><span className="tag accent">{plural(n, "article")}</span><ChevronRight size={18} className="muted" /></Link>)}</div>
+        <div className="card flush list">{needed.map(({ l, n }) => <Link key={l.id} to={`/shopping/${l.id}`} style={{ textDecoration: "none", color: "inherit" }}><span className="grow"><Glyph name={l.emoji} />{l.name}</span><span className="tag accent">{plural(n, "article")}</span><ChevronRight size={18} className="muted" /></Link>)}</div>
       </>}
 
       {soon.length > 0 && <>
         <div className="section-title"><h2 className="grow">Anniversaires à venir</h2><Link className="btn small" to="/birthdays">Année</Link></div>
-        <div className="card flush list">{soon.map((b) => <div key={b.id}><span className="grow">{BIRTHDAY_EMOJI[b.kind]} {b.name}{b.age != null && b.kind !== "memorial" ? ` · ${b.age} ans` : ""}{b.gift_ideas ? <span className="small muted"> · 🎁 {b.gift_ideas}</span> : null}</span><span className={`tag ${b.in <= 3 ? "warn" : ""}`}>{inDays(b.in)}</span></div>)}</div>
+        <div className="card flush list">{soon.map((b) => <div key={b.id}><span className="grow"><Glyph name={BIRTHDAY_ICON[b.kind]} />{b.name}{b.age != null && b.kind !== "memorial" ? ` · ${b.age} ans` : ""}{b.gift_ideas ? <span className="small muted"> · <Glyph name="gift" />{b.gift_ideas}</span> : null}</span><span className={`tag ${b.in <= 3 ? "warn" : ""}`}>{inDays(b.in)}</span></div>)}</div>
       </>}
 
-      {cds.length > 0 && <div className="row wrap">{cds.map((c) => <div key={c.id} className="card grow"><span className="num" style={{ fontSize: "1.6rem", color: "var(--accent)" }}>{c.in}</span> <span className="muted">jour{c.in > 1 ? "s" : ""} avant</span> <b>{c.emoji} {c.title}</b></div>)}</div>}
+      {cds.length > 0 && <div className="row wrap">{cds.map((c) => <div key={c.id} className="card grow"><span className="num" style={{ fontSize: "1.6rem", color: "var(--accent)" }}>{c.in}</span> <span className="muted">jour{c.in > 1 ? "s" : ""} avant</span> <b><Glyph name={c.emoji} />{c.title}</b></div>)}</div>}
 
       {eventId && <EventSheet id={eventId} onClose={() => setEventId(null)} />}
       {adding && <EventSheet day={today} onClose={() => setAdding(false)} />}

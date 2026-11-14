@@ -7,6 +7,7 @@ import { useHousehold, useMembers, useToday } from "../lib/hooks";
 import { useSession } from "../lib/session";
 import { store } from "../lib/store";
 import type { Chore, Occurrence, TimeOfDay } from "../lib/types";
+import { IconPicker } from "./icons";
 import { Field, MemberChips, Segmented, Sheet, toast } from "./ui";
 
 const TIMES: { value: TimeOfDay; label: string }[] = [{ value: "morning", label: "Matin" }, { value: "afternoon", label: "Après-midi" }, { value: "evening", label: "Soir" }, { value: "anytime", label: "Peu importe" }];
@@ -54,9 +55,9 @@ export function RuleSheet({ chore, onClose }: { chore?: Chore; onClose: () => vo
       {chore && <button className="btn danger" onClick={() => { if (confirm("Supprimer cette règle ? Ce qui a déjà été fait reste au journal.")) { store.remove("chores", chore.id); onClose(); } }}><Trash2 />Supprimer</button>}
       <button className="btn primary" onClick={save}>Enregistrer</button></>}>
       <div className="row">
-        <Field label="Icône"><input className="input" style={{ width: 64, textAlign: "center" }} value={emoji} onChange={(ev) => setEmoji(ev.target.value)} placeholder="🧹" /></Field>
         <div className="grow"><Field label="Tâche"><input className="input" value={title} onChange={(ev) => setTitle(ev.target.value)} placeholder="Vider la litière" autoFocus={!chore} /></Field></div>
       </div>
+      <Field label="Icône"><IconPicker value={emoji} onChange={(k) => setEmoji(k ?? "")} /></Field>
       <Field label="Qui"><MemberChips value={who} options={members.family.filter((m) => !m.needs_caregiver)} none="Qui veut" onChange={setWho} /></Field>
       {who.length > 1 && <label className="switch"><input type="checkbox" checked={rotate} onChange={(ev) => setRotate(ev.target.checked)} />À tour de rôle (sinon : ensemble)</label>}
       <Field label="Fréquence">

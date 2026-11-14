@@ -1,6 +1,7 @@
 // Pure logic shared by the server and the app: dates, chore rhythms, Google Calendar title conventions.
 import { describe, expect, it } from "vitest";
 import { decodeBirthday, decodeTitle, encodeDescription, encodeTitle, sameName, stripFooter, type Person } from "../supabase/functions/_shared/calendar-codec.ts";
+import { ICON_KEYS, iconKey } from "../supabase/functions/_shared/icons.ts";
 import { describeSchedule, matches, nextDays, openUntil, scheduleError } from "../supabase/functions/_shared/schedule.ts";
 import { addDays, daysBetween, fmtTime, instant, norm, parseWhen, partsIn } from "../supabase/functions/_shared/time.ts";
 
@@ -88,5 +89,16 @@ describe("Google Calendar conventions", () => {
     expect(decodeBirthday("Verres d'anniv")).toBeNull();
     expect(sameName("Noah", "Noah (Tremblay)")).toBe(true);
     expect(sameName("Noah Tremblay", "Noah Gagnon")).toBe(false);
+  });
+});
+
+describe("icons", () => {
+  it("understands names and the emoji of the first data, nothing else", () => {
+    expect(iconKey("cat")).toBe("cat");
+    expect(iconKey("🛒")).toBe("shopping-cart");
+    expect(iconKey("🗑️")).toBe("trash"); // with its variation selector
+    expect(iconKey("🦄")).toBeNull();
+    expect(iconKey(null)).toBeNull();
+    expect(new Set(ICON_KEYS).size).toBe(ICON_KEYS.length);
   });
 });

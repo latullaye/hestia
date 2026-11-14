@@ -53,12 +53,12 @@ async function reminders() {
     for (const m of members) {
       const lines: string[] = [];
       const ev = events.filter((e) => mine(m, [...e.participant_ids, ...e.caregiver_ids]));
-      if (ev.length) lines.push(`📅 ${ev.map((e) => `${e.all_day ? "" : fmtTime(Date.parse(e.starts_at), tz) + " "}${e.title}`).join(", ")}`);
+      if (ev.length) lines.push(`Agenda : ${ev.map((e) => `${e.all_day ? "" : fmtTime(Date.parse(e.starts_at), tz) + " "}${e.title}`).join(", ")}`);
       const ch = chores.filter((c) => mine(m, c.assignee_ids));
-      if (ch.length) lines.push(`🧹 ${ch.map((c) => c.title).join(", ")}`);
-      if (bdays.length) lines.push(`🎂 ${bdays.map((b) => b.name).join(", ")}`);
+      if (ch.length) lines.push(`Tâches : ${ch.map((c) => c.title).join(", ")}`);
+      if (bdays.length) lines.push(`Anniversaire : ${bdays.map((b) => b.name).join(", ")}`);
       const waiting = pending.filter((e) => e.approver_ids.includes(m.id));
-      if (waiting.length) lines.push(`⏳ À approuver : ${waiting.map((e) => e.title).join(", ")}`);
+      if (waiting.length) lines.push(`À approuver : ${waiting.map((e) => e.title).join(", ")}`);
       if (lines.length && await once(db, `digest:${today}:${m.id}`)) { await notify(db, m.id, "digest", "Aujourd'hui", lines.join("\n"), "#/"); report.digest++; }
     }
   }
@@ -109,7 +109,7 @@ Deno.serve(async (req: Request) => {
   if (body.task === "test") {
     const who = await memberFromToken(req, db, env);
     if (!who) return json({ error: "auth" }, 401);
-    return json(await sendPush(db, [who.member.id], { title: "Hestia", body: "Les notifications fonctionnent ✅", url: "#/settings", tag: "test" }, subject()));
+    return json(await sendPush(db, [who.member.id], { title: "Hestia", body: "Les notifications fonctionnent.", url: "#/settings", tag: "test" }, subject()));
   }
   if (!(await isInternal(req, db))) return json({ error: "auth" }, 401);
   if (body.task === "push" && typeof body.notification_id === "string") return json(await push(body.notification_id));

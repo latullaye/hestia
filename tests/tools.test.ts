@@ -69,7 +69,7 @@ describe("shopping", () => {
     expect(log).toMatchObject({ via: "intercom", action: "purchased", actor_id: sam.actor!.id });
   });
   it("creates a list with ordered aisles", async () => {
-    const text = await ok(c, "courses_liste_enregistrer", { nom: "Marché", emoji: "🧺", rayons: ["Fromager", "Maraîcher"] });
+    const text = await ok(c, "courses_liste_enregistrer", { nom: "Marché", icone: "shopping-basket", rayons: ["Fromager", "Maraîcher"] });
     expect(text).toContain("Fromager, Maraîcher");
     expect(await ok(c, "courses_ajouter", { articles: [{ nom: "Comté", rayon: "fromager" }], liste: "marché" })).toContain("Marché, Fromager");
   });
@@ -140,13 +140,15 @@ describe("chores", () => {
     expect(await ok(sam, "tache_cocher", { tache: "cuisine", etat: "a_faire" })).toContain("Remis à faire");
   });
   it("creates rules from plain frequencies", async () => {
-    let text = await ok(c, "tache_regle_enregistrer", { titre: "Sortir les poubelles", pour: ["Alex"], frequence: { type: "weekly", jours_semaine: [3] }, moment: "soir" });
+    let text = await ok(c, "tache_regle_enregistrer", { titre: "Sortir les poubelles", icone: "trash", pour: ["Alex"], frequence: { type: "weekly", jours_semaine: [3] }, moment: "soir" });
     expect(text).toContain("le mercredi soir");
     text = await ok(c, "tache_regle_enregistrer", { titre: "Laver les vitres", pour: ["Alex"], frequence: { type: "yearly", mois: [5] } });
     expect(text).toContain("en mai, chaque année");
     text = await ok(c, "tache_regle_enregistrer", { regle: "poubelles", frequence: { type: "weekly", jours_semaine: [6], report_jours: 1 }, moment: "journee" });
     expect(text).toContain("le samedi (sinon le lendemain)");
     expect((await run(c, "tache_regle_enregistrer", { titre: "x", frequence: { type: "weekly" } })).text).toContain("Fréquence invalide");
+    expect((await run(c, "tache_regle_enregistrer", { titre: "y", icone: "🧹", frequence: { type: "daily" } })).error).toBe(true); // a name of the set, not an emoji
+    expect((await db.one(`select emoji from public.chores where title = 'Sortir les poubelles'`))!.emoji).toBe("trash");
     expect(await ok(c, "taches_regles", {})).toContain("Laver les vitres");
     const n = await db.one(`select count(*)::int as n from public.chore_occurrences o join public.chores r on r.id = o.chore_id
       where r.title = 'Sortir les poubelles' and o.deleted_at is null and extract(isodow from o.due_date) <> 6`);
@@ -170,7 +172,7 @@ describe("birthdays, countdowns, overview, log", () => {
     expect(text).toContain("🎁 un livre");
   });
   it("manages countdowns", async () => {
-    expect(await ok(c, "decompte_enregistrer", { titre: "Vacances", date: addDays(today, 30), emoji: "🏖" })).toContain("dans 30 jours");
+    expect(await ok(c, "decompte_enregistrer", { titre: "Vacances", date: addDays(today, 30), icone: "umbrella" })).toContain("dans 30 jours");
   });
   it("gives the overview", async () => {
     const text = await ok(kiosk, "hestia_aujourdhui");

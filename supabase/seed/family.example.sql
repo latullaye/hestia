@@ -8,10 +8,10 @@ insert into public.members (name, role, needs_caregiver, color, emoji, aliases, 
 select v.name, v.role, v.needs_caregiver, v.color, v.emoji, v.aliases, v.birth_date::date, v.sort_order,
        (select id from auth.users u where lower(u.email) = lower(v.email)), 'system'
 from (values
-  ('Parent 1', 'adult',  false, '#1f6f78', null, '{}'::text[],        null,         1, 'parent1@example.com'),
-  ('Parent 2', 'adult',  false, '#c2603a', null, '{Surnom}'::text[],  null,         2, 'parent2@example.com'),
-  ('Enfant',   'child',  true,  '#d39a1c', '🐣', '{}'::text[],        '2026-01-01', 3, null),
-  ('Kiosque',  'device', false, '#5d706d', '📺', '{}'::text[],        null,         9, 'kiosque@example.com')
+  ('Parent 1', 'adult',  false, '#2f6f73', null, '{}'::text[],        null,         1, 'parent1@example.com'),
+  ('Parent 2', 'adult',  false, '#b9765a', null, '{Surnom}'::text[],  null,         2, 'parent2@example.com'),
+  ('Enfant',   'child',  true,  '#b89a4e', null, '{}'::text[],        '2026-01-01', 3, null),
+  ('Kiosque',  'device', false, '#6b7a78', null, '{}'::text[],        null,         9, 'kiosque@example.com')
 ) as v (name, role, needs_caregiver, color, emoji, aliases, birth_date, sort_order, email)
 where not exists (select 1 from public.members m where m.name = v.name);
 
@@ -42,11 +42,11 @@ join public.shopping_lists l on l.name = v.list and l.deleted_at is null
 left join public.shopping_sections s on s.list_id = l.id and s.name = v.section and s.deleted_at is null
 where not exists (select 1 from public.shopping_items i where i.list_id = l.id and i.name = v.name);
 
--- 5. Recurring chores (schedule: see docs/DATA_MODEL.md)
+-- 5. Recurring chores (schedule: see docs/DATA_MODEL.md; emoji: an icon name of supabase/functions/_shared/icons.ts)
 insert into public.chores (title, emoji, assignee_ids, schedule, time_of_day, updated_via)
 select v.title, v.emoji, array(select id from public.members where name = any (v.who)), v.schedule::jsonb, v.time_of_day, 'system'
 from (values
-  ('Vider la litière', '🐈', '{Parent 1}'::text[], '{"type": "daily"}', 'evening'),
-  ('Sortir les poubelles', '🗑️', '{Parent 1}'::text[], '{"type": "weekly", "weekdays": [3]}', 'evening')
+  ('Vider la litière', 'cat', '{Parent 1}'::text[], '{"type": "daily"}', 'evening'),
+  ('Sortir les poubelles', 'trash', '{Parent 1}'::text[], '{"type": "weekly", "weekdays": [3]}', 'evening')
 ) as v (title, emoji, who, schedule, time_of_day)
 where not exists (select 1 from public.chores c where c.title = v.title and c.deleted_at is null);

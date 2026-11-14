@@ -14,10 +14,10 @@ export function demoTables(): Partial<{ [T in keyof Tables]: Tables[T][] }> {
   const at = (k: number, time: string) => instant(d(k), time, TZ).toISOString();
   const [alex, sam, leo, kiosk] = ["m-alex", "m-sam", "m-leo", "m-kiosk"];
   const members: Tables["members"][] = [
-    { id: alex, auth_user_id: "demo-adult", name: "Alex", role: "adult", needs_caregiver: false, color: "#1f6f78", emoji: null, aliases: [], birth_date: null, sort_order: 1, active: true },
-    { id: sam, auth_user_id: null, name: "Sam", role: "adult", needs_caregiver: false, color: "#c2603a", emoji: null, aliases: [], birth_date: null, sort_order: 2, active: true },
-    { id: leo, auth_user_id: null, name: "Léo", role: "child", needs_caregiver: true, color: "#d39a1c", emoji: "🐣", aliases: [], birth_date: null, sort_order: 3, active: true },
-    { id: kiosk, auth_user_id: "demo-kiosk", name: "Kiosque", role: "device", needs_caregiver: false, color: "#5d706d", emoji: "📺", aliases: [], birth_date: null, sort_order: 9, active: true },
+    { id: alex, auth_user_id: "demo-adult", name: "Alex", role: "adult", needs_caregiver: false, color: "#2f6f73", emoji: null, aliases: [], birth_date: null, sort_order: 1, active: true },
+    { id: sam, auth_user_id: null, name: "Sam", role: "adult", needs_caregiver: false, color: "#b9765a", emoji: null, aliases: [], birth_date: null, sort_order: 2, active: true },
+    { id: leo, auth_user_id: null, name: "Léo", role: "child", needs_caregiver: true, color: "#b89a4e", emoji: null, aliases: [], birth_date: null, sort_order: 3, active: true },
+    { id: kiosk, auth_user_id: "demo-kiosk", name: "Kiosque", role: "device", needs_caregiver: false, color: "#6b7a78", emoji: null, aliases: [], birth_date: null, sort_order: 9, active: true },
   ];
   const ev = (k: number, start: string, end: string, title: string, extra: Partial<Tables["events"]> = {}): Tables["events"] => ({
     id: id("e"), title, description: null, location: null, all_day: false, starts_at: at(k, start), ends_at: at(k, end), start_date: null, end_date: null,
@@ -53,10 +53,10 @@ export function demoTables(): Partial<{ [T in keyof Tables]: Tables[T][] }> {
     meal(3, "dinner", 4, { cook_ids: [sam] }), meal(4, "dinner", 6, { cook_ids: [alex] }),
   ];
   const lists: Tables["shopping_lists"][] = [
-    { id: "l-1", name: "Épicerie", emoji: "🛒", sort_order: 1, show_on_kiosk: true }, { id: "l-2", name: "Costco", emoji: "🏬", sort_order: 2, show_on_kiosk: true },
-    { id: "l-3", name: "Pharmacie", emoji: "💊", sort_order: 3, show_on_kiosk: true },
+    { id: "l-1", name: "Épicerie", emoji: "shopping-cart", sort_order: 1, show_on_kiosk: true }, { id: "l-2", name: "Costco", emoji: "store", sort_order: 2, show_on_kiosk: true },
+    { id: "l-3", name: "Pharmacie", emoji: "pill", sort_order: 3, show_on_kiosk: true },
   ];
-  const sectionNames: [string, string][] = [["Fruits & légumes", "🥬"], ["Boulangerie", "🫓"], ["Viandes & poissons", "🥩"], ["Produits laitiers & œufs", "🧀"], ["Garde-manger", "🍚"], ["Produits congelés", "🧊"], ["Ménage & hygiène", "🧹"]];
+  const sectionNames: [string, string][] = [["Fruits & légumes", "salad"], ["Boulangerie", "croissant"], ["Viandes & poissons", "beef"], ["Produits laitiers & œufs", "milk"], ["Garde-manger", "wheat"], ["Produits congelés", "snowflake"], ["Ménage & hygiène", "spray-can"]];
   const sections: Tables["shopping_sections"][] = lists.slice(0, 2).flatMap((l) => sectionNames.map(([name, emoji], i) => ({ id: `${l.id}-s${i}`, list_id: l.id, name, emoji, sort_order: i + 1 })));
   const item = (list: string, section: number | null, name: string, needed = true, note: string | null = null): Tables["shopping_items"] =>
     ({ id: id("i"), list_id: list, section_id: section == null ? null : `${list}-s${section}`, name, note, needed, purchased_at: needed ? null : at(-6, "10:00"), sort_order: 0 });
@@ -70,13 +70,13 @@ export function demoTables(): Partial<{ [T in keyof Tables]: Tables[T][] }> {
   const chore = (title: string, emoji: string, who: string[], schedule: Tables["chores"]["schedule"], time: Tables["chores"]["time_of_day"], extra: Partial<Tables["chores"]> = {}): Tables["chores"] =>
     ({ id: id("c"), title, emoji, description: null, assignee_ids: who, assignment: "fixed", schedule, time_of_day: time, start_date: d(-30), end_date: null, active: true, sort_order: 0, ...extra });
   const chores = [
-    chore("Vider la litière", "🐈", [alex], { type: "daily" }, "evening"),
-    chore("Ranger la cuisine", "🍽️", [alex], { type: "daily" }, "evening"),
-    chore("Sortir les poubelles et le recyclage", "🗑️", [alex], { type: "weekly", weekdays: [3] }, "evening"),
-    chore("Sortir le compost", "🌱", [alex], { type: "weekly", weekdays: [1] }, "morning"),
-    chore("Nettoyer la salle de bain", "🛁", [alex], { type: "weekly", weekdays: [6], grace_days: 1 }, "anytime"),
-    chore("Lessive", "🧺", [alex, sam], { type: "weekly", weekdays: [2, 5] }, "anytime", { assignment: "rotate" }),
-    chore("Laver les vitres", "🪟", [alex], { type: "yearly", months: [5] }, "anytime"),
+    chore("Vider la litière", "cat", [alex], { type: "daily" }, "evening"),
+    chore("Ranger la cuisine", "utensils", [alex], { type: "daily" }, "evening"),
+    chore("Sortir les poubelles et le recyclage", "trash", [alex], { type: "weekly", weekdays: [3] }, "evening"),
+    chore("Sortir le compost", "sprout", [alex], { type: "weekly", weekdays: [1] }, "morning"),
+    chore("Nettoyer la salle de bain", "bath", [alex], { type: "weekly", weekdays: [6], grace_days: 1 }, "anytime"),
+    chore("Lessive", "washing-machine", [alex, sam], { type: "weekly", weekdays: [2, 5] }, "anytime", { assignment: "rotate" }),
+    chore("Laver les vitres", "window", [alex], { type: "yearly", months: [5] }, "anytime"),
   ];
   const occ = (c: Tables["chores"], k: number, status: "todo" | "done" = "todo", who = c.assignee_ids): Tables["chore_occurrences"] => ({
     id: id("o"), chore_id: c.id, title: c.title, emoji: c.emoji, due_date: d(k), due_until: d(k + (c.schedule.grace_days || 0)), time_of_day: c.time_of_day,
@@ -102,8 +102,8 @@ export function demoTables(): Partial<{ [T in keyof Tables]: Tables[T][] }> {
   ];
   const year = Number(today.slice(0, 4));
   const countdowns: Tables["countdowns"][] = [
-    { id: "cd-1", title: "Noël", emoji: "🎄", target_date: `${year}-12-25`, yearly: true, show_on_kiosk: true },
-    { id: "cd-2", title: "Vacances", emoji: "🏖️", target_date: d(47), yearly: false, show_on_kiosk: true },
+    { id: "cd-1", title: "Noël", emoji: "tree-pine", target_date: `${year}-12-25`, yearly: true, show_on_kiosk: true },
+    { id: "cd-2", title: "Vacances", emoji: "umbrella", target_date: d(47), yearly: false, show_on_kiosk: true },
   ];
   const settings: Tables["settings"][] = [
     { id: "household", value: { name: "Hestia", timezone: TZ, locale: "fr-CA", weather: { label: "Montréal", latitude: 45.5019, longitude: -73.5674 } } },

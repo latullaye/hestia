@@ -5,10 +5,11 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { toggleOccurrence } from "../components/ChoreSheets";
 import { EventSheet } from "../components/EventSheet";
+import { Glyph } from "../components/icons";
 import { IntercomPanel } from "../components/Intercom";
 import { MealSheet } from "../components/MealSheet";
 import { Avatar, Avatars, CheckBox, Sheet, SyncPill, toast } from "../components/ui";
-import { BIRTHDAY_EMOJI, KIND_EMOJI, addDays, birthdaysOn, cap, countdownsFrom, eventsOn, fmtDay, inDays, mealName, mealsOn, occurrencesOn, partsIn, startTime, uncared, upcomingBirthdays } from "../lib/domain";
+import { BIRTHDAY_ICON, KIND_ICON, addDays, birthdaysOn, cap, countdownsFrom, eventsOn, fmtDay, inDays, mealName, mealsOn, occurrencesOn, partsIn, startTime, uncared, upcomingBirthdays } from "../lib/domain";
 import { demoWeather } from "../lib/demo";
 import { keepAwake } from "../lib/device";
 import { useHousehold, useMembers, useNow, useTable } from "../lib/hooks";
@@ -52,9 +53,9 @@ export function Kiosk() {
     const ms = mealsOn(meals, date, slot);
     return (
       <span className="m"><b>{slot === "lunch" ? "Lunch" : "Souper"}</b>
-        <span>{ms.length ? ms.map((m, i) => (
-          <span key={m.id}>{i > 0 ? " · " : ""}{KIND_EMOJI[m.kind]} {mealName(m, dishMap) || "?"}{m.member_ids.length ? <> <Avatars ids={m.member_ids} members={members} size="sm" /></> : null}
-            {m.cook_ids.length ? <> 👩‍🍳<Avatars ids={m.cook_ids} members={members} size="sm" /></> : null}</span>
+        <span>{ms.length ? ms.map((m) => (
+          <span key={m.id} className="meal"><Glyph name={KIND_ICON[m.kind]} />{mealName(m, dishMap) || "?"}{m.member_ids.length ? <> <Avatars ids={m.member_ids} members={members} size="sm" /></> : null}
+            {m.cook_ids.length ? <> <Glyph name="chef-hat" /><Avatars ids={m.cook_ids} members={members} size="sm" /></> : null}</span>
         )) : <span className="muted">—</span>}</span>
       </span>
     );
@@ -88,21 +89,21 @@ export function Kiosk() {
                   {wx && <div className="wx"><WxIcon code={wx.code} />{Math.round(wx.max)}° / {Math.round(wx.min)}°</div>}
                 </div>
                 <div className="kday-body">
-                  {bds.map((b) => <div key={b.id} className="kbday">{BIRTHDAY_EMOJI[b.kind]} {b.name}{b.year && b.kind !== "memorial" ? ` · ${Number(d.slice(0, 4)) - b.year} ans` : ""}</div>)}
+                  {bds.map((b) => <div key={b.id} className="kbday"><Glyph name={BIRTHDAY_ICON[b.kind]} />{b.name}{b.year && b.kind !== "memorial" ? ` · ${Number(d.slice(0, 4)) - b.year} ans` : ""}</div>)}
                   {evs.map((e) => {
                     const alone = uncared(e, members.all);
                     return (
                       <button key={e.id} className={`kevent ${e.status} ${e.kind} ${alone.length ? "alert" : ""}`} onClick={() => setEventId(e.id)}>
-                        <span className="t">{e.status === "pending" ? "⏳ " : ""}{e.all_day ? "Journée" : startTime(e, tz)}</span>
+                        <span className="t">{e.status === "pending" && <Glyph name="hourglass" />}{e.all_day ? "Journée" : startTime(e, tz)}</span>
                         <span className="n">{e.title}</span>
                         {(e.participant_ids.length > 0 || alone.length > 0) && <span className="w"><Avatars ids={e.participant_ids} members={members} size="sm" />
                           {e.caregiver_ids.length > 0 && <span className="care">avec <Avatars ids={e.caregiver_ids} members={members} size="sm" /></span>}
-                          {alone.length > 0 && <span className="tag danger">avec qui ?</span>}</span>}
+                          {alone.length > 0 && <span className="tag warn">avec qui ?</span>}</span>}
                       </button>
                     );
                   })}
                   {!evs.length && !bds.length && <span className="muted small" style={{ padding: "2px 4px" }}>—</span>}
-                  {todo.length > 0 && <div className="kday-chores">🧹 {todo.map((o) => o.title).join(" · ")}</div>}
+                  {todo.length > 0 && <div className="kday-chores"><Glyph name="list-checks" />{todo.map((o) => o.title).join(" · ")}</div>}
                 </div>
                 <button className="kday-meals" onClick={() => setMeal({ date: d, slot: "dinner" })}>{mealRow(d, "lunch")}{mealRow(d, "dinner")}</button>
               </div>
@@ -122,23 +123,23 @@ export function Kiosk() {
           <h3><ListChecks size={15} />Tâches du jour</h3>
           {chores.map((o) => (
             <button key={o.id} className="kline" onClick={() => toggleOccurrence(o, acting?.id ?? null)}>
-              <CheckBox on={o.status === "done"} /><span className={`grow ${o.status === "done" ? "strike" : ""}`}>{o.emoji ? `${o.emoji} ` : ""}{o.title}</span><Avatars ids={o.status === "done" && o.done_by ? [o.done_by] : o.assignee_ids} members={members} size="sm" />
+              <CheckBox on={o.status === "done"} /><span className={`grow ${o.status === "done" ? "strike" : ""}`}><Glyph name={o.emoji} />{o.title}</span><Avatars ids={o.status === "done" && o.done_by ? [o.done_by] : o.assignee_ids} members={members} size="sm" />
             </button>
           ))}
-          {!chores.length && <span className="muted">Rien à faire. 🎉</span>}
+          {!chores.length && <span className="muted">Rien à faire.</span>}
         </div>
         <div className="kcard scroll" style={{ flexGrow: 1.4 }}>
           <h3><ShoppingCart size={15} />À acheter</h3>
           {shopping.map(({ l, mine }) => (
-            <div key={l.id}><b className="small">{l.emoji} {l.name}</b>
+            <div key={l.id}><b className="small"><Glyph name={l.emoji} />{l.name}</b>
               <div className="chips" style={{ gap: 5, marginTop: 3 }}>{mine.map((i) => <button key={i.id} className="chip small" onClick={() => setItem(i)}>{i.name}{i.note ? ` (${i.note})` : ""}</button>)}</div></div>
           ))}
           {!shopping.length && <span className="muted">Rien à acheter.</span>}
         </div>
         {(soon.length > 0 || cds.length > 0) && (
           <div className="kcard scroll">
-            {soon.length > 0 && <><h3>🎂 Bientôt</h3>{soon.slice(0, 5).map((b) => <div key={b.id} className="kline"><span className="grow">{b.name}{b.age != null ? ` · ${b.age} ans` : ""}</span><span className="tag">{inDays(b.in)}</span></div>)}</>}
-            {cds.map((c) => <div key={c.id} className="kcount"><span className="num">{c.in}</span><span>jour{c.in > 1 ? "s" : ""} avant <b>{c.emoji} {c.title}</b></span></div>)}
+            {soon.length > 0 && <><h3><Glyph name="cake" />Bientôt</h3>{soon.slice(0, 5).map((b) => <div key={b.id} className="kline"><span className="grow">{b.name}{b.age != null ? ` · ${b.age} ans` : ""}</span><span className="tag">{inDays(b.in)}</span></div>)}</>}
+            {cds.map((c) => <div key={c.id} className="kcount"><span className="num">{c.in}</span><span>jour{c.in > 1 ? "s" : ""} avant <b><Glyph name={c.emoji} />{c.title}</b></span></div>)}
           </div>
         )}
         <div className="row">
@@ -156,7 +157,7 @@ export function Kiosk() {
       {intercom && <IntercomPanel onClose={() => setIntercom(false)} />}
       {item && (
         <Sheet title={item.name} onClose={() => setItem(null)}>
-          <button className="btn ok" onClick={() => { buy(item); toast(`${item.name} : acheté`); setItem(null); }}>Acheté ✓</button>
+          <button className="btn ok" onClick={() => { buy(item); toast(`${item.name} : acheté`); setItem(null); }}>Acheté</button>
           <button className="btn" onClick={() => { store.put("shopping_items", { ...item, needed: false }); setItem(null); }}>Finalement, pas besoin</button>
         </Sheet>
       )}

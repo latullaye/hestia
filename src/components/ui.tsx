@@ -23,7 +23,7 @@ export function Sheet({ title, onClose, children, footer }: { title: ReactNode; 
 
 export function Avatar({ member, size, title }: { member: Member | undefined | null; size?: "sm" | "lg"; title?: string }) {
   if (!member) return <span className={`avatar ghost ${size || ""}`} title={title}>?</span>;
-  return <span className={`avatar ${size || ""}`} style={{ ["--c" as any]: member.color }} title={title ?? member.name}>{member.emoji || member.name[0]}</span>;
+  return <span className={`avatar ${size || ""}`} style={{ ["--c" as any]: member.color }} title={title ?? member.name}>{member.name[0]}</span>;
 }
 export function Avatars({ ids, members, size }: { ids: string[]; members: Members; size?: "sm" | "lg" }) {
   if (!ids.length) return null;

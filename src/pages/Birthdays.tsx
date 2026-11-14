@@ -2,8 +2,9 @@
 import { Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { MONTHS } from "@shared/schedule.ts";
+import { Glyph } from "../components/icons";
 import { Empty, Field, Segmented, Sheet, SyncPill, toast } from "../components/ui";
-import { BIRTHDAY_EMOJI, cap, fmtDay, inDays, upcomingBirthdays } from "../lib/domain";
+import { BIRTHDAY_ICON, cap, fmtDay, inDays, upcomingBirthdays } from "../lib/domain";
 import { useHousehold, useTable, useToday } from "../lib/hooks";
 import { store } from "../lib/store";
 import type { Birthday } from "../lib/types";
@@ -25,7 +26,7 @@ export function Birthdays() {
           <div className="head label">Dans les 30 prochains jours</div>
           {soon.map((b) => (
             <button key={b.id} onClick={() => setEdit(b)}>
-              <span className="grow">{BIRTHDAY_EMOJI[b.kind]} <b>{b.name}</b>{b.age != null ? ` · ${b.age} ans` : ""}<div className="small muted">{cap(fmtDay(b.next, { weekday: "long", month: "long" }))}{b.gift_ideas ? ` · 🎁 ${b.gift_ideas}` : ""}{b.note ? ` · ${b.note}` : ""}</div></span>
+              <span className="grow"><Glyph name={BIRTHDAY_ICON[b.kind]} /><b>{b.name}</b>{b.age != null ? ` · ${b.age} ans` : ""}<div className="small muted">{cap(fmtDay(b.next, { weekday: "long", month: "long" }))}{b.gift_ideas ? <> · <Glyph name="gift" />{b.gift_ideas}</> : ""}{b.note ? ` · ${b.note}` : ""}</div></span>
               <span className={`tag ${b.in <= 7 ? "warn" : ""}`}>{inDays(b.in)}</span>
             </button>
           ))}
@@ -39,7 +40,7 @@ export function Birthdays() {
               <h3>{cap(name)} <span className="muted small">{rows.length || ""}</span></h3>
               {rows.map((b) => (
                 <button key={b.id} className={`bday ${i + 1 < m0 || (i + 1 === m0 && b.day < d0) ? "past" : ""}`} onClick={() => setEdit(b)}>
-                  <span className="d">{b.day}</span><span className="grow">{b.kind === "anniversary" ? "💞 " : ""}{b.name}{b.year ? <span className="muted small"> · {year - b.year} ans</span> : null}</span>
+                  <span className="d">{b.day}</span><span className="grow">{b.kind === "anniversary" && <Glyph name="heart" />}{b.name}{b.year ? <span className="muted small"> · {year - b.year} ans</span> : null}</span>
                 </button>
               ))}
               {!rows.length && <span className="muted small">—</span>}
@@ -49,7 +50,7 @@ export function Birthdays() {
       </div>
       {memorial.length > 0 && (
         <div className="card flush list">
-          <div className="head label">🕯️ En mémoire</div>
+          <div className="head label"><Glyph name="flame" />En mémoire</div>
           {memorial.map((b) => <button key={b.id} onClick={() => setEdit(b)}><span className="grow">{b.name}{b.year ? ` (${b.year})` : ""}<div className="small muted">{b.day} {MONTHS[b.month - 1]}{b.note ? ` · ${b.note}` : ""}</div></span></button>)}
         </div>
       )}
@@ -78,7 +79,7 @@ function BirthdaySheet({ birthday: b, onClose }: { birthday?: Birthday; onClose:
         <div className="grow"><Field label="Mois"><select className="input" value={f.month} onChange={(e) => set({ month: Number(e.target.value) })}>{MONTHS.map((m, i) => <option key={m} value={i + 1}>{m}</option>)}</select></Field></div>
         <Field label="Année (si connue)"><input className="input" style={{ width: 110 }} inputMode="numeric" value={f.year} onChange={(e) => set({ year: e.target.value })} placeholder="1990" /></Field>
       </div>
-      <Field label="Type"><Segmented value={f.kind} onChange={(kind) => set({ kind })} options={[{ value: "birthday", label: "🎂 Naissance" }, { value: "anniversary", label: "💞 Couple, famille" }, { value: "memorial", label: "🕯️ En mémoire" }]} /></Field>
+      <Field label="Type"><Segmented value={f.kind} onChange={(kind) => set({ kind })} options={[{ value: "birthday", label: <><Glyph name="cake" />Naissance</> }, { value: "anniversary", label: <><Glyph name="heart" />Couple, famille</> }, { value: "memorial", label: <><Glyph name="flame" />En mémoire</> }]} /></Field>
       <Field label="Idées de cadeaux"><textarea className="input" value={f.gifts} onChange={(e) => set({ gifts: e.target.value })} /></Field>
       <Field label="Note"><input className="input" value={f.note} onChange={(e) => set({ note: e.target.value })} placeholder="Lien de parenté, etc." /></Field>
     </Sheet>

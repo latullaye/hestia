@@ -2,7 +2,7 @@
 import { uuids } from "./db.ts";
 import { instant, parseWhen } from "./time.ts";
 import {
-  type Ctx, type Row, actorId, addDays, adults, dayArg, daysBetween, fail, family, fmtDay, list, nameOf, namesOf, norm, people, pick,
+  type Ctx, type Row, actorId, addDays, adults, dayArg, daysBetween, fail, family, fmtDay, iconArg, list, nameOf, namesOf, norm, people, pick,
   relDay, today, tool, when, z,
 } from "./tools.ts";
 
@@ -273,7 +273,7 @@ export const calendarTools = [
     shape: {
       titre: z.string().min(1),
       date: z.string().optional().describe("AAAA-MM-JJ"),
-      emoji: z.string().optional(),
+      icone: iconArg.optional(),
       annuel: z.boolean().optional().describe("revient chaque année à la même date"),
       supprimer: z.boolean().optional(),
     },
@@ -288,10 +288,10 @@ export const calendarTools = [
       const date = a.date ? dayArg(c, a.date) : hit?.target_date ?? fail("Il faut une date (AAAA-MM-JJ).");
       if (hit) {
         await c.db.exec(`update public.countdowns set target_date = $2::date, emoji = $3, yearly = $4, updated_by = $5::uuid, updated_via = $6 where id = $1::uuid`,
-          [hit.id, date, a.emoji ?? hit.emoji, a.annuel ?? hit.yearly, actorId(c), c.via]);
+          [hit.id, date, a.icone ?? hit.emoji, a.annuel ?? hit.yearly, actorId(c), c.via]);
       } else {
         await c.db.exec(`insert into public.countdowns (title, target_date, emoji, yearly, updated_by, updated_via) values ($1, $2::date, $3, $4, $5::uuid, $6)`,
-          [a.titre.trim(), date, a.emoji ?? null, a.annuel ?? false, actorId(c), c.via]);
+          [a.titre.trim(), date, a.icone ?? null, a.annuel ?? false, actorId(c), c.via]);
       }
       const n = daysBetween(today(c), date);
       return `${a.titre.trim()} : ${n >= 0 ? `dans ${n} jour${n > 1 ? "s" : ""}` : "date passée"} (${fmtDay(date, { year: "numeric" })}).`;

@@ -49,7 +49,7 @@ Ce que fait chaque partie, et les règles qui ne se voient pas à l'écran. À t
 
 ## Tâches ménagères
 
-- **Tâches régulières** : titre, icône, qui (une personne, plusieurs, « qui veut »), à tour de rôle ou non, rythme,
+- **Tâches régulières** : titre, icône (à choisir parmi des pictogrammes au trait, jamais d'emoji), qui (une personne, plusieurs, « qui veut »), à tour de rôle ou non, rythme,
   moment de la journée, active ou en pause. L'éditeur montre la phrase (« le samedi (sinon le lendemain) ») et les
   prochaines dates. Rythmes : tous les (N) jours ; jours de la semaine (toutes les N semaines) ; jours du mois ; nième
   jour de semaine du mois ; dans le courant d'un mois de l'année ; une date par an. « Reporter de N jours » garde la

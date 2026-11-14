@@ -57,7 +57,8 @@ L'adresse donne accès aux données de la famille : la traiter comme un mot de p
 | `decompte_enregistrer` | Ajoute, modifie ou retire un décompte. |
 | `journal` | Qui a fait quoi : par domaine, action, personne, mots, période. |
 
-Règles communes : rien n'est supprimé pour de bon ; les personnes se désignent par leur prénom (ou « moi », « tous »,
+Règles communes : rien n'est supprimé pour de bon ; l'icône d'une tâche, d'une liste ou d'un décompte (« icone ») est un
+nom de la liste partagée (`cat`, `trash`, `umbrella`…), jamais un emoji ; les personnes se désignent par leur prénom (ou « moi », « tous »,
 « nous deux ») ; les dates sont `AAAA-MM-JJ`, les heures `HH:MM`, à l'heure de la maison ; les réponses sont en français.
 
 Exemples de demandes : « Ajoute les ingrédients de la carbonara à l'épicerie », « Enregistre cette recette dans nos

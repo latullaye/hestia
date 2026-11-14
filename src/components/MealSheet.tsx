@@ -3,10 +3,11 @@
 import { Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { norm } from "@shared/time.ts";
-import { KIND_EMOJI, KIND_LABEL, SLOT_LABEL, cap, fmtDay, mealName, mealsOn, recentDishes } from "../lib/domain";
+import { KIND_ICON, KIND_LABEL, SLOT_LABEL, cap, fmtDay, mealName, mealsOn, recentDishes } from "../lib/domain";
 import { useHousehold, useMembers, useTable, useToday } from "../lib/hooks";
 import { store } from "../lib/store";
 import type { Meal, MealKind, MealSlot } from "../lib/types";
+import { Glyph } from "./icons";
 import { Field, MemberChips, Segmented, Sheet, toast } from "./ui";
 
 export function MealSheet({ date, slot, onClose }: { date: string; slot: MealSlot; onClose: () => void }) {
@@ -56,15 +57,15 @@ export function MealSheet({ date, slot, onClose }: { date: string; slot: MealSlo
         </Field>
         {slot !== "dinner" && recent.length > 0 && (
           <Field label="Restes des derniers jours">
-            <div className="chips">{recent.map((r) => <button key={r.name} className={`chip small ${f.text === r.name && f.kind === "leftovers" ? "on" : ""}`} onClick={() => choose(r.name, r.dish_id, "leftovers")}>♻️ {r.name}</button>)}</div>
+            <div className="chips">{recent.map((r) => <button key={r.name} className={`chip small ${f.text === r.name && f.kind === "leftovers" ? "on" : ""}`} onClick={() => choose(r.name, r.dish_id, "leftovers")}><Glyph name="recycle" />{r.name}</button>)}</div>
           </Field>
         )}
         {suggestions.length > 0 && (
           <Field label={q ? "Dans nos plats" : "Nos plats"}>
-            <div className="chips">{suggestions.map((d) => <button key={d.id} className={`chip small ${f.dishId === d.id ? "on" : ""}`} onClick={() => choose(d.name, d.id)}>{d.favorite ? "⭐ " : ""}{d.name}</button>)}</div>
+            <div className="chips">{suggestions.map((d) => <button key={d.id} className={`chip small ${f.dishId === d.id ? "on" : ""}`} onClick={() => choose(d.name, d.id)}>{d.favorite && <Glyph name="star" />}{d.name}</button>)}</div>
           </Field>
         )}
-        <Field label="Type"><Segmented value={f.kind} onChange={(kind) => set({ kind })} options={(["home", "leftovers", "restaurant", "takeout"] as MealKind[]).map((k) => ({ value: k, label: `${KIND_EMOJI[k]} ${KIND_LABEL[k]}`.trim() }))} /></Field>
+        <Field label="Type"><Segmented value={f.kind} onChange={(kind) => set({ kind })} options={(["home", "leftovers", "restaurant", "takeout"] as MealKind[]).map((k) => ({ value: k, label: <><Glyph name={KIND_ICON[k]} />{KIND_LABEL[k]}</> }))} /></Field>
         <Field label="Pour qui"><MemberChips value={f.who} options={members.adults} none="Tout le monde" onChange={(who) => set({ who })} /></Field>
         {f.kind === "home" && <Field label="Qui cuisine"><MemberChips value={f.cooks} options={members.adults} onChange={(cooks) => set({ cooks })} /></Field>}
         <Field label="Note"><input className="input" value={f.note} onChange={(e) => set({ note: e.target.value })} /></Field>

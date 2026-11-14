@@ -6,6 +6,7 @@
 // (updated_by) and from where (updated_via), so the activity log stays truthful.
 import { z } from "zod";
 import { type Db, type Member, type Row, isUuid } from "./db.ts";
+import { ICON_KEYS } from "./icons.ts";
 import { addDays, daysBetween, fmtDay, fmtTime, isDay, norm, partsIn, relDay } from "./time.ts";
 
 export type Ctx = {
@@ -32,6 +33,8 @@ export function fail(message: string): never { throw new ToolError(message); }
 export function tool<S extends z.ZodRawShape>(t: Tool<S>): Tool<S> { return t; }
 
 // ---------- Shared helpers ----------
+// The icon of a chore, a list or a countdown: one name of the shared set (the app draws it as a thin line icon)
+export const iconArg = z.enum(ICON_KEYS).describe("icône au trait, choisie dans la liste selon le sens (ex. cat pour la litière, trash pour les poubelles)");
 export const today = (c: Ctx) => partsIn(c.now(), c.tz).day;
 export const family = (c: Ctx) => c.members.filter((m) => m.role !== "device");
 export const adults = (c: Ctx) => c.members.filter((m) => m.role === "adult");

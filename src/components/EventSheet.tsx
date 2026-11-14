@@ -10,7 +10,7 @@ import { Avatar, Field, MemberChips, Sheet, toast } from "./ui";
 
 const KINDS: [string, string][] = [["event", "Événement"], ["medical", "Santé"], ["activity", "Activité"], ["social", "Sortie, amis"], ["work", "Travail"], ["travel", "Voyage"], ["other", "Autre"]];
 export const STATUS_TAG: Record<string, { cls: string; text: string }> = {
-  pending: { cls: "warn", text: "⏳ En attente d'approbation" }, declined: { cls: "danger", text: "Refusé" }, cancelled: { cls: "danger", text: "Annulé" },
+  pending: { cls: "warn", text: "En attente d'approbation" }, declined: { cls: "danger", text: "Refusé" }, cancelled: { cls: "danger", text: "Annulé" },
 };
 
 export function EventSheet({ id, day, onClose }: { id?: string; day?: string; onClose: () => void }) {
@@ -38,7 +38,7 @@ function EventView({ event: e, onClose, onEdit }: { event: CalEvent; onClose: ()
   const decide = (status: "confirmed" | "declined") => {
     if (text.trim()) comment();
     store.put("events", { ...e, status, approval_decided_by: actor!.id, approval_decided_at: new Date().toISOString(), approval_note: text.trim() || null });
-    toast(status === "confirmed" ? "Approuvé ✅" : "Refusé");
+    toast(status === "confirmed" ? "Approuvé" : "Refusé");
     onClose();
   };
   return (
@@ -64,7 +64,7 @@ function EventView({ event: e, onClose, onEdit }: { event: CalEvent; onClose: ()
       <div className="card col">
         <Field label="Pour qui"><MemberChips value={e.participant_ids} options={members.family} none="Toute la famille" onChange={(ids) => store.put("events", { ...e, participant_ids: ids })} /></Field>
         {(alone.length > 0 || e.caregiver_ids.length > 0 || members.family.some((m) => m.needs_caregiver && e.participant_ids.includes(m.id))) && (
-          <Field label={alone.length ? `⚠ Qui accompagne ${alone.map((m) => m.name).join(", ")} ?` : "Accompagné par"}>
+          <Field label={alone.length ? `Qui accompagne ${alone.map((m) => m.name).join(", ")} ?` : "Accompagné par"}>
             <MemberChips value={e.caregiver_ids} options={members.adults} onChange={(ids) => store.put("events", { ...e, caregiver_ids: ids })} />
           </Field>
         )}
@@ -135,7 +135,7 @@ function EventForm({ event, day, onClose, onDone }: { event?: CalEvent; day?: st
       participant_ids: f.who, caregiver_ids: needsCarer ? f.carers : [], approver_ids: approvers, status,
       ...(event ? {} : { created_by: actor?.id ?? null }),
     } as Partial<CalEvent>);
-    toast(status === "pending" && !wasPending ? "Demande envoyée ⏳" : "Enregistré");
+    toast(status === "pending" && !wasPending ? "Demande envoyée" : "Enregistré");
     onDone();
   };
   const locked = !!event?.gcal_recurring;
