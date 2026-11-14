@@ -105,10 +105,17 @@ begin
 end $$;
 -- A change coming from Google does not bounce back to Google
 reset role;
-update public.events set gcal_dirty = false where id = '30000000-0000-0000-0000-000000000001';
+update public.events set gcal_dirty = false, updated_via = 'gcal' where id = '30000000-0000-0000-0000-000000000001';
 update public.events set title = '5 à 7', updated_via = 'gcal' where id = '30000000-0000-0000-0000-000000000001';
 do $$ begin
   assert not (select gcal_dirty from public.events where id = '30000000-0000-0000-0000-000000000001'), 'gcal changes are not pushed back';
+end $$;
+-- An app working from an old copy cannot undo the Google link
+update public.events set gcal_event_id = 'g-1', updated_via = 'gcal' where id = '30000000-0000-0000-0000-000000000001';
+update public.events set gcal_event_id = null, location = 'Bar', updated_via = 'app' where id = '30000000-0000-0000-0000-000000000001';
+do $$ begin
+  assert (select gcal_event_id from public.events where id = '30000000-0000-0000-0000-000000000001') = 'g-1', 'the Google id is kept';
+  assert (select gcal_dirty from public.events where id = '30000000-0000-0000-0000-000000000001'), 'and the change goes to Google';
 end $$;
 
 -- ---------- Chores ----------

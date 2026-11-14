@@ -54,6 +54,12 @@ begin
     if new.updated_via <> 'gcal' and new.deleted_at is null then new.gcal_dirty := true; end if;
     return new;
   end if;
+  -- The Google link belongs to the server: an app working from an old copy must not undo it
+  if new.updated_via <> 'gcal' then
+    new.gcal_event_id := old.gcal_event_id; new.gcal_etag := old.gcal_etag; new.gcal_recurring := old.gcal_recurring;
+    new.gcal_synced_at := old.gcal_synced_at; new.gcal_dirty := old.gcal_dirty; new.source := old.source;
+    new.birthday_id := old.birthday_id; new.created_by := old.created_by;
+  end if;
   if new.status is distinct from old.status then
     if new.status = 'pending' then
       new.approval_requested_at := now();
