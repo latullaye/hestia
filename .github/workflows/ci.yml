@@ -1,0 +1,37 @@
+# Checks every change: types, unit tests, build, the database rules on a throwaway Postgres, the tools, and the
+# Edge Functions' types. No secret is needed.
+name: CI
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: No secret, no personal data
+        run: bash scripts/check-privacy.sh
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Types
+        run: npm run check
+      - name: Unit tests
+        run: npm test
+      - name: Build
+        run: npm run build
+      - name: Database rules and tools (throwaway Postgres)
+        run: npm run test:tools
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Edge Functions types
+        run: DENO=deno bash scripts/check-functions.sh

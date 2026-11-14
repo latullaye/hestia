@@ -1,0 +1,17 @@
+# Supabase CLI configuration. Only what differs from the defaults is written here.
+# The project itself (its ref, its keys) is not in this file: see docs/SETUP.md.
+project_id = "hestia"
+
+# The functions check who is calling themselves (user token, MCP token or the database's internal secret):
+# see supabase/functions/_shared/http.ts.
+[functions.mcp]
+verify_jwt = false
+
+[functions.intercom]
+verify_jwt = false
+
+[functions.gcal-sync]
+verify_jwt = false
+
+[functions.notify]
+verify_jwt = false
