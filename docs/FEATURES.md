@@ -80,6 +80,7 @@ Ce que fait chaque partie, et les règles qui ne se voient pas à l'écran. À t
 - La semaine à venir en 7 colonnes à partir d'aujourd'hui (flèches pour avancer ou reculer ; retour à aujourd'hui après
   3 minutes). Par jour : météo, anniversaires, événements (avatars des personnes, « avec » l'accompagnateur, `⏳`), tâches
   particulières du jour, dîner et souper (avec qui cuisine).
+- Plein écran automatique à l'ouverture (ou au premier toucher) : voir [KIOSK.md](KIOSK.md).
 - À droite : météo du moment, tâches du jour à cocher, à acheter (toucher : acheté ou pas besoin), anniversaires à venir,
   décomptes, accès aux autres écrans, **Interphone**.
 - L'écran reste allumé ; l'app se met à jour toute seule ; hors ligne, elle montre la dernière copie.

@@ -62,3 +62,24 @@ export function keepAwake(): () => void {
   document.addEventListener("visibilitychange", again);
   return () => { stopped = true; document.removeEventListener("visibilitychange", again); lock?.release?.().catch(() => {}); };
 }
+
+// ---------- Full screen (kiosk) ----------
+// A browser only goes full screen right after a touch or a click. Opening the kiosk from a link counts; when the page is
+// loaded directly (the tablet's bookmark, a reload), the first touch does it. Leaving the kiosk gives the bars back,
+// except on the kitchen tablet (stay: true), where every screen is a detour from the kiosk.
+export function fullScreen(stay: boolean): () => void {
+  const root = document.documentElement as HTMLElement & { webkitRequestFullscreen?: () => void };
+  const doc = document as Document & { webkitFullscreenElement?: Element; webkitExitFullscreen?: () => void };
+  const on = () => !!(document.fullscreenElement || doc.webkitFullscreenElement);
+  const enter = () => {
+    if (on()) return;
+    try { void (root.requestFullscreen?.({ navigationUI: "hide" }) ?? root.webkitRequestFullscreen?.())?.catch?.(() => {}); } catch { /* refused: the next touch tries again */ }
+  };
+  enter();
+  // Also covers the user leaving full screen (Esc, a swipe): the next touch brings it back
+  document.addEventListener("pointerup", enter);
+  return () => {
+    document.removeEventListener("pointerup", enter);
+    if (!stay && on()) try { void (document.exitFullscreen?.() ?? doc.webkitExitFullscreen?.()); } catch { /* nothing to leave */ }
+  };
+}
