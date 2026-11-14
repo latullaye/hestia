@@ -140,8 +140,8 @@ export function demoTables(): Partial<{ [T in keyof Tables]: Tables[T][] }> {
   const arrivals: Tables["arrivals"][] = [{ id: "a-1", member_id: sam, from_label: "du bureau", left_at: new Date(Date.now() - 12 * 60_000).toISOString(),
     eta: new Date(Date.now() + 18 * 60_000).toISOString(), notify_ids: [alex], arrived_at: null }];
   const stays: Tables["stays"][] = [
-    { id: "s-1", kind: "visit", place: "Chez Mamie Jo", start_date: d(5), end_date: d(7), member_ids: [], transport: "car", carshare: true, carshare_booked: false, note: null },
-    { id: "s-2", kind: "vacation", place: "Portugal", start_date: d(40), end_date: d(52), member_ids: [], transport: "plane", carshare: false, carshare_booked: false, note: null },
+    { id: "s-1", kind: "visit", status: "confirmed", place: "Chez Mamie Jo", start_date: d(5), end_date: d(7), member_ids: [], transport: "car", carshare: true, carshare_booked: false, note: "fête de Noah" },
+    { id: "s-2", kind: "vacation", status: "planned", place: "Portugal", start_date: d(40), end_date: d(52), member_ids: [], transport: "plane", carshare: false, carshare_booked: false, note: null },
   ];
   return { arrivals, stays, members, settings, events, event_comments, birthdays, countdowns, dishes, meal_plan, shopping_lists: lists, shopping_sections: sections, shopping_items, chores, chore_occurrences, notifications, gift_people, gifts };
 }

@@ -31,7 +31,7 @@ export type Occurrence = Sync & { chore_id: string | null; title: string; emoji:
 export type Arrival = Sync & { member_id: string; from_label: string | null; left_at: string; eta: string; notify_ids: string[]; arrived_at: string | null };
 export type Transport = "car" | "bus" | "train" | "plane" | "other";
 export type Stay = Sync & {
-  kind: "visit" | "vacation"; place: string; start_date: string; end_date: string; member_ids: string[];
+  kind: "visit" | "vacation"; status: "planned" | "confirmed"; place: string; start_date: string; end_date: string; member_ids: string[];
   transport: Transport | null; carshare: boolean; carshare_booked: boolean; note: string | null;
 };
 export type GiftPerson = Sync & { name: string; birthday_id: string | null; member_id: string | null; for_birthday: boolean; for_christmas: boolean; note: string | null };

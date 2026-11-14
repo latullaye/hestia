@@ -305,3 +305,6 @@ body.dragging * { cursor: grabbing !important; }
 /* Someone on the way home is worth more than the weather's wording */
 .kiosk-head:has(.karrival) .kweather .small { display: none; }
 .karrival { flex: none; }
+.stay-row.planned, .stay-banner.planned { border-style: dashed; }
+.list > .stay-row.planned { background: var(--surface); box-shadow: inset 3px 0 0 var(--warn); }
+.kstay.planned { background: var(--surface); color: var(--ink); border: 1.5px dashed var(--warn); }

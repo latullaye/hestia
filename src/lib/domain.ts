@@ -54,9 +54,11 @@ export const STAY_ICON: Record<string, string> = { visit: "home", vacation: "pla
 export const stayOn = (stays: Stay[], day: string) =>
   stays.filter((s) => !s.deleted_at && s.start_date <= day && day <= s.end_date).sort((a, b) => a.start_date.localeCompare(b.start_date))[0];
 // Everyone (all adults) away: nobody cooks at home, so no meal to plan
-export const allAway = (s: Stay | undefined, adults: Member[]) => !!s && (!s.member_ids.length || adults.every((m) => s.member_ids.includes(m.id)));
+export const allAway = (s: Stay | undefined, adults: Member[]) => !!s && s.status !== "planned" && (!s.member_ids.length || adults.every((m) => s.member_ids.includes(m.id)));
 // "À Chelsea", "Chez Mamie Jo", "Vacances · Mexique"
 export const stayLabel = (s: Stay) => (s.kind === "vacation" ? `Vacances · ${s.place}` : /^(chez|au|aux|à|en)\s/i.test(s.place) ? cap(s.place) : `À ${s.place}`);
+// With the note, as the agenda shows it: "À Chelsea · une fête"
+export const stayTitle = (s: Stay) => `${stayLabel(s)}${s.note ? ` · ${s.note}` : ""}`;
 // A shared car to book and not booked yet: something to do before leaving
 export const carshareMissing = (s: Stay) => s.transport === "car" && s.carshare && !s.carshare_booked;
 

@@ -10,7 +10,7 @@ import { Glyph } from "../components/icons";
 import { IntercomPanel } from "../components/Intercom";
 import { MealSheet } from "../components/MealSheet";
 import { Avatar, Avatars, CheckBox, Sheet, SyncPill, toast } from "../components/ui";
-import { BIRTHDAY_ICON, KIND_ICON, STAY_ICON, SLOT_LABEL, addDays, allAway, carshareMissing, stayLabel, stayOn, birthdaysOn, cap, countdownsFrom, eventsOn, fmtDay, inDays, mealName, mealsOn, occurrencesOn, partsIn, startTime, uncared, upcomingBirthdays } from "../lib/domain";
+import { BIRTHDAY_ICON, KIND_ICON, STAY_ICON, SLOT_LABEL, addDays, allAway, carshareMissing, stayLabel, stayOn, stayTitle, birthdaysOn, cap, countdownsFrom, eventsOn, fmtDay, inDays, mealName, mealsOn, occurrencesOn, partsIn, startTime, uncared, upcomingBirthdays } from "../lib/domain";
 import { demoWeather } from "../lib/demo";
 import { fullScreen, keepAwake } from "../lib/device";
 import { useHousehold, useMembers, useNow, useTable } from "../lib/hooks";
@@ -128,13 +128,13 @@ export function Kiosk() {
           const wx = weather?.days.find((x) => x.date === d), bds = birthdaysOn(birthdays, d), evs = eventsOn(events, d, tz), s = stayOn(stays, d);
           const todo = d === today ? [] : occurrencesOn(occurrences, d, tz, today).filter((o) => !o.chore_id || !everyDay.has(o.chore_id));
           return (
-            <div key={d} className={`kday ${d === today ? "today" : ""} ${d < today ? "past" : ""} ${s ? "away" : ""}`}>
+            <div key={d} className={`kday ${d === today ? "today" : ""} ${d < today ? "past" : ""} ${s?.status === "confirmed" ? "away" : ""}`}>
               <div className="kday-head">
                 <div><div className="dow">{fmtDay(d, { day: undefined, month: undefined })}</div><div className="dom">{Number(d.slice(8))}</div></div>
                 {wx && <div className="wx"><WxIcon code={wx.code} />{Math.round(wx.max)}° / {Math.round(wx.min)}°</div>}
               </div>
               <div className="kday-body">
-                {s && <button className={`kstay ${carshareMissing(s) ? "warn" : ""}`} onClick={() => setStay(s)}><Glyph name={STAY_ICON[s.kind]} />{stayLabel(s)}</button>}
+                {s && <button className={`kstay ${carshareMissing(s) ? "warn" : ""} ${s.status}`} onClick={() => setStay(s)}><Glyph name={STAY_ICON[s.kind]} />{stayTitle(s)}{s.status === "planned" ? " ?" : ""}</button>}
                 {bds.map((b) => <div key={b.id} className="kbday"><Glyph name={BIRTHDAY_ICON[b.kind]} />{b.name}{b.year && b.kind !== "memorial" ? ` · ${Number(d.slice(0, 4)) - b.year} ans` : ""}</div>)}
                 {evs.filter((e) => e.all_day).map(eventCard)}
                 {dayBody(d, evs)}

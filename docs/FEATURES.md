@@ -97,13 +97,18 @@ Plus › **Je rentre**, ou un appui long sur l'icône de Hestia sur Android (rac
 
 Agenda › bouton valise. Fiche : `StaySheet` (`src/components/Away.tsx`).
 
+- **À confirmer** : une absence peut être seulement envisagée ; elle s'affiche en pointillés, « À confirmer », et se
+  confirme d'un bouton dans sa fiche. Tant qu'elle n'est pas confirmée, elle ne change ni les tâches ni les repas.
+- **Pour quoi** : une note libre (un anniversaire, une fête) qui s'affiche dans l'agenda à côté du lieu.
+- Les autres adultes reçoivent une **notification** quand on propose ou ajoute une absence, la confirme, change ses dates
+  ou l'annule (`private.stay_notify`).
 - **Séjour** (dans la famille, chez des amis ; les lieux déjà utilisés se choisissent d'un toucher) ou **Vacances**
   (destination libre), du… au…, qui part (toute la famille par défaut), comment (voiture, bus, train, avion) et, en
   voiture, s'il faut réserver une **Communauto** et si c'est fait.
 - Mis en évidence : une ligne en tête de chaque jour de l'agenda, un trait sous les jours de la bande de semaine, un
   bandeau sur l'écran d'accueil à partir de 7 jours avant (en ambre si la Communauto reste à réserver), les colonnes
   teintées sur le kiosque.
-- Les **tâches** de ceux qui partent sont passées pendant ces jours (par le serveur : `private.chore_away`), et
+- Une fois confirmée, les **tâches** de ceux qui partent sont passées pendant ces jours (par le serveur : `private.chore_away`), et
   reviennent si le séjour change ou est annulé.
 - Quand toute la famille part, il n'y a **pas de repas à prévoir** : la semaine des repas et le kiosque l'indiquent à la
   place du dîner et du souper.

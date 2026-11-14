@@ -7,7 +7,7 @@ import { EventSheet } from "../components/EventSheet";
 import { Glyph } from "../components/icons";
 import { EventRow } from "../components/rows";
 import { SyncPill } from "../components/ui";
-import { BIRTHDAY_ICON, STAY_ICON, TRANSPORT_LABEL, addDays, birthdaysOn, cap, carshareMissing, dayTitle, eventsOn, fmtDay, partsIn, stayLabel, stayOn } from "../lib/domain";
+import { BIRTHDAY_ICON, STAY_ICON, TRANSPORT_LABEL, addDays, birthdaysOn, cap, carshareMissing, dayTitle, eventsOn, fmtDay, partsIn, stayOn, stayTitle } from "../lib/domain";
 import type { Stay } from "../lib/types";
 import { useHousehold, useMembers, useTable, useToday } from "../lib/hooks";
 
@@ -50,8 +50,8 @@ export function Calendar() {
           <div key={d} className="col" style={{ gap: 6 }}>
             <div className="section-title"><h2>{dayTitle(d, today)}</h2>{dayTitle(d, today) !== cap(fmtDay(d, { weekday: "long", month: "long" })) && <span className="muted small">{fmtDay(d)}</span>}</div>
             <div className="card flush list">
-              {s && <button className={`stay-row ${carshareMissing(s) ? "warn" : ""}`} onClick={() => setStay(s)}><Glyph name={STAY_ICON[s.kind]} />
-                <span className="grow"><b>{stayLabel(s)}</b>{s.member_ids.length ? <span className="small muted"> · {members.names(s.member_ids)}</span> : null}
+              {s && <button className={`stay-row ${carshareMissing(s) ? "warn" : ""} ${s.status}`} onClick={() => setStay(s)}><Glyph name={STAY_ICON[s.kind]} />
+                <span className="grow"><b>{stayTitle(s)}</b>{s.status === "planned" && <span className="tag warn" style={{ marginLeft: 6 }}>À confirmer</span>}{s.member_ids.length ? <span className="small muted"> · {members.names(s.member_ids)}</span> : null}
                   <span className="small muted">{d === s.start_date && s.transport ? ` · départ en ${TRANSPORT_LABEL[s.transport].toLowerCase()}` : ""}{d === s.start_date && carshareMissing(s) ? " · Communauto à réserver" : ""}</span></span></button>}
               {bds.map((b) => <div key={b.id}><Glyph name={BIRTHDAY_ICON[b.kind]} /><span className="grow">{b.kind === "memorial" ? "En mémoire de " : ""}{b.name}{b.year && b.kind !== "memorial" ? ` · ${Number(d.slice(0, 4)) - b.year} ans` : ""}</span></div>)}
               {evs.map((e) => <EventRow key={e.id} event={e} tz={tz} members={members} onOpen={openEvent} />)}

@@ -2,7 +2,7 @@
 import { Car, ChevronRight, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { STAY_ICON, TRANSPORT_LABEL, addDays, carshareMissing, fmtDay, stayLabel } from "../lib/domain";
+import { STAY_ICON, TRANSPORT_LABEL, addDays, carshareMissing, fmtDay, stayLabel, stayTitle } from "../lib/domain";
 import { type Members, useMembers, useNow, useTable } from "../lib/hooks";
 import { useSession } from "../lib/session";
 import { store } from "../lib/store";
@@ -49,9 +49,9 @@ export function StayBanner({ today, onOpen }: { today: string; onOpen: (s: Stay)
   const stays = useTable("stays").filter((s) => !s.deleted_at && s.end_date >= today && s.start_date <= addDays(today, 7))
     .sort((a, b) => a.start_date.localeCompare(b.start_date));
   return <>{stays.map((s) => (
-    <button key={s.id} className={`card row stay-banner ${carshareMissing(s) ? "warn" : ""}`} onClick={() => onOpen(s)}>
+    <button key={s.id} className={`card row stay-banner ${carshareMissing(s) ? "warn" : ""} ${s.status}`} onClick={() => onOpen(s)}>
       <Glyph name={STAY_ICON[s.kind]} />
-      <span className="grow"><b>{stayLabel(s)}</b>
+      <span className="grow"><b>{stayTitle(s)}</b>{s.status === "planned" && <span className="tag warn" style={{ marginLeft: 6 }}>À confirmer</span>}
         <div className="small muted">{s.start_date <= today ? `Jusqu'au ${fmtDay(s.end_date, { weekday: "long" })}` : `Du ${fmtDay(s.start_date, { weekday: "long" })} au ${fmtDay(s.end_date, { weekday: "long" })}`}
           {s.transport ? ` · ${TRANSPORT_LABEL[s.transport]}` : ""}{carshareMissing(s) ? " · Communauto à réserver" : s.carshare ? " · Communauto réservée" : ""}</div></span>
       <ChevronRight size={18} className="muted" />
@@ -65,22 +65,23 @@ export function StaySheet({ stay, day, onClose }: { stay?: Stay; day?: string; o
   const places = [...new Set(all.filter((s) => s.kind === "visit").sort((a, b) => b.start_date.localeCompare(a.start_date)).map((s) => s.place))].slice(0, 6);
   const start = stay?.start_date ?? day ?? new Date().toISOString().slice(0, 10);
   const [f, setF] = useState({
-    kind: stay?.kind ?? "visit" as Stay["kind"], place: stay?.place ?? places[0] ?? "", start, end: stay?.end_date ?? addDays(start, 2),
+    kind: stay?.kind ?? "visit" as Stay["kind"], planned: stay?.status === "planned", place: stay?.place ?? places[0] ?? "", start, end: stay?.end_date ?? addDays(start, 2),
     who: stay?.member_ids ?? [] as string[], transport: stay?.transport ?? null as Transport | null, carshare: stay?.carshare ?? false,
     booked: stay?.carshare_booked ?? false, note: stay?.note ?? "",
   });
   const set = (p: Partial<typeof f>) => setF((x) => ({ ...x, ...p }));
-  const save = () => {
+  const save = (confirm = false) => {
     if (!f.place.trim()) return toast(f.kind === "vacation" ? "Où partez-vous ?" : "Où allez-vous ?");
-    store.put("stays", { ...(stay || {}), kind: f.kind, place: f.place.trim(), start_date: f.start, end_date: f.end < f.start ? f.start : f.end, member_ids: f.who,
+    store.put("stays", { ...(stay || {}), kind: f.kind, status: f.planned && !confirm ? "planned" : "confirmed", place: f.place.trim(), start_date: f.start, end_date: f.end < f.start ? f.start : f.end, member_ids: f.who,
       transport: f.transport, carshare: f.transport === "car" && f.carshare, carshare_booked: f.transport === "car" && f.carshare && f.booked, note: f.note.trim() || null });
-    toast(stay ? "Enregistré" : "Ajouté à l'agenda");
+    toast(confirm ? "Confirmé" : stay ? "Enregistré" : f.planned ? "Proposé : les autres sont prévenus" : "Ajouté : les autres sont prévenus");
     onClose();
   };
   return (
     <Sheet title={stay ? stayLabel(stay) : "Absence"} onClose={onClose} footer={<>
       {stay && <button className="btn danger" onClick={() => { store.remove("stays", stay.id); onClose(); }}><Trash2 />Annuler</button>}
-      <button className="btn primary" onClick={save}>Enregistrer</button></>}>
+      {stay?.status === "planned" && <button className="btn" onClick={() => save(true)}>Confirmer</button>}
+      <button className="btn primary" onClick={() => save()}>Enregistrer</button></>}>
       <Segmented value={f.kind} onChange={(kind) => set({ kind })} options={[{ value: "visit", label: "Séjour" }, { value: "vacation", label: "Vacances" }]} />
       <Field label={f.kind === "vacation" ? "Destination" : "Où"}>
         <input className="input" value={f.place} onChange={(e) => set({ place: e.target.value })} placeholder={f.kind === "vacation" ? "France, Mexique…" : "Chez qui, quelle ville"} />
@@ -90,6 +91,8 @@ export function StaySheet({ stay, day, onClose }: { stay?: Stay; day?: string; o
         <Field label="Du"><input className="input" type="date" value={f.start} onChange={(e) => set({ start: e.target.value, end: e.target.value > f.end ? e.target.value : f.end })} /></Field>
         <Field label="Au (inclus)"><input className="input" type="date" value={f.end} min={f.start} onChange={(e) => set({ end: e.target.value })} /></Field>
       </div>
+      <label className="switch"><input type="checkbox" checked={f.planned} onChange={(e) => set({ planned: e.target.checked })} />À confirmer (on pense y aller)</label>
+      <Field label="Pour quoi (s'affiche dans l'agenda)"><input className="input" value={f.note} onChange={(e) => set({ note: e.target.value })} placeholder="Un anniversaire, une fête…" /></Field>
       <Field label="Qui part"><MemberChips value={f.who} options={members.family} none="Toute la famille" onChange={(who) => set({ who })} /></Field>
       <Field label="Comment">
         <div className="chips">{(["car", "bus", "train", "plane", "other"] as Transport[]).map((t) => (
@@ -100,8 +103,8 @@ export function StaySheet({ stay, day, onClose }: { stay?: Stay; day?: string; o
         <label className="switch"><input type="checkbox" checked={f.carshare} onChange={(e) => set({ carshare: e.target.checked })} />Il faut réserver une Communauto</label>
         {f.carshare && <label className="switch"><input type="checkbox" checked={f.booked} onChange={(e) => set({ booked: e.target.checked })} /><Car size={18} />Communauto réservée</label>}
       </>}
-      <Field label="Note"><input className="input" value={f.note} onChange={(e) => set({ note: e.target.value })} placeholder="Heure de départ, à apporter…" /></Field>
-      <p className="tiny muted">Pendant ces jours, les tâches de ceux qui partent sont passées ; si toute la famille part, il n'y a pas de repas à prévoir.</p>
+      <p className="tiny muted">Les autres adultes sont prévenus quand on propose, confirme, déplace ou annule. Une fois confirmé, les tâches de ceux qui
+        partent sont passées pendant ces jours ; si toute la famille part, il n'y a pas de repas à prévoir.</p>
     </Sheet>
   );
 }

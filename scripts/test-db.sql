@@ -240,6 +240,27 @@ do $$ begin
   assert (select count(*) from public.chore_occurrences where chore_id = '40000000-0000-0000-0000-000000000009' and status = 'skipped') = 0, 'a cancelled stay passes nothing';
 end $$;
 
+-- ---------- A stay only planned passes nothing; the other adult is told ----------
+set role authenticated;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-0000000000a2', false);
+insert into public.stays (id, place, start_date, end_date, status, note) values
+  ('70000000-0000-0000-0000-000000000002', 'Chez Mamie', private.today() + 2, private.today() + 3, 'planned', 'sa fête');
+do $$ begin
+  assert (select count(*) from public.chore_occurrences where chore_id = '40000000-0000-0000-0000-000000000009' and status = 'skipped') = 0, 'planned: nothing passed';
+end $$;
+update public.stays set status = 'confirmed' where id = '70000000-0000-0000-0000-000000000002';
+do $$ begin
+  assert (select count(*) from public.chore_occurrences where chore_id = '40000000-0000-0000-0000-000000000009' and status = 'skipped') = 2, 'confirmed: two days passed';
+end $$;
+update public.stays set deleted_at = now() where id = '70000000-0000-0000-0000-000000000002';
+reset role;
+do $$ begin
+  assert (select count(*) from public.notifications where kind = 'stay' and member_id = '10000000-0000-0000-0000-000000000001'
+    and data ->> 'stay_id' = '70000000-0000-0000-0000-000000000002') = 3, 'Alex told: proposed, confirmed, cancelled';
+  assert (select count(*) from public.notifications where kind = 'stay' and member_id = '10000000-0000-0000-0000-000000000002') = 0, 'the author is not told';
+  assert exists (select 1 from public.notifications where kind = 'stay' and title = 'Sam propose : Chez Mamie' and body like '% · à confirmer · sa fête'), 'proposal text';
+end $$;
+
 -- ---------- On the way home: the others are told, again when the time moves by 5 minutes or more ----------
 insert into public.arrivals (id, member_id, from_label, left_at, eta, notify_ids) values
   ('71000000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000001', 'du bureau', now(), now() + interval '30 minutes',
