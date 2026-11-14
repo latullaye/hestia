@@ -12,6 +12,7 @@ import { SessionProvider, useSession } from "./lib/session";
 import { Birthdays } from "./pages/Birthdays";
 import { Calendar } from "./pages/Calendar";
 import { Chores } from "./pages/Chores";
+import { Inbox, inboxOf } from "./pages/Inbox";
 import { Kiosk } from "./pages/Kiosk";
 import { Login, NotLinked } from "./pages/Login";
 import { Meals } from "./pages/Meals";
@@ -26,8 +27,7 @@ function Shell() {
   const { me, isKiosk } = useSession();
   const navigate = useNavigate(), location = useLocation();
   const events = useTable("events"), notifications = useTable("notifications");
-  const badge = events.filter((e) => e.status === "pending" && me && e.approver_ids.includes(me.id)).length
-    + notifications.filter((n) => me && n.member_id === me.id && !n.read_at).length;
+  const { badge } = inboxOf(events, notifications, me);
   // On the kitchen tablet, any screen other than the kiosk is a detour
   useEffect(() => {
     if (!isKiosk) return;
@@ -71,6 +71,7 @@ function Routed() {
         <Route path="/shopping/:listId" element={<Shopping />} />
         <Route path="/chores" element={<Chores />} />
         <Route path="/birthdays" element={<Birthdays />} />
+        <Route path="/inbox" element={<Inbox />} />
         <Route path="/journal" element={<Journal />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/more" element={<More />} />

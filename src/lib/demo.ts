@@ -31,7 +31,9 @@ export function demoTables(): Partial<{ [T in keyof Tables]: Tables[T][] }> {
     ev(2, "19:00", "22:00", "Soirée jeux chez les voisins"),
     ev(3, "14:00", "15:00", "Yoga maman-bébé", { participant_ids: [sam, leo], caregiver_ids: [sam] }),
     ev(4, "09:00", "10:00", "Vaccins", { participant_ids: [leo], kind: "medical", location: "CLSC" }),
-    ev(5, "18:00", "23:30", "Party de bureau", { participant_ids: [alex], status: "confirmed", approver_ids: [sam] }),
+    ev(5, "18:00", "23:30", "Party de bureau", { participant_ids: [alex], status: "confirmed", approver_ids: [sam], approval_decided_by: sam, approval_decided_at: at(-1, "20:10"), approval_note: "Vas-y, je garde Léo." }),
+    ev(8, "18:30", "21:30", "Souper entre amies", { participant_ids: [sam], created_by: sam, status: "pending", approver_ids: [alex], location: "Chez Camille" }),
+    ev(10, "08:00", "17:00", "Tournoi de golf", { participant_ids: [alex], status: "declined", approver_ids: [sam], approval_decided_by: sam, approval_decided_at: at(-3, "12:30"), approval_note: "On reçoit mes parents ce jour-là." }),
     { ...ev(6, "00:00", "00:00", "Visite des grands-parents"), all_day: true, start_date: d(6), end_date: d(7), ends_at: at(8, "00:00") },
   ];
   const dishNames = ["Spaghetti carbonara", "Rouleaux de printemps", "Chili végé", "Poulet au beurre", "Saumon teriyaki", "Risotto aux champignons", "Tacos", "Soupe aux lentilles"];
@@ -111,6 +113,7 @@ export function demoTables(): Partial<{ [T in keyof Tables]: Tables[T][] }> {
   ];
   const notifications: Tables["notifications"][] = [
     { id: "n-1", member_id: alex, kind: "task_assigned", title: "Nouvelle tâche", body: "Sam : Appeler le plombier", url: "#/chores", data: {}, read_at: null, created_at: at(-1, "18:00") },
+    { id: "n-2", member_id: alex, kind: "approval_decision", title: "Sam a approuvé", body: "Party de bureau\nVas-y, je garde Léo.", url: "#/inbox", data: {}, read_at: at(-1, "21:00"), created_at: at(-1, "20:10") },
   ];
   const event_comments: Tables["event_comments"][] = [{ id: "ec-1", event_id: events[1].id, author_id: sam, body: "Tu rentres pour le bain ?", created_at: at(0, "08:00") }];
   return { members, settings, events, event_comments, birthdays, countdowns, dishes, meal_plan, shopping_lists: lists, shopping_sections: sections, shopping_items, chores, chore_occurrences, notifications };

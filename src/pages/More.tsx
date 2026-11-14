@@ -1,22 +1,25 @@
 // Everything that is not a daily screen: birthdays, the activity log, settings, the kiosk view.
-import { Cake, ChevronRight, History, MonitorSmartphone, Settings } from "lucide-react";
+import { Cake, ChevronRight, History, Inbox as InboxIcon, MonitorSmartphone, Settings } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Empty, Segmented, SyncPill } from "../components/ui";
-import { useHousehold, useMembers, useSyncStatus } from "../lib/hooks";
+import { useHousehold, useMembers, useSyncStatus, useTable } from "../lib/hooks";
 import { useSession } from "../lib/session";
 import { supabase } from "../lib/supabase";
+import { inboxOf } from "./Inbox";
 
 export function More() {
   const { me } = useSession();
-  const links = [
+  const { badge } = inboxOf(useTable("events"), useTable("notifications"), me);
+  const links: { to: string; icon: JSX.Element; label: string; count?: number }[] = [
+    { to: "/inbox", icon: <InboxIcon />, label: "Boîte de réception", count: badge },
     { to: "/birthdays", icon: <Cake />, label: "Anniversaires de l'année" }, { to: "/journal", icon: <History />, label: "Journal et statistiques" },
     { to: "/kiosk", icon: <MonitorSmartphone />, label: "Vue kiosque" }, { to: "/settings", icon: <Settings />, label: "Réglages" },
   ];
   return (
     <div className="page">
       <div className="top"><h1>{me ? me.name : "Plus"}</h1><SyncPill /></div>
-      <div className="card flush list">{links.map((l) => <Link key={l.to} to={l.to} style={{ textDecoration: "none", color: "inherit" }}><span className="muted row">{l.icon}</span><span className="grow">{l.label}</span><ChevronRight size={18} className="muted" /></Link>)}</div>
+      <div className="card flush list">{links.map((l) => <Link key={l.to} to={l.to} style={{ textDecoration: "none", color: "inherit" }}><span className="muted row">{l.icon}</span><span className="grow">{l.label}</span>{!!l.count && <span className="tag warn">{l.count}</span>}<ChevronRight size={18} className="muted" /></Link>)}</div>
     </div>
   );
 }

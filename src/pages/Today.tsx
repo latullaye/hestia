@@ -7,14 +7,14 @@ import { EventSheet } from "../components/EventSheet";
 import { MealSheet } from "../components/MealSheet";
 import { Glyph } from "../components/icons";
 import { ChoreRow, EventRow } from "../components/rows";
-import { Avatars, Sheet, SyncPill } from "../components/ui";
+import { Avatars, SyncPill } from "../components/ui";
 import { BIRTHDAY_ICON, KIND_ICON, addDays, cap, countdownsFrom, eventDays, eventsOn, fmtDay, inDays, mealName, mealsOn, occurrencesOn, plural, upcomingBirthdays } from "../lib/domain";
 import { useHousehold, useMembers, useTable, useToday } from "../lib/hooks";
 import { demoWeather } from "../lib/demo";
 import { useSession } from "../lib/session";
-import { store } from "../lib/store";
 import type { MealSlot } from "../lib/types";
 import { describe, useWeather } from "../lib/weather";
+import { inboxOf } from "./Inbox";
 
 export function Today() {
   const { tz, weather: place } = useHousehold(), today = useToday(tz), members = useMembers(), { me, demo } = useSession();
@@ -25,17 +25,15 @@ export function Today() {
   const [eventId, setEventId] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
   const [meal, setMeal] = useState<{ date: string; slot: MealSlot } | null>(null);
-  const [inbox, setInbox] = useState(false);
   const dishMap = useMemo(() => new Map(dishes.map((d) => [d.id, d])), [dishes]);
 
   const todays = eventsOn(events, today, tz, true), tomorrow = eventsOn(events, addDays(today, 1), tz);
-  const toApprove = events.filter((e) => e.status === "pending" && !e.deleted_at && me && e.approver_ids.includes(me.id));
+  const { toAnswer: toApprove, badge } = inboxOf(events, notifications, me);
   const chores = occurrencesOn(occurrences, today, tz, today);
   const mine = chores.filter((o) => !o.assignee_ids.length || (me && o.assignee_ids.includes(me.id)));
   const others = chores.filter((o) => !mine.includes(o));
   const soon = upcomingBirthdays(birthdays, today).filter((b) => b.in <= 21);
   const cds = countdownsFrom(countdowns, today).slice(0, 3);
-  const unread = notifications.filter((n) => me && n.member_id === me.id && !n.read_at).sort((a, b) => b.created_at.localeCompare(a.created_at));
   const w = weather && describe(weather.current.code, weather.current.isDay);
   const needed = lists.map((l) => ({ l, n: items.filter((i) => i.list_id === l.id && i.needed).length })).filter((x) => x.n);
   const mealLine = (slot: MealSlot) => {
@@ -59,7 +57,7 @@ export function Today() {
         <div className="grow"><h1>{cap(fmtDay(today, { weekday: "long", month: "long" }))}</h1>
           {weather && w && <div className="muted small row" style={{ gap: 5 }}><w.Icon size={17} /><span>{Math.round(weather.current.temperature)}° · {w.text} · {Math.round(weather.days[0]?.min)}° / {Math.round(weather.days[0]?.max)}°</span></div>}</div>
         <SyncPill />
-        <button className="icon-btn" onClick={() => setInbox(true)} aria-label="Notifications"><Bell />{unread.length > 0 && <span className="dot">{unread.length}</span>}</button>
+        <Link className="icon-btn" to="/inbox" aria-label="Boîte de réception"><Bell />{badge > 0 && <span className="dot">{badge}</span>}</Link>
       </div>
 
       {toApprove.map((e) => (
@@ -100,16 +98,6 @@ export function Today() {
       {eventId && <EventSheet id={eventId} onClose={() => setEventId(null)} />}
       {adding && <EventSheet day={today} onClose={() => setAdding(false)} />}
       {meal && <MealSheet {...meal} onClose={() => setMeal(null)} />}
-      {inbox && (
-        <Sheet title="Notifications" onClose={() => { unread.forEach((n) => store.put("notifications", { ...n, read_at: new Date().toISOString() })); setInbox(false); }}>
-          {notifications.filter((n) => me && n.member_id === me.id).sort((a, b) => b.created_at.localeCompare(a.created_at)).slice(0, 40).map((n) => (
-            <a key={n.id} className="card" href={n.url || "#/"} onClick={() => setInbox(false)} style={{ textDecoration: "none", color: "inherit", borderColor: n.read_at ? undefined : "var(--accent)" }}>
-              <b>{n.title}</b><div style={{ whiteSpace: "pre-wrap" }}>{n.body}</div><div className="tiny muted">{new Date(n.created_at).toLocaleString("fr-CA", { timeZone: tz, dateStyle: "medium", timeStyle: "short" })}</div>
-            </a>
-          ))}
-          {!notifications.some((n) => me && n.member_id === me.id) && <p className="muted">Aucune notification.</p>}
-        </Sheet>
-      )}
     </div>
   );
 }
