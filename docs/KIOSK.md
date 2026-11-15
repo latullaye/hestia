@@ -43,6 +43,8 @@ plein écran n'existe pas dans le navigateur : installer l'app. Le code est `ful
 
 - **Qui est là ?** : toucher son avatar, en haut, avant d'agir (cocher une tâche, approuver, parler à l'interphone) :
   l'action est notée à son nom. Sans cela, elle est notée au nom du kiosque.
+- Balayer la semaine vers la gauche ou la droite : les jours défilent, un par un ; sans toucher pendant 3 minutes, elle
+  revient doucement à aujourd'hui.
 - Toucher un événement : détail, qui accompagne, approbation, commentaires. Toucher le dîner ou le souper d'un jour : le
   choisir. Glisser un plat vers une autre case repas : le déplacer.
 - Les quatre boutons en bas à droite (Agenda, Repas, Courses, Tâches), au-dessus de l'interphone, ouvrent l'agenda, les repas, les courses et les tâches en plein écran ; l'écran

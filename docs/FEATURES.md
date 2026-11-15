@@ -12,6 +12,9 @@ Ce que fait chaque partie, et les règles qui ne se voient pas à l'écran. À t
 
 ## Calendrier
 
+- La bande de semaine en haut de l'agenda se **balaie** : vers la gauche, la semaine suivante ; vers la droite, la
+  précédente. Elle suit le doigt et se pose toujours sur une semaine entière (les flèches font le même mouvement).
+
 - Agenda de la famille, miroir de Google Agenda « Family » dans les deux sens ([ARCHITECTURE.md](ARCHITECTURE.md)).
 - **Pour qui** : personne de sélectionné = toute la famille. Dans Google, le titre devient `Prénom : titre` (adultes) ou
   `titre (Prénom)` (enfant) ; à la lecture, ces formes sont reconnues, de même qu'un prénom ou un surnom dans le titre.
@@ -139,6 +142,10 @@ Plus › **Cadeaux** (adultes seulement ; le kiosque ne les voit pas). Écran : 
   Par jour : météo, anniversaires, événements, tâches particulières du jour, puis **dîner** et **souper** en deux grandes
   cases. Les événements sont placés **selon l'heure** : le matin en haut, le soir en bas (l'espace libre est partagé en
   proportion des heures qui les séparent, de 7 h à 22 h ; ils ne se chevauchent jamais).
+- **Balayer** la semaine vers la gauche ou la droite fait défiler les jours : elle suit le doigt et se pose toujours sur
+  un jour entier ; un geste vif va plus loin (une semaine au plus). Les flèches avancent ou reculent d'une semaine.
+  Après 3 minutes sans toucher, elle revient d'elle-même, en glissant, jusqu'à aujourd'hui. Mécanisme commun :
+  `src/lib/swipe.ts`.
 - Glisser un plat d'une case repas à une autre le déplace : il suit le doigt dès qu'on bouge (un simple toucher ouvre le
   repas).
 - Les repas forment une bande continue en bas de chaque colonne, d'une autre teinte que l'agenda.

@@ -1,7 +1,7 @@
 // The kitchen screen (landscape tablet, always on): the week at a glance, weather, shopping, today's chores, coming
 // birthdays, countdowns, and the intercom. Everything is readable from across the room; a touch opens the detail.
 import { CalendarDays, ChevronLeft, ChevronRight, CookingPot, ListChecks, Mic, ShoppingCart, UserRound } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { toggleOccurrence } from "../components/ChoreSheets";
 import { ArrivalBanners, StaySheet } from "../components/Away";
@@ -15,6 +15,7 @@ import { demoWeather } from "../lib/demo";
 import { fullScreen, keepAwake } from "../lib/device";
 import { useHousehold, useMembers, useNow, useTable } from "../lib/hooks";
 import { useMealDrag } from "../lib/mealDrag";
+import { useSwipe } from "../lib/swipe";
 import { useSession } from "../lib/session";
 import { store } from "../lib/store";
 import type { CalEvent, MealSlot, ShoppingItem, Stay } from "../lib/types";
@@ -23,6 +24,9 @@ import { buy } from "./Shopping";
 
 // The hours the week columns stand for: earlier events sit at the top, later ones at the bottom
 const DAY_START = 7, DAY_END = 22;
+// Spare columns kept on each side of the week, so that a swipe always has days to show
+const SPARE = 7;
+const IDLE_BACK_MS = 3 * 60 * 1000;
 
 const WxIcon = ({ code }: { code: number }) => { const { Icon } = describe(code); return <Icon className="e" />; };
 
@@ -37,7 +41,10 @@ export function Kiosk() {
   const everyDay = useMemo(() => new Set(rules.filter((c) => c.schedule.type === "daily" && !c.schedule.every).map((c) => c.id)), [rules]);
   const weather = useWeather(place, tz, demo ? demoWeather() : null);
   const dishMap = useMemo(() => new Map(dishes.map((d) => [d.id, d])), [dishes]);
-  const [offset, setOffset] = useState(0); // weeks from the current one
+  const [offset, setOffset] = useState(0); // days from today: the first column shown
+  // Swiping the week: it follows the finger and settles on a whole day; at most a week per throw
+  const swipe = useSwipe({ base: SPARE, maxSteps: 7, onSettle: (steps) => setOffset((o) => o + steps) });
+  const touched = useRef(Date.now());
   const [eventId, setEventId] = useState<string | null>(null);
   const [meal, setMeal] = useState<{ date: string; slot: MealSlot } | null>(null);
   const drag = useMealDrag({ instant: true });
@@ -47,10 +54,26 @@ export function Kiosk() {
   useEffect(() => keepAwake(), []);
   useEffect(() => fullScreen(isKiosk), [isKiosk]);
   // Back to this week after a while, so the screen never stays on another week
-  useEffect(() => { if (!offset) return; const t = setTimeout(() => setOffset(0), 3 * 60 * 1000); return () => clearTimeout(t); }, [offset]);
+  // After a while without a touch, the week glides back to today
+  const backToToday = useCallback((slow = true) => {
+    // A week at a time at most (the spare columns), one glide after the other until today
+    const glide = () => {
+      const o = offsetRef.current;
+      if (!o) return;
+      const steps = Math.sign(o) * Math.min(Math.abs(o), SPARE);
+      requestAnimationFrame(() => swipe.go(-steps, slow ? 700 + 60 * Math.abs(steps) : 320, slow ? "cubic-bezier(.45,0,.25,1)" : undefined, glide));
+    };
+    glide();
+  }, [swipe.go]); // eslint-disable-line react-hooks/exhaustive-deps
+  const offsetRef = useRef(offset);
+  offsetRef.current = offset;
+  useEffect(() => {
+    const t = setInterval(() => { if (offsetRef.current && Date.now() - touched.current > IDLE_BACK_MS) backToToday(); }, 10_000);
+    return () => clearInterval(t);
+  }, [backToToday]);
 
-  const first = addDays(today, offset * 7);
-  const days = [...Array(7)].map((_, i) => addDays(first, i));
+  // The seven days shown, plus a week of spare columns on each side for the swipe
+  const days = [...Array(7 + 2 * SPARE)].map((_, i) => addDays(today, offset - SPARE + i));
   const chores = occurrencesOn(occurrences, today, tz, today);
   const shopping = [...lists].filter((l) => l.show_on_kiosk).sort((a, b) => a.sort_order - b.sort_order)
     .map((l) => ({ l, mine: items.filter((i) => i.list_id === l.id && i.needed).sort((a, b) => a.name.localeCompare(b.name)) })).filter((x) => x.mine.length);
@@ -101,7 +124,7 @@ export function Kiosk() {
   };
 
   return (
-    <div className="kiosk">
+    <div className="kiosk" onPointerDownCapture={() => { touched.current = Date.now(); }}>
       <div className="kiosk-head">
         <span className="clock">{Number(local.time.slice(0, 2))} h {local.time.slice(3)}</span>
         <span className="date">{cap(fmtDay(today, { weekday: "long", month: "long" }))}</span>
@@ -117,18 +140,19 @@ export function Kiosk() {
           ))}
         </div>
         <SyncPill />
-        <button className="icon-btn" onClick={() => setOffset(offset - 1)} aria-label="Semaine précédente"><ChevronLeft /></button>
-        {offset !== 0 && <button className="btn small" onClick={() => setOffset(0)}>Aujourd'hui</button>}
-        <button className="icon-btn" onClick={() => setOffset(offset + 1)} aria-label="Semaine suivante"><ChevronRight /></button>
+        <button className="icon-btn" onClick={() => swipe.go(-7, 420)} aria-label="Semaine précédente"><ChevronLeft /></button>
+        {offset !== 0 && <button className="btn small" onClick={() => backToToday(false)}>Aujourd'hui</button>}
+        <button className="icon-btn" onClick={() => swipe.go(7, 420)} aria-label="Semaine suivante"><ChevronRight /></button>
         {!isKiosk && <Link className="btn small" to="/">Quitter</Link>}
       </div>
 
-      <div className="kiosk-week">
+      <div className="kiosk-week" {...swipe.viewport}>
+        <div className="kiosk-track" ref={swipe.track}>
         {days.map((d) => {
           const wx = weather?.days.find((x) => x.date === d), bds = birthdaysOn(birthdays, d), evs = eventsOn(events, d, tz), s = stayOn(stays, d);
           const todo = d === today ? [] : occurrencesOn(occurrences, d, tz, today).filter((o) => !o.chore_id || !everyDay.has(o.chore_id));
           return (
-            <div key={d} className={`kday ${d === today ? "today" : ""} ${d < today ? "past" : ""} ${s?.status === "confirmed" ? "away" : ""}`}>
+            <div key={d} data-day={d} className={`kday ${d === today ? "today" : ""} ${d < today ? "past" : ""} ${s?.status === "confirmed" ? "away" : ""}`}>
               <div className="kday-head">
                 <div><div className="dow">{fmtDay(d, { day: undefined, month: undefined })}</div><div className="dom">{Number(d.slice(8))}</div></div>
                 {wx && <div className="wx"><WxIcon code={wx.code} />{Math.round(wx.max)}° / {Math.round(wx.min)}°</div>}
@@ -146,6 +170,7 @@ export function Kiosk() {
             </div>
           );
         })}
+        </div>
       </div>
 
       <div className="kiosk-bottom">
