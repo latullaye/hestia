@@ -4,7 +4,7 @@
 import { NOTIFY_TOPICS, type NotifyPrefs, wantsTopic } from "@shared/notify-prefs.ts";
 import { useHousehold, useTable } from "../lib/hooks";
 import { store } from "../lib/store";
-import { Segmented } from "./ui";
+import { Field, Segmented } from "./ui";
 
 const LEADS = [15, 30, 60, 120];
 const leadLabel = (m: number) => (m < 60 ? `${m} min` : `${m / 60} h`);
@@ -57,11 +57,9 @@ export function NotifyPrefsCard({ memberId }: { memberId: string }) {
             <Toggle on={!!quiet} label="Heures calmes" onChange={(v) => save({ quiet: v ? { from: "22:00", to: "07:00" } : null })} />
           </label>
           {quiet && (
-            <div className="row" style={{ gap: 8 }}>
-              <span className="small muted">De</span>
-              <input className="input" type="time" value={quiet.from} onChange={(e) => e.target.value && save({ quiet: { ...quiet, from: e.target.value } })} />
-              <span className="small muted">à</span>
-              <input className="input" type="time" value={quiet.to} onChange={(e) => e.target.value && save({ quiet: { ...quiet, to: e.target.value } })} />
+            <div className="fields">
+              <Field label="De"><input className="input" type="time" value={quiet.from} onChange={(e) => e.target.value && save({ quiet: { ...quiet, from: e.target.value } })} /></Field>
+              <Field label="Jusqu'à"><input className="input" type="time" value={quiet.to} onChange={(e) => e.target.value && save({ quiet: { ...quiet, to: e.target.value } })} /></Field>
             </div>
           )}
         </div>

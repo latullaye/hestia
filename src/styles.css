@@ -32,7 +32,7 @@
 [hidden] { display: none !important; }
 html, body, #root { height: 100%; }
 html, body { margin: 0; -webkit-tap-highlight-color: transparent; overscroll-behavior: none; }
-/* An app, not a page: a finger does not select text, a long press opens no menu, a double tap does not zoom, pictures do
+/* An app, not a page: a finger does not select text, a long press opens no menu, a double tap or a pinch does not zoom (index.html, main.tsx), pictures do
    not come loose. Text stays selectable where one types or might copy (.selectable: an address, a note). */
 html { touch-action: manipulation; -webkit-text-size-adjust: 100%; }
 body { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
@@ -120,6 +120,11 @@ svg { flex: none; }
 .field { display: flex; flex-direction: column; gap: 5px; }
 .field > label, .field > .label { font-size: 0.78rem; font-weight: 700; color: var(--muted); text-transform: none; letter-spacing: 0; }
 .input, select.input, textarea.input { width: 100%; min-height: 44px; padding: 9px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); outline: none; }
+/* Fields side by side share the width and never push past the card (time inputs have a wide built-in size on phones) */
+.fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.field { min-width: 0; }
+.input[type="time"], .input[type="date"] { min-width: 0; -webkit-appearance: none; appearance: none; text-align: left; }
+.input::-webkit-date-and-time-value { text-align: left; }
 .input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent); }
 textarea.input { min-height: 84px; resize: vertical; line-height: 1.4; }
 .fields { display: flex; flex-wrap: wrap; gap: 10px; } .fields > * { flex: 1 1 120px; min-width: 0; }
@@ -328,7 +333,6 @@ body.dragging * { cursor: grabbing !important; }
 .pref { display: flex; flex-direction: column; gap: 8px; padding: 8px 0; border-top: 1px solid var(--line); }
 .pref-group + .pref { border-top: 0; }
 .pref-row { display: flex; align-items: center; gap: 12px; min-height: 44px; cursor: pointer; }
-.pref .input[type="time"] { width: auto; }
 .toggle { appearance: none; -webkit-appearance: none; flex: none; position: relative; width: 46px; height: 28px; margin: 0; border-radius: 999px;
   background: var(--line); border: 0; cursor: pointer; transition: background 0.18s; }
 .toggle::after { content: ""; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff;

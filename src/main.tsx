@@ -14,6 +14,10 @@ const update = registerSW({
   onNeedRefresh: () => void update(true),
 });
 
+// No pinch zoom, like an app: iOS ignores user-scalable=no in the viewport tag, so the two-finger gesture is stopped here
+document.addEventListener("gesturestart", (e) => e.preventDefault());
+document.addEventListener("touchmove", (e) => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
+
 // On a touch screen, a long press opens no browser menu (copy, share, open in a new tab), except where text is editable
 if (matchMedia("(pointer: coarse)").matches) {
   document.addEventListener("contextmenu", (e) => {

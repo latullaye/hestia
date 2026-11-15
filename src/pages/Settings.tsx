@@ -104,12 +104,20 @@ export function Settings() {
       {isAdult && <>
         <span className="label">La maison</span>
         <div className="card col">
-          <div className="row"><div className="grow"><Field label="Météo : lieu"><input className="input" value={place.label} onChange={(e) => setPlace({ ...place, label: e.target.value })} /></Field></div>
-            <Field label="Latitude"><input className="input" style={{ width: 100 }} inputMode="decimal" value={place.latitude} onChange={(e) => setPlace({ ...place, latitude: e.target.value as any })} /></Field>
-            <Field label="Longitude"><input className="input" style={{ width: 100 }} inputMode="decimal" value={place.longitude} onChange={(e) => setPlace({ ...place, longitude: e.target.value as any })} /></Field></div>
-          <div className="row"><Field label="Résumé du matin"><input className="input" type="time" value={rem.morning} onChange={(e) => setRem({ ...rem, morning: e.target.value })} /></Field>
+          <Field label="Météo : lieu"><input className="input" value={place.label} onChange={(e) => setPlace({ ...place, label: e.target.value })} /></Field>
+          <div className="fields">
+            <Field label="Latitude"><input className="input" inputMode="decimal" value={place.latitude} onChange={(e) => setPlace({ ...place, latitude: e.target.value as any })} /></Field>
+            <Field label="Longitude"><input className="input" inputMode="decimal" value={place.longitude} onChange={(e) => setPlace({ ...place, longitude: e.target.value as any })} /></Field>
+          </div>
+          <div className="fields">
+            <Field label="Résumé du matin"><input className="input" type="time" value={rem.morning} onChange={(e) => setRem({ ...rem, morning: e.target.value })} /></Field>
             <Field label="Rappel du soir"><input className="input" type="time" value={rem.evening} onChange={(e) => setRem({ ...rem, evening: e.target.value })} /></Field>
-            <Field label="Avant un événement (min)"><input className="input" style={{ width: 110 }} inputMode="numeric" value={rem.before} onChange={(e) => setRem({ ...rem, before: e.target.value })} /></Field></div>
+          </div>
+          <Field label="Rappel avant un événement" hint="Par défaut ; chacun peut choisir le sien dans Mes notifications.">
+            <select className="input" value={rem.before} onChange={(e) => setRem({ ...rem, before: e.target.value })}>
+              {[...new Set(["15", "30", "60", "120", rem.before])].sort((a, b) => Number(a) - Number(b)).map((m) => <option key={m} value={m}>{m === "0" ? "Aucun rappel" : Number(m) < 60 ? `${m} min` : `${Number(m) / 60} h`}{m === "0" ? "" : " avant"}</option>)}
+            </select>
+          </Field>
           <button className="btn primary" onClick={saveHousehold}>Enregistrer</button>
         </div>
 
