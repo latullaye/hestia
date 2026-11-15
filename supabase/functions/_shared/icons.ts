@@ -8,7 +8,7 @@ export const ICON_KEYS = [
   "bed", "sofa", "window", "lightbulb", "wrench", "hammer", "paint-roller", "key", "car", "bike", "mail", "phone", "wallet", "receipt",
   // kitchen and food
   "utensils", "cooking-pot", "chef-hat", "fridge", "shopping-cart", "shopping-basket", "shopping-bag", "store", "package", "carrot", "salad", "apple", "croissant",
-  "wheat", "beef", "fish", "egg", "milk", "droplet", "cup", "ice-cream", "nut",
+  "wheat", "beef", "fish", "egg", "milk", "droplet", "cup", "ice-cream", "nut", "pot-steam", "lunchbox",
   // stores, to tell lists apart at a glance: a six-ray spark, a heavy C, an "a" over a smile-arrow
   "spark", "letter-c", "smile-a",
   // family, animals, health

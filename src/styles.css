@@ -229,7 +229,7 @@ textarea.input { min-height: 84px; resize: vertical; line-height: 1.4; }
 .kday-meals .m .meal { display: block; padding: 1px 0; font-weight: 600; overflow-wrap: break-word; line-height: 1.2; }
 .kday-meals .m .add { font-size: 1.2em; line-height: 1; }
 .kday-meals .m b { display: block; font-size: 0.66em; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
-.kday-chores { font-size: 0.78em; color: var(--muted); padding: 0 2px; }
+.kday-chores { font-size: 0.78em; color: var(--muted); padding: 0 2px; display: flex; flex-direction: column; gap: 3px; }
 .kiosk-bottom { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.5fr) minmax(0, 1fr) clamp(220px, 22vw, 300px); gap: 10px; min-height: 0; }
 .kiosk-actions { display: grid; grid-template-rows: minmax(0, 1fr) auto; gap: 8px; min-height: 0; }
 .knav { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; min-height: 0; }

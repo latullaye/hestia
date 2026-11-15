@@ -162,7 +162,7 @@ export function Kiosk() {
                 {bds.map((b) => <div key={b.id} className="kbday"><Glyph name={BIRTHDAY_ICON[b.kind]} />{b.name}{b.year && b.kind !== "memorial" ? ` · ${Number(d.slice(0, 4)) - b.year} ans` : ""}</div>)}
                 {evs.filter((e) => e.all_day).map(eventCard)}
                 {dayBody(d, evs)}
-                {todo.length > 0 && <div className="kday-chores"><Glyph name="list-checks" />{todo.map((o) => o.title).join(" · ")}</div>}
+                {todo.length > 0 && <div className="kday-chores">{todo.map((o) => <span key={o.id}><Glyph name={o.emoji || "list-checks"} />{o.title}</span>)}</div>}
               </div>
               {allAway(s, members.adults) && !mealsOn(meals, d).length
                 ? <div className="kday-meals away"><span className="m"><b>Repas</b><span className="muted">{stayLabel(s!)}</span></span></div>

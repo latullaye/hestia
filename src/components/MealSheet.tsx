@@ -89,7 +89,7 @@ export function MealSheet({ date, slot, onClose }: { date: string; slot: MealSlo
           <div className="card flush list results">
             {cooked.map((r) => (
               <button key={r.name} onClick={() => set({ text: r.name, dishId: r.dish_id })} className={norm(r.name) === q ? "on" : ""}>
-                <span className="grow"><Glyph name="recycle" />{r.name}</span><span className="tiny muted">{cap(fmtDay(r.date, { weekday: "long" }))}</span>
+                <span className="grow"><Glyph name="lunchbox" />{r.name}</span><span className="tiny muted">{cap(fmtDay(r.date, { weekday: "long" }))}</span>
               </button>
             ))}
           </div>

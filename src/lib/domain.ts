@@ -31,7 +31,7 @@ export const uncared = (e: CalEvent, members: Member[]) =>
 export const mealName = (m: Meal, dishes: Map<string, Dish>) => m.label || (m.dish_id && dishes.get(m.dish_id)?.name) || "";
 export const SLOT_LABEL: Record<string, string> = { breakfast: "Déjeuner", lunch: "Dîner", dinner: "Souper" };
 export const KIND_LABEL: Record<string, string> = { home: "Maison", leftovers: "Restes", restaurant: "Resto", takeout: "À emporter", other: "Autre" };
-export const KIND_ICON: Record<string, string | null> = { home: null, leftovers: "recycle", restaurant: "utensils", takeout: "shopping-bag", other: null };
+export const KIND_ICON: Record<string, string | null> = { home: "pot-steam", leftovers: "lunchbox", restaurant: "utensils", takeout: "shopping-bag", other: null };
 export const mealsOn = (meals: Meal[], day: string, slot?: string) =>
   meals.filter((m) => m.date === day && (!slot || m.slot === slot)).sort((a, b) => (a.created_at || "").localeCompare(b.created_at || ""));
 // What was cooked at home in the week before a meal, most recent first: what its leftovers can be made of
