@@ -18,6 +18,15 @@ const drawing = (strokeWidth: number, body: JSX.Element): Drawing => (props) => 
   <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" {...props}>{body}</svg>
 );
 const Spark = drawing(2, <>{[0, 60, 120, 180, 240, 300].map((a) => <ellipse key={a} transform={`rotate(${a} 12 12)`} cx="12" cy="5.7" rx="1.75" ry="3.4" fill="currentColor" stroke="none" />)}</>);
+// Meals: a steaming pot (cooked at home) and a food box with its lid clipped on (leftovers)
+const PotSteam = drawing(2, <>
+  <path d="M3.5 12h17" /><path d="M5 12v4.5A3.5 3.5 0 0 0 8.5 20h7a3.5 3.5 0 0 0 3.5-3.5V12" /><path d="M2 12h1.5M20.5 12H22" />
+  <path d="M8.5 9c-1-1.1 1-2.2 0-3.6M12 9c-1-1.1 1-2.2 0-3.6M15.5 9c-1-1.1 1-2.2 0-3.6" />
+</>);
+const LunchBox = drawing(2, <>
+  <rect x="2.5" y="8" width="19" height="3.2" rx="1.2" />
+  <path d="M4 11.2v5.3A2.5 2.5 0 0 0 6.5 19h11a2.5 2.5 0 0 0 2.5-2.5v-5.3" /><path d="M5.5 11.2v2.6M18.5 11.2v2.6" />
+</>);
 const LetterC = drawing(3.2, <path d="M17.2 7.4a6.6 6.6 0 1 0 0 9.2" />);
 const SmileA = drawing(2, <>
   <path d="M8.4 6.6c1-.9 2.2-1.3 3.6-1.3 2.2 0 3.6 1.1 3.6 3.3v5.6" />
@@ -34,7 +43,7 @@ const DRAWINGS: Record<IconKey, LucideIcon | Drawing> = {
   wheat: Wheat, beef: Beef, fish: Fish, egg: Egg, milk: Milk, droplet: Droplet, cup: CupSoda, "ice-cream": IceCreamCone, nut: Nut, baby: Baby, cat: Cat, dog: Dog,
   pill: Pill, stethoscope: Stethoscope, syringe: Syringe, heart: Heart, book: BookOpen, music: Music, dumbbell: Dumbbell, cake: Cake, gift: Gift, party: PartyPopper,
   flame: Flame, star: Star, calendar: Calendar, hourglass: Hourglass, plane: Plane, tent: Tent, umbrella: Umbrella, sun: Sun, "tree-pine": TreePine, monitor: Monitor,
-  "list-checks": ListChecks, spark: Spark, "letter-c": LetterC, "smile-a": SmileA,
+  "list-checks": ListChecks, spark: Spark, "letter-c": LetterC, "smile-a": SmileA, "pot-steam": PotSteam, lunchbox: LunchBox,
 };
 
 // An icon in the flow of the text. Draws nothing for an unknown value.

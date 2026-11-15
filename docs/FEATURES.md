@@ -12,6 +12,9 @@ Ce que fait chaque partie, et les règles qui ne se voient pas à l'écran. À t
 
 ## Calendrier
 
+- La bande de semaine en haut de l'agenda se **balaie** : vers la gauche, la semaine suivante ; vers la droite, la
+  précédente. Elle suit le doigt et se pose toujours sur une semaine entière (les flèches font le même mouvement).
+
 - Agenda de la famille, miroir de Google Agenda « Family » dans les deux sens ([ARCHITECTURE.md](ARCHITECTURE.md)).
 - **Pour qui** : personne de sélectionné = toute la famille. Dans Google, le titre devient `Prénom : titre` (adultes) ou
   `titre (Prénom)` (enfant) ; à la lecture, ces formes sont reconnues, de même qu'un prénom ou un surnom dans le titre.
@@ -43,7 +46,7 @@ Ce que fait chaque partie, et les règles qui ne se voient pas à l'écran. À t
 - **Nos plats** : nom, ingrédients, recette, tags, favori, **service** (entrée, plat principal, accompagnement, dessert,
   déjeuner, boisson ; plusieurs possibles), **source** (une personne, un livre) et lien. La liste se filtre par service
   et se cherche par nom, tag, source ou ingrédient.
-- Type : maison, restes, resto, à emporter. **Qui cuisine** : un adulte ou les deux ; on peut le décider avant de choisir le plat.
+- Type, avec son icône devant le plat : maison (une casserole qui fume), restes (une boîte à lunch), resto, à emporter. **Qui cuisine** : un adulte ou les deux ; on peut le décider avant de choisir le plat.
 - Les repas ne vont jamais dans Google Agenda.
 - Les enfants qui ne mangent pas encore à table n'apparaissent pas (seuls les adultes sont proposés dans « Pour qui »).
 
@@ -136,9 +139,14 @@ Plus › **Cadeaux** (adultes seulement ; le kiosque ne les voit pas). Écran : 
 
 - En haut : l'heure, la date, la météo du moment, « Qui est là ? », la semaine (flèches).
 - La semaine à venir en 7 colonnes sur toute la largeur, à partir d'aujourd'hui (retour à aujourd'hui après 3 minutes).
-  Par jour : météo, anniversaires, événements, tâches particulières du jour, puis **dîner** et **souper** en deux grandes
+  Par jour : météo, anniversaires, événements, tâches particulières du jour (chacune avec son icône : la poubelle, le
+  compost…), puis **dîner** et **souper** en deux grandes
   cases. Les événements sont placés **selon l'heure** : le matin en haut, le soir en bas (l'espace libre est partagé en
   proportion des heures qui les séparent, de 7 h à 22 h ; ils ne se chevauchent jamais).
+- **Balayer** la semaine vers la gauche ou la droite fait défiler les jours : elle suit le doigt et se pose toujours sur
+  un jour entier ; un geste vif va plus loin (une semaine au plus). Les flèches avancent ou reculent d'une semaine.
+  Après 3 minutes sans toucher, elle revient d'elle-même, en glissant, jusqu'à aujourd'hui. Mécanisme commun :
+  `src/lib/swipe.ts`.
 - Glisser un plat d'une case repas à une autre le déplace : il suit le doigt dès qu'on bouge (un simple toucher ouvre le
   repas).
 - Les repas forment une bande continue en bas de chaque colonne, d'une autre teinte que l'agenda.
@@ -166,6 +174,12 @@ Plus › **Cadeaux** (adultes seulement ; le kiosque ne les voit pas). Écran : 
 | Résumé du matin (événements, tâches, anniversaires, accords en attente) | Chaque adulte, s'il y a quelque chose |
 | Rappel du soir | Qui a encore des tâches |
 | Avant un événement | Les adultes concernés ou accompagnateurs |
+
+Chaque notification a son image, qui dit de quoi il s'agit avant de la lire : sablier (accord demandé), coche ou croix
+(accordé, refusé), agenda (événement qui approche), liste (tâches), soleil (résumé du matin), bulle (commentaire), maison
+(quelqu'un rentre), valise (absence). Sur Android, l'image est à droite et sa silhouette dans la barre d'état ; l'iPhone
+montre toujours l'icône de l'app. Les dates s'écrivent « ven. 20 nov. à 19 h ». Images : `public/icons/notify/`, faites
+par `npm run icons` ; choix selon le type : `src/sw.ts`.
 
 ### Boîte de réception
 

@@ -10,6 +10,7 @@ import { SyncPill } from "../components/ui";
 import { BIRTHDAY_ICON, STAY_ICON, TRANSPORT_LABEL, addDays, birthdaysOn, cap, carshareMissing, dayTitle, eventsOn, fmtDay, partsIn, stayOn, stayTitle } from "../lib/domain";
 import type { Stay } from "../lib/types";
 import { useHousehold, useMembers, useTable, useToday } from "../lib/hooks";
+import { useSwipe } from "../lib/swipe";
 
 const monday = (day: string) => addDays(day, 1 - partsIn(Date.parse(day + "T12:00:00Z"), "UTC").dow);
 
@@ -24,6 +25,8 @@ export function Calendar() {
   const week = [...Array(7)].map((_, i) => addDays(weekStart, i));
   const days = [...Array(21)].map((_, i) => addDays(selected, i));
   const openEvent = (id: string) => navigate(`/event/${id}`);
+  // Swiping the week strip: to the left, the next week; to the right, the one before
+  const swipe = useSwipe({ base: 1, maxSteps: 1, onSettle: (steps) => setSelected((s) => addDays(s, steps * 7)) });
 
   return (
     <div className="page">
@@ -31,15 +34,21 @@ export function Calendar() {
         <button className="icon-btn" onClick={() => setStay("new")} aria-label="Ajouter une absence (séjour, vacances)"><Luggage /></button>
         <button className="icon-btn" onClick={() => setAdding(true)} aria-label="Ajouter un événement"><Plus /></button></div>
       <div className="card row" style={{ padding: 8 }}>
-        <button className="icon-btn plain" onClick={() => setSelected(addDays(selected, -7))} aria-label="Semaine précédente"><ChevronLeft /></button>
-        <div className="weekstrip grow">
-          {week.map((d) => (
-            <button key={d} className={`${d === selected ? "on" : ""} ${d === today ? "today" : ""} ${eventsOn(events, d, tz).length ? "has" : ""} ${stayOn(stays, d) ? "away" : ""}`} onClick={() => setSelected(d)}>
-              {fmtDay(d, { day: undefined, month: undefined }).slice(0, 3)}<b>{Number(d.slice(8))}</b><i />
-            </button>
-          ))}
+        <button className="icon-btn plain" onClick={() => swipe.go(-1)} aria-label="Semaine précédente"><ChevronLeft /></button>
+        <div className="swipe-viewport grow" {...swipe.viewport}>
+          <div className="swipe-track" ref={swipe.track}>
+            {[-7, 0, 7].map((shift) => (
+              <div key={shift} className="weekstrip">
+                {week.map((w) => addDays(w, shift)).map((d) => (
+                  <button key={d} className={`${d === selected ? "on" : ""} ${d === today ? "today" : ""} ${eventsOn(events, d, tz).length ? "has" : ""} ${stayOn(stays, d) ? "away" : ""}`} onClick={() => setSelected(d)}>
+                    {fmtDay(d, { day: undefined, month: undefined }).slice(0, 3)}<b>{Number(d.slice(8))}</b><i />
+                  </button>
+                ))}
+              </div>
+            ))}
+          </div>
         </div>
-        <button className="icon-btn plain" onClick={() => setSelected(addDays(selected, 7))} aria-label="Semaine suivante"><ChevronRight /></button>
+        <button className="icon-btn plain" onClick={() => swipe.go(1)} aria-label="Semaine suivante"><ChevronRight /></button>
       </div>
       {selected !== today && <button className="btn small" style={{ alignSelf: "flex-start" }} onClick={() => setSelected(today)}>Revenir à aujourd'hui</button>}
 
