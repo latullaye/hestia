@@ -1,4 +1,5 @@
 // The rows of the database, as the app sees them (see docs/DATA_MODEL.md and supabase/migrations).
+import type { NotifyPrefs } from "@shared/notify-prefs.ts";
 import type { Schedule } from "@shared/schedule.ts";
 
 export type Sync = { id: string; created_at?: string; updated_at?: string; updated_by?: string | null; updated_via?: string; deleted_at?: string | null };
@@ -6,6 +7,7 @@ export type Sync = { id: string; created_at?: string; updated_at?: string; updat
 export type Member = Sync & {
   auth_user_id: string | null; name: string; role: "adult" | "child" | "device"; needs_caregiver: boolean; color: string; emoji: string | null;
   aliases: string[]; birth_date: string | null; sort_order: number; active: boolean;
+  notify_prefs?: NotifyPrefs; // what reaches this person's phone (supabase/functions/_shared/notify-prefs.ts)
 };
 export type Setting = Sync & { value: Record<string, any> };
 export type EventStatus = "confirmed" | "pending" | "declined" | "cancelled";

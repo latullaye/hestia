@@ -178,6 +178,21 @@ Plus › **Cadeaux** (adultes seulement ; le kiosque ne les voit pas). Écran : 
 | Résumé du matin (événements, tâches, anniversaires, accords en attente) | Chaque adulte, s'il y a quelque chose |
 | Rappel du soir | Qui a encore des tâches |
 | Avant un événement | Les adultes concernés ou accompagnateurs |
+| Quelqu'un rentre, une absence proposée ou changée | Les autres adultes |
+
+### Ce que chacun reçoit
+
+**Réglages › Mes notifications**, pour chaque adulte et pour tous ses appareils (`src/components/NotifyPrefs.tsx`) :
+
+- un interrupteur par sujet : demandes d'approbation, réponses à mes demandes, rappel avant un événement, commentaires,
+  résumé du matin, nouvelle tâche pour moi, tâches du soir, quelqu'un rentre, séjours et vacances ;
+- le délai du rappel avant un événement (15 min, 30 min, 1 h, 2 h ; par défaut celui de la maison, *La maison*) ;
+- des **heures calmes** (ex. 22 h à 7 h, même à cheval sur minuit) : ce qui arrive pendant ces heures est envoyé à la
+  fin (au plus 15 minutes après), sauf si on l'a déjà lu dans l'app entre-temps.
+
+Un sujet coupé n'empêche que l'envoi au téléphone : tout reste dans la boîte de réception. La notification de test
+(Réglages) passe toujours. Choix rangés dans `members.notify_prefs` et appliqués par la fonction `notify` juste avant
+l'envoi (`supabase/functions/_shared/notify-prefs.ts`).
 
 Chaque notification a son image, qui dit de quoi il s'agit avant de la lire : sablier (accord demandé), coche ou croix
 (accordé, refusé), agenda (événement qui approche), liste (tâches), soleil (résumé du matin), bulle (commentaire), maison
@@ -201,6 +216,13 @@ décider et les notifications non lues.
 ## Journal
 
 Plus › Journal : qui a fait quoi, quand, et d'où (app, kiosque, interphone, Claude, Google Agenda), filtrable par domaine.
+
+## Comme une app
+
+Sur téléphone et tablette, Hestia se comporte comme une app et non comme une page web : un doigt ne sélectionne pas le
+texte, un appui long n'ouvre pas le menu du navigateur, un double toucher ne zoome pas, les images ne se détachent pas.
+Le texte reste sélectionnable dans les champs, et là où on peut vouloir le copier (lieu et description d'un événement :
+classe `selectable`). Le pincement pour agrandir reste permis. Réglage : `src/styles.css` (début) et `src/main.tsx`.
 
 ## Hors ligne
 

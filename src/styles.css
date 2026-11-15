@@ -32,6 +32,12 @@
 [hidden] { display: none !important; }
 html, body, #root { height: 100%; }
 html, body { margin: 0; -webkit-tap-highlight-color: transparent; overscroll-behavior: none; }
+/* An app, not a page: a finger does not select text, a long press opens no menu, a double tap does not zoom, pictures do
+   not come loose. Text stays selectable where one types or might copy (.selectable: an address, a note). */
+html { touch-action: manipulation; -webkit-text-size-adjust: 100%; }
+body { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+input, textarea, select, [contenteditable="true"], .selectable, .selectable * { -webkit-user-select: text; user-select: text; -webkit-touch-callout: default; }
+img, svg, a { -webkit-user-drag: none; }
 body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 16px; line-height: 1.35; -webkit-font-smoothing: antialiased; }
 h1, h2, h3 { font-family: var(--font-display); font-weight: 500; margin: 0; line-height: 1.15; }
 h1 { font-size: 1.45rem; } h2 { font-size: 1.1rem; } h3 { font-size: 1rem; }
@@ -315,3 +321,18 @@ body.dragging * { cursor: grabbing !important; }
 /* ---------- Swiping through days and weeks (src/lib/swipe.ts) ---------- */
 .swipe-viewport { overflow: hidden; touch-action: pan-y; min-width: 0; }
 .swipe-track { display: grid; grid-auto-flow: column; grid-auto-columns: 100%; will-change: transform; }
+
+/* Réglages › Mes notifications: one line per topic, a switch on the right */
+.prefs { gap: 14px; }
+.pref-group { font-size: 0.78rem; font-weight: 700; color: var(--muted); margin-bottom: 2px; }
+.pref { display: flex; flex-direction: column; gap: 8px; padding: 8px 0; border-top: 1px solid var(--line); }
+.pref-group + .pref { border-top: 0; }
+.pref-row { display: flex; align-items: center; gap: 12px; min-height: 44px; cursor: pointer; }
+.pref .input[type="time"] { width: auto; }
+.toggle { appearance: none; -webkit-appearance: none; flex: none; position: relative; width: 46px; height: 28px; margin: 0; border-radius: 999px;
+  background: var(--line); border: 0; cursor: pointer; transition: background 0.18s; }
+.toggle::after { content: ""; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.25); transition: transform 0.18s; }
+.toggle:checked { background: var(--accent); }
+.toggle:checked::after { transform: translateX(18px); }
+.toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }

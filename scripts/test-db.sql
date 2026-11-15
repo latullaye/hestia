@@ -361,6 +361,25 @@ do $$ begin
   assert (select count(*) from public.activity_log where entity_type in ('gifts', 'gift_people')) = 0, 'gifts never reach the shared log';
 end $$;
 
+-- ---------- Notification preferences: personal, kept out of the journal, always an object ----------
+set role authenticated;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-0000000000a1', false);
+update public.members set notify_prefs = '{"off": ["digest"], "quiet": {"from": "22:00", "to": "07:00"}}' where id = '10000000-0000-0000-0000-000000000001';
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-0000000000a9', false);
+do $$ begin
+  update public.members set notify_prefs = '{}' where id = '10000000-0000-0000-0000-000000000001';
+  assert (select notify_prefs ->> 'off' from public.members where id = '10000000-0000-0000-0000-000000000001') = '["digest"]', 'the kiosk cannot change them';
+end $$;
+reset role;
+do $$ begin
+  assert (select count(*) from public.activity_log where entity_type = 'members' and data ? 'notify_prefs') = 0, 'preferences stay out of the journal';
+  begin
+    update public.members set notify_prefs = '[]' where id = '10000000-0000-0000-0000-000000000001';
+    assert false, 'preferences must be an object';
+  exception when check_violation then null;
+  end;
+end $$;
+
 -- ---------- A member removed for good: nothing blocks, their name leaves the rows ----------
 -- (rolled back: the tool tests that follow use the same family)
 begin;

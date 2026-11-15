@@ -3,6 +3,7 @@
 import { Copy, Plus, RefreshCw, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Glyph, IconPicker } from "../components/icons";
+import { NotifyPrefsCard } from "../components/NotifyPrefs";
 import { Avatar, Field, Segmented, Sheet, SyncPill, toast } from "../components/ui";
 import { APP_VERSION, BUILD_TIME, FUNCTIONS_URL } from "../config";
 import { disablePush, enablePush, isIOS, isStandalone, pushState, type PushState } from "../lib/device";
@@ -86,6 +87,11 @@ export function Settings() {
         <Field label="Apparence"><Segmented value={theme} onChange={(t) => { setTheme(t); if (t === "auto") localStorage.removeItem("hestia-theme"); else localStorage.setItem("hestia-theme", t); applyTheme(); }}
           options={[{ value: "auto", label: "Comme l'appareil" }, { value: "light", label: "Clair" }, { value: "dark", label: "Sombre" }]} /></Field>
       </div>
+
+      {isAdult && me && <>
+        <span className="label">Mes notifications</span>
+        <NotifyPrefsCard memberId={me.id} />
+      </>}
 
       <span className="label">La famille</span>
       <div className="card flush list">
