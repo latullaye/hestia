@@ -22,7 +22,7 @@ débuts ; les quelques emoji encore présents dans les données sont traduits à
 
 | Table | Contenu | À savoir |
 |---|---|---|
-| `members` | Adultes, enfants, appareils (`role` : `adult`, `child`, `device`). | `auth_user_id` relie un compte. `needs_caregiver` : ne va nulle part seul. `aliases` : surnoms reconnus dans les titres Google et à l'interphone. Écriture : adultes seulement. |
+| `members` | Adultes, enfants, appareils (`role` : `adult`, `child`, `device`). | `auth_user_id` relie un compte. `needs_caregiver` : ne va nulle part seul. `aliases` : surnoms reconnus dans les titres Google et à l'interphone. `notify_prefs` : ce que la personne veut recevoir sur son téléphone (`off`, `quiet`, `event_before`), hors du journal. Écriture : adultes seulement. |
 | `settings` | Réglages de la maison (clé / JSON). | `household` : `{name, timezone, locale, weather: {label, latitude, longitude}}` ; `reminders` : `{morning, evening, event_minutes_before}`. |
 | `events` | Événements. | Voir ci-dessous. |
 | `event_comments` | Commentaires d'un événement. | Notifie les adultes concernés. |
@@ -38,7 +38,7 @@ débuts ; les quelques emoji encore présents dans les données sont traduits à
 | `shopping_items` | Articles. | Un article reste dans sa liste ; `needed` dit s'il est à acheter. Cocher = `needed = false` + `purchased_at`. `purchase_count` tenu par déclencheur. |
 | `chores` | Règles des tâches régulières. | `schedule` (JSON, ci-dessous), `assignment` : `fixed` ou `rotate`. |
 | `chore_occurrences` | Ce qui est à faire un jour donné. | Générées depuis les règles ; `chore_id` nul = tâche ponctuelle. `due_until` : dernier jour possible (nul : reste jusqu'à ce que ce soit fait). `status` : `todo`, `done`, `skipped`. |
-| `notifications` | Boîte de réception, une ligne par destinataire. | Chaque insertion déclenche un envoi push. |
+| `notifications` | Boîte de réception, une ligne par destinataire. | Chaque insertion déclenche un envoi push, selon les choix du destinataire (`members.notify_prefs`) : sujet coupé, pas d'envoi ; heures calmes, `pushed_at` reste vide et l'envoi part à la fin. |
 | `push_subscriptions` | Abonnements Web Push, un par app installée. | |
 | `activity_log` | Journal : `at`, `actor_id`, `via`, `action`, `entity_type`, `entity_id`, `label`, `data`. | Écrit par déclencheur uniquement. |
 | `intercom_log` | Échanges avec l'interphone. | Écrit par la fonction `intercom`. |

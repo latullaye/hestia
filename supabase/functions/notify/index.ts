@@ -2,12 +2,14 @@
 //   GET  ?vapid                                   the public key the app subscribes with (made on first call)
 //   POST { task: "push", notification_id }        from the database, for each new row of public.notifications
 //   POST { task: "reminders" }                    from pg_cron every 15 minutes: morning summary, evening reminder,
-//                                                 "in one hour" before an event (times in settings.reminders)
+//                                                 "in one hour" before an event (times in settings.reminders);
+//                                                 also sends the pushes held during someone's quiet hours
 //   POST { task: "action", token, action }        from a notification's buttons: approve | decline, without opening the app
 //   POST { task: "test" }                         from the app (signed in): a test notification on one's own devices
 import { type Db, type Member, householdTz, loadMembers, uuids } from "../_shared/db.ts";
 import { isInternal, json, memberFromToken, preflight, rememberFunctionsUrl } from "../_shared/http.ts";
 import { type PushPayload, sendPush, vapid } from "../_shared/push.ts";
+import { type NotifyPrefs, decide, eventLead } from "../_shared/notify-prefs.ts";
 import { db, env } from "../_shared/runtime.ts";
 import { addDays, fmtTime, instant, partsIn } from "../_shared/time.ts";
 
@@ -24,6 +26,15 @@ async function push(notificationId: string) {
   const [n] = await db.exec(`update public.notifications set pushed_at = now() where id = $1::uuid and pushed_at is null
     returning id, member_id, kind, title, body, url, action_token`, [notificationId]);
   if (!n) return { sent: 0 };
+  // What the person chose (Réglages): a muted topic is not pushed (the row stays in the inbox); during their quiet hours
+  // the row is handed back, and the next reminders run tries again
+  const prefs = (await db.one(`select notify_prefs from public.members where id = $1::uuid`, [n.member_id]))?.notify_prefs as NotifyPrefs | undefined;
+  const choice = decide(prefs, n.kind, n.url, partsIn(Date.now(), await householdTz(db)).time);
+  if (choice === "skip") return { sent: 0, skipped: true };
+  if (choice === "hold") {
+    await db.exec(`update public.notifications set pushed_at = null where id = $1::uuid`, [n.id]);
+    return { sent: 0, held: true };
+  }
   const payload: PushPayload = { title: n.title, body: n.body || "", url: n.url || "#/", tag: n.id, kind: n.kind };
   if (n.kind === "approval_request") {
     payload.token = n.action_token;
@@ -36,9 +47,16 @@ async function reminders() {
   const tz = await householdTz(db), now = Date.now(), local = partsIn(now, tz), today = local.day;
   const cfg = (await db.one(`select value from public.settings where id = 'reminders'`))?.value || {};
   const members = (await loadMembers(db)).filter((m) => m.role === "adult");
+  const prefs = new Map((await db.all(`select id, notify_prefs from public.members`)).map((r) => [r.id, r.notify_prefs as NotifyPrefs]));
   const mine = (m: Member, ids: string[]) => !ids.length || ids.includes(m.id);
   const at = (hm: string | undefined, fallback: string) => { const d = minutes(local.time) - minutes(/^\d\d:\d\d$/.test(hm || "") ? hm! : fallback); return d >= 0 && d < 15; };
-  const report = { digest: 0, evening: 0, events: 0 };
+  const report = { digest: 0, evening: 0, events: 0, held: 0 };
+
+  // Pushes held during quiet hours (or lost on the way): sent now if their time has come. Not older than 12 hours, not
+  // already read in the app.
+  const held = await db.all(`select id from public.notifications where pushed_at is null and read_at is null
+    and created_at > now() - interval '12 hours' and created_at < now() - interval '1 minute' order by created_at`);
+  for (const h of held) if ((await push(h.id)).sent) report.held++;
 
   const chores = await db.all(`select id, title, assignee_ids, time_of_day from public.chore_occurrences
     where deleted_at is null and status = 'todo' and due_date <= $1::date and (due_until is null or due_until >= $1::date)`, [today]);
@@ -68,13 +86,16 @@ async function reminders() {
       if (ch.length && await once(db, `evening:${today}:${m.id}`)) { await notify(db, m.id, "reminder", "Encore à faire", ch.map((c) => c.title).join(", "), "#/chores"); report.evening++; }
     }
   }
-  const before = Number(cfg.event_minutes_before ?? 60);
-  if (before > 0) {
+  // Each person may choose their own lead (Réglages); the household's is the default
+  const before = Number(cfg.event_minutes_before ?? 60), lead = (m: Member) => eventLead(prefs.get(m.id), before);
+  const longest = Math.max(0, ...members.map(lead));
+  if (longest > 0) {
     const soon = await db.all(`select id, title, location, starts_at, participant_ids, caregiver_ids from public.events
       where deleted_at is null and status = 'confirmed' and not all_day and kind <> 'birthday'
-        and starts_at > now() and starts_at <= now() + make_interval(mins => $1::int)`, [before]);
+        and starts_at > now() and starts_at <= now() + make_interval(mins => $1::int)`, [longest]);
     for (const e of soon) {
-      for (const m of members.filter((x) => mine(x, [...e.participant_ids, ...e.caregiver_ids]))) {
+      const left = (Date.parse(e.starts_at) - now) / 60000;
+      for (const m of members.filter((x) => mine(x, [...e.participant_ids, ...e.caregiver_ids]) && left <= lead(x))) {
         if (await once(db, `event:${e.id}:${e.starts_at}:${m.id}`)) {
           await notify(db, m.id, "reminder", `${fmtTime(Date.parse(e.starts_at), tz)} · ${e.title}`, e.location ? e.location.split("\n")[0] : "Bientôt", `#/event/${e.id}`, { event_id: e.id });
           report.events++;

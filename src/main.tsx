@@ -14,4 +14,11 @@ const update = registerSW({
   onNeedRefresh: () => void update(true),
 });
 
+// On a touch screen, a long press opens no browser menu (copy, share, open in a new tab), except where text is editable
+if (matchMedia("(pointer: coarse)").matches) {
+  document.addEventListener("contextmenu", (e) => {
+    if (!(e.target as Element | null)?.closest?.("input, textarea, [contenteditable='true'], .selectable")) e.preventDefault();
+  });
+}
+
 createRoot(document.getElementById("root")!).render(<StrictMode><App /></StrictMode>);

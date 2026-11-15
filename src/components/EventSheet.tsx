@@ -51,8 +51,8 @@ function EventView({ event: e, onClose, onEdit }: { event: CalEvent; onClose: ()
           <b>{cap(fmtDay(days.first, { weekday: "long", month: "long" }))}{days.last !== days.first ? ` → ${fmtDay(days.last, { weekday: "long", month: "long" })}` : ""}</b>
           <div className="muted">{timeRange(e, tz)}</div>
         </div></div>
-        {e.location && <div className="row top"><MapPin size={20} className="muted" /><a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(e.location)}`} target="_blank" rel="noreferrer">{e.location}</a></div>}
-        {e.description && <p style={{ whiteSpace: "pre-wrap" }}>{e.description}</p>}
+        {e.location && <div className="row top"><MapPin size={20} className="muted" /><a className="selectable" href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(e.location)}`} target="_blank" rel="noreferrer">{e.location}</a></div>}
+        {e.description && <p className="selectable" style={{ whiteSpace: "pre-wrap" }}>{e.description}</p>}
         <div className="row wrap">
           {STATUS_TAG[e.status] && <span className={`tag ${STATUS_TAG[e.status].cls}`}>{STATUS_TAG[e.status].text}</span>}
           {e.kind === "medical" && <span className="tag danger">Santé</span>}
