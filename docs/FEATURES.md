@@ -111,6 +111,10 @@ Agenda › bouton valise. Fiche : `StaySheet` (`src/components/Away.tsx`).
 - Mis en évidence : une ligne en tête de chaque jour de l'agenda, un trait sous les jours de la bande de semaine, un
   bandeau sur l'écran d'accueil à partir de 7 jours avant (en ambre si la Communauto reste à réserver), les colonnes
   teintées sur le kiosque.
+- **Google Agenda** : chaque absence y apparaît aussi, en journée entière dans « Family » (« À Chelsea · la note », avec
+  « (à confirmer) » tant qu'elle ne l'est pas, et le moyen de transport en description). La déplacer dans Google déplace
+  l'absence ; la supprimer dans Google l'annule. Le titre, lui, vient toujours de Hestia. Dans Hestia, seule l'absence
+  s'affiche (l'événement qui la porte, `events.stay_id`, est caché).
 - Une fois confirmée, les **tâches** de ceux qui partent sont passées pendant ces jours (par le serveur : `private.chore_away`), et
   reviennent si le séjour change ou est annulé.
 - Quand toute la famille part, il n'y a **pas de repas à prévoir** : la semaine des repas et le kiosque l'indiquent à la

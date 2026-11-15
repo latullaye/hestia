@@ -17,7 +17,7 @@ export type SyncStatus = { online: boolean; syncing: boolean; pending: number; l
 // Columns the server owns: never sent back from a local copy (see the triggers in supabase/migrations)
 const SERVER_COLUMNS: Partial<Record<TableName, string[]>> & { all: string[] } = {
   all: ["created_at", "updated_at"],
-  events: ["gcal_event_id", "gcal_etag", "gcal_recurring", "gcal_synced_at", "gcal_dirty", "birthday_id", "source", "created_by", "approval_requested_at"],
+  events: ["gcal_event_id", "gcal_etag", "gcal_recurring", "gcal_synced_at", "gcal_dirty", "birthday_id", "source", "created_by", "approval_requested_at", "stay_id"],
   shopping_items: ["name_key", "purchase_count", "needed_at"],
   dishes: ["name_key"],
   chore_occurrences: ["done_at", "created_by", "stay_id"],

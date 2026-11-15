@@ -267,6 +267,40 @@ do $$ begin
   assert exists (select 1 from public.notifications where kind = 'stay' and title = 'Sam propose : Chez Mamie' and body like '% · à confirmer · sa fête'), 'proposal text';
 end $$;
 
+-- ---------- A stay is mirrored by an all-day event for Google; Google's changes come back to the stay ----------
+set role authenticated;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-0000000000a1', false);
+insert into public.stays (id, place, start_date, end_date, status, note, transport, carshare) values
+  ('70000000-0000-0000-0000-000000000003', 'Lac-Joli', private.today() + 10, private.today() + 12, 'planned', 'une fête', 'car', true);
+reset role;
+do $$
+declare e public.events;
+begin
+  select * into e from public.events where stay_id = '70000000-0000-0000-0000-000000000003';
+  assert e.title = 'À Lac-Joli · une fête (à confirmer)', 'title: ' || e.title;
+  assert e.all_day and e.start_date = private.today() + 10 and e.end_date = private.today() + 12, 'dates';
+  assert e.description = 'En voiture · Communauto à réserver', 'description: ' || coalesce(e.description, '');
+  assert e.gcal_dirty and e.kind = 'travel' and e.status = 'confirmed', 'to be sent to Google, without an approval';
+  assert (select count(*) from public.activity_log where entity_type = 'events' and entity_id = e.id::text) = 0, 'not logged twice';
+end $$;
+update public.stays set status = 'confirmed', start_date = private.today() + 11 where id = '70000000-0000-0000-0000-000000000003';
+do $$ begin
+  assert (select title from public.events where stay_id = '70000000-0000-0000-0000-000000000003') = 'À Lac-Joli · une fête', 'confirmed: no mark';
+  assert (select start_date from public.events where stay_id = '70000000-0000-0000-0000-000000000003') = private.today() + 11, 'moved';
+end $$;
+-- Moved in Google, then deleted in Google
+update public.events set start_date = private.today() + 14, end_date = private.today() + 15, updated_via = 'gcal'
+where stay_id = '70000000-0000-0000-0000-000000000003';
+do $$ begin
+  assert (select (start_date, end_date) = (private.today() + 14, private.today() + 15) from public.stays where id = '70000000-0000-0000-0000-000000000003'), 'the stay follows Google';
+end $$;
+update public.events set deleted_at = now(), updated_via = 'gcal' where stay_id = '70000000-0000-0000-0000-000000000003';
+do $$ begin
+  assert (select deleted_at is not null from public.stays where id = '70000000-0000-0000-0000-000000000003'), 'deleted in Google: the stay is cancelled';
+end $$;
+set role authenticated;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-0000000000a2', false);
+
 -- ---------- On the way home: the others are told, again when the time moves by 5 minutes or more ----------
 insert into public.arrivals (id, member_id, from_label, left_at, eta, notify_ids) values
   ('71000000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000001', 'du bureau', now(), now() + interval '30 minutes',

@@ -13,7 +13,7 @@ export type CalEvent = Sync & {
   title: string; description: string | null; location: string | null; all_day: boolean; starts_at: string; ends_at: string | null;
   start_date: string | null; end_date: string | null; kind: string; participant_ids: string[]; caregiver_ids: string[]; status: EventStatus;
   approver_ids: string[]; approval_requested_at?: string | null; approval_decided_by?: string | null; approval_decided_at?: string | null;
-  approval_note?: string | null; created_by?: string | null; source?: string; gcal_event_id?: string | null; gcal_recurring?: boolean; birthday_id?: string | null;
+  approval_note?: string | null; created_by?: string | null; source?: string; gcal_event_id?: string | null; gcal_recurring?: boolean; birthday_id?: string | null; stay_id?: string | null;
 };
 export type EventComment = Sync & { event_id: string; author_id: string | null; body: string };
 export type Birthday = Sync & { name: string; month: number; day: number; year: number | null; kind: "birthday" | "anniversary" | "memorial"; note: string | null; gift_ideas: string | null };
