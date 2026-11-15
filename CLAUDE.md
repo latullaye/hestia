@@ -35,7 +35,7 @@ reprendre. Lire d'abord [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), puis [docs
 | `npm run check:functions` | Types des Edge Functions (Deno). |
 | `npm run check:privacy` | Cherche secrets et courriels réels dans les fichiers suivis par git (lancé par la CI). |
 | `npm run build` | Construit l'app dans `dist/`. |
-| `npm run icons` | Régénère les icônes PNG depuis `public/icons/icon.svg`. |
+| `npm run icons` | Régénère les icônes PNG depuis `public/icons/icon.svg`, et les images des notifications. |
 
 `test:db` et `test:tools` demandent les binaires du serveur PostgreSQL (`initdb`, `pg_ctl`), pas Docker ni la CLI Supabase.
 La CI (`.github/workflows/ci.yml`) lance tout cela à chaque pull request.

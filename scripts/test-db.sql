@@ -212,6 +212,12 @@ do $$ begin
 end $$;
 rollback;
 
+-- ---------- Dates as people say them ----------
+do $$ begin
+  assert private.day_fr('2026-11-20') = 'ven. 20 nov.', private.day_fr('2026-11-20');
+  assert private.time_fr('19:00') = '19 h' and private.time_fr('07:05') = '7 h 05', private.time_fr('07:05');
+end $$;
+
 -- ---------- Away: the chores of a stay's days are passed, and come back when it is cancelled ----------
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-0000000000a2', false);

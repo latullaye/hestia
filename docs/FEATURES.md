@@ -167,6 +167,12 @@ Plus › **Cadeaux** (adultes seulement ; le kiosque ne les voit pas). Écran : 
 | Rappel du soir | Qui a encore des tâches |
 | Avant un événement | Les adultes concernés ou accompagnateurs |
 
+Chaque notification a son image, qui dit de quoi il s'agit avant de la lire : sablier (accord demandé), coche ou croix
+(accordé, refusé), agenda (événement qui approche), liste (tâches), soleil (résumé du matin), bulle (commentaire), maison
+(quelqu'un rentre), valise (absence). Sur Android, l'image est à droite et sa silhouette dans la barre d'état ; l'iPhone
+montre toujours l'icône de l'app. Les dates s'écrivent « ven. 20 nov. à 19 h ». Images : `public/icons/notify/`, faites
+par `npm run icons` ; choix selon le type : `src/sw.ts`.
+
 ### Boîte de réception
 
 La cloche de l'écran d'accueil et **Plus › Boîte de réception** ouvrent le même écran (`src/pages/Inbox.tsx`) :
