@@ -220,9 +220,9 @@ Plus › Journal : qui a fait quoi, quand, et d'où (app, kiosque, interphone, C
 ## Comme une app
 
 Sur téléphone et tablette, Hestia se comporte comme une app et non comme une page web : un doigt ne sélectionne pas le
-texte, un appui long n'ouvre pas le menu du navigateur, un double toucher ne zoome pas, les images ne se détachent pas.
-Le texte reste sélectionnable dans les champs, et là où on peut vouloir le copier (lieu et description d'un événement :
-classe `selectable`). Le pincement pour agrandir reste permis. Réglage : `src/styles.css` (début) et `src/main.tsx`.
+texte, un appui long n'ouvre pas le menu du navigateur, ni un double toucher ni un pincement ne zooment, les images ne se
+détachent pas. Le texte reste sélectionnable dans les champs, et là où on peut vouloir le copier (lieu et description d'un événement :
+classe `selectable`). Réglage : `index.html` (viewport), `src/styles.css` (début) et `src/main.tsx`.
 
 ## Hors ligne
 
