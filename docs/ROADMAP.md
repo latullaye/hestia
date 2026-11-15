@@ -15,7 +15,6 @@ Détail : [FEATURES.md](FEATURES.md).
 
 | Idée | Notes pour qui s'y met |
 |---|---|
-| **Absences vers Google Agenda** | Un séjour pourrait aussi devenir un événement d'une journée entière dans « Family », pour le voir sur les téléphones. |
 | **Rappel « Je rentre »** | Une notification au partant vers 17 h les jours de semaine (« Tu pars bientôt ? »), avec le bouton d'envoi. Il faudrait l'heure habituelle par personne. |
 | **Cadeaux pour Claude** (MCP, interphone) | Pas d'outil encore : chaque outil devra filtrer selon `c.actor` comme `private.gift_visible` (le serveur des outils lit tout), et rien côté kiosque, où l'on ne sait pas qui parle. |
 | **Vue mois** dans l'agenda et sur le kiosque | `eventsOn` par jour existe ; il manque la grille. |

@@ -4,7 +4,8 @@ import type { Stay, Birthday, CalEvent, Countdown, Dish, Meal, Member, Occurrenc
 
 export { addDays, daysBetween, fmtDay, partsIn, instant };
 
-export const visibleEvent = (e: CalEvent) => e.kind !== "birthday" && e.status !== "cancelled";
+// A stay's event exists for Google Calendar; Hestia shows the stay itself
+export const visibleEvent = (e: CalEvent) => e.kind !== "birthday" && e.status !== "cancelled" && !e.stay_id;
 // The local day(s) an event covers
 export function eventDays(e: CalEvent, tz: string): { first: string; last: string } {
   if (e.all_day) return { first: e.start_date || partsIn(Date.parse(e.starts_at), tz).day, last: e.end_date || e.start_date || partsIn(Date.parse(e.starts_at), tz).day };
