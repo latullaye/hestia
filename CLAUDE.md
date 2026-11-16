@@ -81,6 +81,9 @@ docs/                     la documentation
   `authenticated` puisse exécuter cette fonction.
 - Les quatre `deno.json` des fonctions sont identiques : les garder en phase, et en phase avec les versions de `package.json`.
 - Les fonctions sont déployées avec `verify_jwt = false` et vérifient elles-mêmes l'appelant (`_shared/http.ts`).
+- Créer un formateur `Intl` (ou appeler `toLocaleDateString`/`toLocaleTimeString` avec des options) est lent : le kiosque
+  en faisait des milliers par rendu, ce qui figeait les balayages sur tablette. Pour les dates et heures affichées en
+  boucle, passer par `partsIn`, `fmtDay`, `fmtTime` (`_shared/time.ts`), qui gardent leurs formateurs.
 - L'interphone utilise `claude-opus-5-5` par défaut (secret `HESTIA_MODEL` pour changer), effort `low`, avec repli côté
   serveur (`fallbacks: "default"`).
 

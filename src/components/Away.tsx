@@ -1,5 +1,6 @@
 // Being on the way home, and being away from home: the banners several screens show, and the sheet of a stay.
 import { Car, ChevronRight, Trash2 } from "lucide-react";
+import { partsIn } from "@shared/time.ts";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { STAY_ICON, TRANSPORT_LABEL, addDays, carshareMissing, fmtDay, stayLabel, stayTitle } from "../lib/domain";
@@ -12,8 +13,11 @@ import { Field, MemberChips, Segmented, Sheet, toast } from "./ui";
 
 const SHOWN_AFTER_ETA = 20 * 60_000; // an arrival stays on screen a little after its time
 
-export const hhmm = (iso: string | number, tz: string) =>
-  new Date(iso).toLocaleTimeString("fr-CA", { timeZone: tz, hour: "numeric", minute: "2-digit" }).replace(":", " h ");
+// "17 h 05" (partsIn reuses its formatter: this is drawn on every render of the kiosk)
+export const hhmm = (iso: string | number, tz: string) => {
+  const [h, m] = partsIn(typeof iso === "number" ? iso : Date.parse(iso), tz).time.split(":");
+  return `${Number(h)} h ${m}`;
+};
 export const minutesLeft = (eta: string, now: number) => Math.round((Date.parse(eta) - now) / 60_000);
 
 export function activeArrivals(arrivals: Arrival[], now: number) {
