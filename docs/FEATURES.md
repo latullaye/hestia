@@ -149,8 +149,9 @@ Plus › **Cadeaux** (adultes seulement ; le kiosque ne les voit pas). Écran : 
   proportion des heures qui les séparent, de 7 h à 22 h ; ils ne se chevauchent jamais).
 - **Balayer** la semaine vers la gauche ou la droite fait défiler les jours : elle suit le doigt et se pose toujours sur
   un jour entier ; un geste vif va plus loin (une semaine au plus). Les flèches avancent ou reculent d'une semaine.
-  Après 3 minutes sans toucher, elle revient d'elle-même, en glissant, jusqu'à aujourd'hui. Mécanisme commun :
-  `src/lib/swipe.ts`.
+  Après 3 minutes sans toucher, elle revient d'elle-même, en glissant, jusqu'à aujourd'hui. Les gestes s'enchaînent
+  sans attendre : un doigt posé pendant que la semaine glisse la reprend là où elle est (et un simple toucher l'arrête
+  sur le jour le plus proche). Mécanisme commun à l'agenda : `src/lib/swipe.ts`.
 - Glisser un plat d'une case repas à une autre le déplace : il suit le doigt dès qu'on bouge (un simple toucher ouvre le
   repas).
 - Les repas forment une bande continue en bas de chaque colonne, d'une autre teinte que l'agenda.
