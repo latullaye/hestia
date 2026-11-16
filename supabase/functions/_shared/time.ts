@@ -10,13 +10,27 @@ export function validTz(tz: string | null | undefined): string {
 }
 
 // The wall clock of an instant in a time zone
+// Building an Intl formatter is slow (far slower than using one), and the screens ask for the same instants again on
+// every render (each event, for each day shown): formatters are made once per zone, and answers are remembered.
+const formatters = new Map<string, Intl.DateTimeFormat>();
+const answers = new Map<string, Parts>();
 export function partsIn(t: number | Date, tz: string): Parts {
-  const f = new Intl.DateTimeFormat("en-CA", {
-    timeZone: tz, year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23", weekday: "short",
-  });
-  const p = Object.fromEntries(f.formatToParts(new Date(t)).map((x) => [x.type, x.value]));
+  const ms = typeof t === "number" ? t : t.getTime(), key = `${tz}|${ms}`;
+  const known = answers.get(key);
+  if (known) return known;
+  let f = formatters.get(tz);
+  if (!f) {
+    f = new Intl.DateTimeFormat("en-CA", {
+      timeZone: tz, year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23", weekday: "short",
+    });
+    formatters.set(tz, f);
+  }
+  const p = Object.fromEntries(f.formatToParts(new Date(ms)).map((x) => [x.type, x.value]));
   const dow = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].indexOf(p.weekday) + 1;
-  return { day: `${p.year}-${p.month}-${p.day}`, time: `${p.hour}:${p.minute}`, dow };
+  const parts = { day: `${p.year}-${p.month}-${p.day}`, time: `${p.hour}:${p.minute}`, dow };
+  if (answers.size > 20_000) answers.clear(); // a long-running kiosk must not grow without end
+  answers.set(key, parts);
+  return parts;
 }
 
 // The instant of a wall clock ("2026-11-14", "17:30") in a time zone
@@ -36,8 +50,13 @@ export const daysBetween = (a: string, b: string) => Math.round((Date.parse(b + 
 export const isDay = (s: unknown): s is string => typeof s === "string" && /^\d{4}-\d{2}-\d{2}$/.test(s) && !Number.isNaN(Date.parse(s + "T12:00:00Z"));
 
 // "sam. 14 nov."
-export const fmtDay = (day: string, opts: Intl.DateTimeFormatOptions = {}) =>
-  new Date(day + "T12:00:00Z").toLocaleDateString("fr-CA", { timeZone: "UTC", weekday: "short", day: "numeric", month: "short", ...opts });
+const dayFormats = new Map<string, Intl.DateTimeFormat>();
+export const fmtDay = (day: string, opts: Intl.DateTimeFormatOptions = {}) => {
+  const key = JSON.stringify(opts);
+  let f = dayFormats.get(key);
+  if (!f) dayFormats.set(key, f = new Intl.DateTimeFormat("fr-CA", { timeZone: "UTC", weekday: "short", day: "numeric", month: "short", ...opts }));
+  return f.format(new Date(day + "T12:00:00Z"));
+};
 // "17 h 30", "9 h"
 export function fmtTime(t: number | Date | string, tz: string) {
   const [h, m] = (typeof t === "string" && /^\d\d:\d\d/.test(t) ? t : partsIn(new Date(t), tz).time).split(":");
