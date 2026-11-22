@@ -31,7 +31,7 @@ function useDays(n: number) {
   const chores = occurrencesOn(occurrences, today, tz, today).filter((o) => o.status === "todo");
   const soon = [
     ...upcomingBirthdays(birthdays, today).filter((b) => b.in >= n && b.in <= 30 && b.kind !== "memorial")
-      .map((b) => ({ key: b.id, icon: BIRTHDAY_ICON[b.kind] ?? "cake", text: b.name, in: b.in })),
+      .map((b) => ({ key: b.id, icon: BIRTHDAY_ICON[b.kind] ?? "cake", text: shortName(b.name), in: b.in })),
   ].sort((a, b) => a.in - b.in).slice(0, 4);
   // The countdowns shown on the kiosk (Noël…) are at the top, beside the date
   const counts = countdownsFrom(countdowns.filter((c) => c.show_on_kiosk), today).slice(0, 2)
@@ -39,6 +39,8 @@ function useDays(n: number) {
   return { tz, today, members, days, chores, soon, counts, dish: (m: Meal) => mealName(m, dishMap) || "Plat à choisir" };
 }
 
+// "Camille Dubois-Laferrière" → "Camille D.": enough to know who, short enough for a line of the poster
+const shortName = (name: string) => { const [first, second] = name.trim().split(/\s+/); return second ? `${first} ${second[0]}.` : first; };
 const dayName = (d: string, i: number) => (i === 0 ? "Aujourd'hui" : i === 1 ? "Demain" : cap(fmtDay(d, { weekday: "long", day: undefined, month: undefined })));
 const dayDate = (d: string) => fmtDay(d, { weekday: undefined, day: "numeric", month: "long" });
 
@@ -55,12 +57,23 @@ function Head({ today, small, counts = [] }: { today: string; small?: boolean; c
   );
 }
 
+// Who it is for (their badges), and with whom when a child goes with an adult: "Léo avec Sam"
+function Who({ e, members }: { e: CalEvent; members: ReturnType<typeof useMembers> }) {
+  if (!e.participant_ids.length && !e.caregiver_ids.length) return null;
+  return (
+    <span className="p-who">
+      {e.participant_ids.length > 0 && <Avatars ids={e.participant_ids} members={members} size="sm" />}
+      {e.caregiver_ids.length > 0 && <><em>avec</em><Avatars ids={e.caregiver_ids} members={members} size="sm" /></>}
+    </span>
+  );
+}
+
 function EventLine({ e, tz, members }: { e: CalEvent; tz: string; members: ReturnType<typeof useMembers> }) {
   return (
     <div className={`p-event ${e.status}`}>
       <span className="p-time">{e.status === "pending" && <Glyph name="hourglass" />}{e.all_day ? "Journée" : startTime(e, tz)}</span>
       <span className="p-title">{e.title}</span>
-      {e.participant_ids.length > 0 && <Avatars ids={e.participant_ids} members={members} size="sm" />}
+      <Who e={e} members={members} />
     </div>
   );
 }
@@ -134,7 +147,7 @@ function Aujourdhui() {
               <div className="p-dayhead"><b>{dayName(d, i)}</b><span>{dayDate(d)}</span></div>
               {stay && <span className="p-line"><Glyph name={STAY_ICON[stay.kind]} />{stayLabel(stay)}</span>}
               {birthdays.map((b) => <span key={b.id} className="p-line"><Glyph name={BIRTHDAY_ICON[b.kind] ?? "cake"} />{b.name}</span>)}
-              {events.slice(0, 2).map((e) => <span key={e.id} className="p-line"><b>{e.all_day ? "Journée" : startTime(e, tz)}</b><span>{e.title}</span></span>)}
+              {events.slice(0, 2).map((e) => <span key={e.id} className="p-line"><b>{e.all_day ? "Journée" : startTime(e, tz)}</b><span>{e.title}</span><Who e={e} members={members} /></span>)}
               {events.length > 2 && <span className="p-line muted">et {events.length - 2} autre{events.length > 3 ? "s" : ""}</span>}
               {!events.length && !stay && !birthdays.length && !lunch.length && !dinner.length && <span className="p-line muted">Rien de prévu</span>}
               {(lunch.length > 0 || dinner.length > 0) && <span className="p-menu">
