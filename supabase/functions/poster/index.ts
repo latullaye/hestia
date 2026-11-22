@@ -67,7 +67,8 @@ async function upload(req: Request, d: Db) {
   const previous = JSON.parse((await config(d, "poster_items")) || "[]") as string[];
   const out = await replacePicture(photosClient(c, refresh),
     { tv: await config(d, "photos_album_tv"), trash: await config(d, "photos_album_trash"), previous },
-    bytes, `hestia-tele-${now.day}-${now.time.replace(":", "")}`, `Hestia · télé · ${now.day} ${now.time}`);
+    bytes, `hestia-tele-${now.day}-${now.time.replace(":", "")}`, `Hestia · télé · ${now.day} ${now.time}`,
+    (which, id) => setConfig(d, which === "tv" ? "photos_album_tv" : "photos_album_trash", id));
   await setConfig(d, "photos_album_tv", out.tv);
   if (out.trash) await setConfig(d, "photos_album_trash", out.trash);
   await setConfig(d, "poster_items", JSON.stringify(out.ids));

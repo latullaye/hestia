@@ -1,6 +1,6 @@
 // The TV poster's albums, against a fake Google: the new picture goes in twice, the previous ones move to the album to empty.
 import { describe, expect, it } from "vitest";
-import { ALBUM_TRASH, ALBUM_TV, photosClient, replacePicture } from "../supabase/functions/_shared/photos.ts";
+import { ALBUM_TRASH, ALBUM_TV, photosClient, replacePicture, withComment } from "../supabase/functions/_shared/photos.ts";
 
 function fakeGoogle(opts: { goneAlbum?: string } = {}) {
   const albums = new Map<string, { title: string; items: string[] }>();
@@ -35,6 +35,20 @@ function fakeGoogle(opts: { goneAlbum?: string } = {}) {
 globalThis.fetch = (async () => new Response(JSON.stringify({ access_token: "t" }))) as typeof fetch;
 
 describe("TV poster albums", () => {
+  it("each copy differs by a JPEG comment, the picture itself untouched", () => {
+    const jpeg = new Uint8Array([0xff, 0xd8, 0xff, 0xdb, 1, 2, 3]);
+    const c = withComment(jpeg, "hestia 2");
+    expect([...c.subarray(0, 4)]).toEqual([0xff, 0xd8, 0xff, 0xfe]);
+    expect((c[4] << 8) | c[5]).toBe(10);
+    expect(new TextDecoder().decode(c.subarray(6, 14))).toBe("hestia 2");
+    expect([...c.subarray(14)]).toEqual([...jpeg.subarray(2)]);
+  });
+  it("albums are remembered as soon as they exist", async () => {
+    const g = fakeGoogle(), seen: string[] = [];
+    await replacePicture(photosClient({ clientId: "c", clientSecret: "s" }, "r", g.fetcher), { tv: null, trash: null, previous: ["old-1"] },
+      new Uint8Array([0xff, 0xd8]), "d", "d", async (which, id) => { seen.push(`${which}:${g.albums.get(id)?.title}`); });
+    expect(seen).toEqual([`tv:${ALBUM_TV}`, `trash:${ALBUM_TRASH}`]);
+  });
   it("first picture: makes the TV album and puts the picture in twice", async () => {
     const g = fakeGoogle();
     const out = await replacePicture(photosClient({ clientId: "c", clientSecret: "s" }, "r", g.fetcher), { tv: null, trash: null, previous: [] },
