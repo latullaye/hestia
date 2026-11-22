@@ -101,7 +101,7 @@ C'est une demande ferme de la famille, à respecter dans tout nouvel écran :
   (`supabase/functions/_shared/icons.ts`). Les colonnes `emoji` de la base contiennent ces noms.
 - **Une seule couleur d'accent** (le bleu-vert `--accent`), sur des fonds clairs et neutres. L'ambre (`--warn`) est
   réservé à ce qui attend (approbation, retard), le rouge doux (`--danger`) à ce qui demande attention. Pas de vert, pas
-  d'aplats vifs, pas de dégradés.
+  d'aplats vifs, pas de dégradés (seule exception, demandée : l'effet verre de l'affiche télé, `#/poster`).
 - **Peu de choses par écran** : cartes blanches à bord fin, beaucoup d'air, une information par ligne. Sur le kiosque,
   tout doit se lire de loin sans rien d'agressif.
 - **Le logo** : une maison dont les murs forment un H, et la barre du H se termine par un point ambre (la braise du foyer).

@@ -32,20 +32,25 @@ function useDays(n: number) {
   const soon = [
     ...upcomingBirthdays(birthdays, today).filter((b) => b.in >= n && b.in <= 30 && b.kind !== "memorial")
       .map((b) => ({ key: b.id, icon: BIRTHDAY_ICON[b.kind] ?? "cake", text: b.name, in: b.in })),
-    ...countdownsFrom(countdowns.filter((c) => c.show_on_kiosk), today).filter((c) => c.in >= n)
-      .map((c) => ({ key: c.id, icon: c.emoji || "calendar", text: c.title, in: c.in })),
   ].sort((a, b) => a.in - b.in).slice(0, 4);
-  return { tz, today, members, days, chores, soon, dish: (m: Meal) => mealName(m, dishMap) || "Plat à choisir" };
+  // The countdowns shown on the kiosk (Noël…) are at the top, beside the date
+  const counts = countdownsFrom(countdowns.filter((c) => c.show_on_kiosk), today).slice(0, 2)
+    .map((c) => ({ key: c.id, icon: c.emoji || "calendar", text: c.title, in: c.in }));
+  return { tz, today, members, days, chores, soon, counts, dish: (m: Meal) => mealName(m, dishMap) || "Plat à choisir" };
 }
 
 const dayName = (d: string, i: number) => (i === 0 ? "Aujourd'hui" : i === 1 ? "Demain" : cap(fmtDay(d, { weekday: "long", day: undefined, month: undefined })));
 const dayDate = (d: string) => fmtDay(d, { weekday: undefined, day: "numeric", month: "long" });
 
-function Head({ today, small }: { today: string; small?: boolean }) {
+type Count = { key: string; icon: string; text: string; in: number };
+function Head({ today, small, counts = [] }: { today: string; small?: boolean; counts?: Count[] }) {
   return (
     <header className="p-head">
       <span className="p-logo"><Wordmark height={small ? 56 : 72} /></span>
-      <span className="p-date">{cap(fmtDay(today, { weekday: "long", day: "numeric", month: "long" }))}</span>
+      <span className="p-head-right">
+        <span className="p-date">{cap(fmtDay(today, { weekday: "long", day: "numeric", month: "long" }))}</span>
+        {counts.map((c) => <span key={c.key} className="p-count"><Glyph name={c.icon} />{c.text}<b>{c.in === 0 ? "aujourd'hui" : c.in === 1 ? "demain" : `dans ${c.in} jours`}</b></span>)}
+      </span>
     </header>
   );
 }
@@ -73,17 +78,17 @@ function Soon({ soon, max = 3 }: { soon: ReturnType<typeof useDays>["soon"]; max
   return (
     <div className="p-soon">
       <span className="p-label">Bientôt</span>
-      {soon.slice(0, max).map((s) => <span key={s.key} className="p-chip"><Glyph name={s.icon} />{s.text}<em>dans {s.in} jours</em></span>)}
+      {soon.slice(0, max).map((s) => <span key={s.key} className="p-chip"><Glyph name={s.icon} /><span className="p-chip-t">{s.text}</span><em>dans {s.in} jours</em></span>)}
     </div>
   );
 }
 
 // A: the coming days side by side, like the kiosk
 function Semaine() {
-  const { tz, today, members, days, chores, soon, dish } = useDays(5);
+  const { tz, today, members, days, chores, soon, counts, dish } = useDays(5);
   return (
     <div className="poster p-semaine">
-      <Head today={today} />
+      <Head today={today} counts={counts} />
       <div className="p-cols">
         {days.map(({ d, i, events, birthdays, stay, dinner }) => (
           <section key={d} className={`p-col ${i === 0 ? "today" : ""}`}>
@@ -97,7 +102,7 @@ function Semaine() {
       </div>
       <footer className="p-foot">
         {chores.length > 0 && <div className="p-chores"><span className="p-label">Tâches du jour</span>
-          {chores.slice(0, 4).map((o) => <span key={o.id} className="p-chip"><Glyph name={o.emoji || "check"} />{o.title}</span>)}</div>}
+          {chores.slice(0, 4).map((o) => <span key={o.id} className="p-chip"><Glyph name={o.emoji || "check"} /><span className="p-chip-t">{o.title}</span></span>)}</div>}
         <Soon soon={soon} />
       </footer>
     </div>
@@ -106,11 +111,12 @@ function Semaine() {
 
 // B: today in large, the next three days in a column beside it
 function Aujourdhui() {
-  const { tz, today, members, days, chores, soon, dish } = useDays(4);
+  const { tz, today, members, days, chores, soon, counts, dish } = useDays(4);
   const [t, ...next] = days;
   return (
     <div className="poster p-aujourdhui">
-      <Head today={today} />
+      <span className="p-orb one" /><span className="p-orb two" /><span className="p-orb three" />
+      <Head today={today} counts={counts} />
       <div className="p-split">
         <section className="p-today">
           <span className="p-label">Aujourd'hui</span>
@@ -119,7 +125,7 @@ function Aujourdhui() {
           <div className="p-events big">{t.events.length ? t.events.map((e) => <EventLine key={e.id} e={e} tz={tz} members={members} />) : <span className="p-empty">Rien de prévu</span>}</div>
           <div className="p-meals"><Meals list={t.lunch} dish={dish} label="Dîner" /><Meals list={t.dinner} dish={dish} label="Souper" /></div>
           {chores.length > 0 && <div className="p-chores"><span className="p-label">Tâches</span>
-            {chores.slice(0, 4).map((o) => <span key={o.id} className="p-chip"><Glyph name={o.emoji || "check"} />{o.title}</span>)}</div>}
+            {chores.slice(0, 4).map((o) => <span key={o.id} className="p-chip"><Glyph name={o.emoji || "check"} /><span className="p-chip-t">{o.title}</span></span>)}</div>}
           <Soon soon={soon} />
         </section>
         <section className="p-next">
@@ -128,7 +134,7 @@ function Aujourdhui() {
               <div className="p-dayhead"><b>{dayName(d, i)}</b><span>{dayDate(d)}</span></div>
               {stay && <span className="p-line"><Glyph name={STAY_ICON[stay.kind]} />{stayLabel(stay)}</span>}
               {birthdays.map((b) => <span key={b.id} className="p-line"><Glyph name={BIRTHDAY_ICON[b.kind] ?? "cake"} />{b.name}</span>)}
-              {events.slice(0, 2).map((e) => <span key={e.id} className="p-line"><b>{e.all_day ? "Journée" : startTime(e, tz)}</b>{e.title}</span>)}
+              {events.slice(0, 2).map((e) => <span key={e.id} className="p-line"><b>{e.all_day ? "Journée" : startTime(e, tz)}</b><span>{e.title}</span></span>)}
               {events.length > 2 && <span className="p-line muted">et {events.length - 2} autre{events.length > 3 ? "s" : ""}</span>}
               {!events.length && !stay && !birthdays.length && !lunch.length && !dinner.length && <span className="p-line muted">Rien de prévu</span>}
               {(lunch.length > 0 || dinner.length > 0) && <span className="p-menu">
@@ -145,10 +151,10 @@ function Aujourdhui() {
 
 // C: a calm list, three days, very large type: only what is planned and what is eaten in the evening
 function Epure() {
-  const { tz, today, days, soon, dish } = useDays(3);
+  const { tz, today, days, soon, counts, dish } = useDays(3);
   return (
     <div className="poster p-epure">
-      <Head today={today} small />
+      <Head today={today} small counts={counts} />
       <div className="p-rows">
         {days.map(({ d, i, events, birthdays, stay, dinner }) => (
           <section key={d} className="p-row">
