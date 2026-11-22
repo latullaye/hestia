@@ -252,6 +252,14 @@ décider et les notifications non lues.
 
 Plus › Journal : qui a fait quoi, quand, et d'où (app, kiosque, interphone, Claude, Google Agenda), filtrable par domaine.
 
+## Affiche pour la télé (en cours)
+
+`#/poster` : les jours qui viennent en une image fixe, pour l'écran de veille de la Chromecast (un album Google Photos).
+Mise en page à 1920 × 1080, prise au double : une image 4K (3840 × 2160). Ni heure ni météo : la télé les affiche
+elle-même en bas à droite, coin laissé vide. Trois variantes à choisir (`?v=semaine`, `?v=aujourdhui`, `?v=epure`),
+sombre par défaut (`&theme=light` pour le clair). Écran : `src/pages/Poster.tsx`. La génération automatique et l'envoi
+dans l'album viendront ensuite.
+
 ## Comme une app
 
 Sur téléphone et tablette, Hestia se comporte comme une app et non comme une page web : un doigt ne sélectionne pas le
