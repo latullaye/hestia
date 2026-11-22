@@ -14,6 +14,18 @@ const API = "https://photoslibrary.googleapis.com/v1";
 
 export type OAuthClient = { clientId: string; clientSecret: string };
 
+// The same picture with a JPEG comment in it (invisible): Google Photos merges identical files into one photo, so each
+// copy must differ by a few bytes to be its own photo in the album
+export function withComment(jpeg: Uint8Array, text: string): Uint8Array {
+  const note = new TextEncoder().encode(text), len = note.length + 2;
+  const out = new Uint8Array(jpeg.length + 2 + len);
+  out.set(jpeg.subarray(0, 2), 0);                           // FF D8: start of image
+  out.set([0xff, 0xfe, len >> 8, len & 0xff], 2);            // a comment segment
+  out.set(note, 6);
+  out.set(jpeg.subarray(2), 6 + note.length);
+  return out;
+}
+
 export function consentUrl(client: OAuthClient, redirectUri: string, state: string): string {
   const q = new URLSearchParams({
     client_id: client.clientId, redirect_uri: redirectUri, response_type: "code", scope: PHOTOS_SCOPES.join(" "),
@@ -52,7 +64,7 @@ export function photosClient(client: OAuthClient, refreshToken: string, fetcher:
       const tokens: string[] = [];
       for (let i = 0; i < copies; i++) {
         const r = await fetcher(`${API}/uploads`, {
-          method: "POST", body: new Blob([bytes as BlobPart]),
+          method: "POST", body: new Blob([(i ? withComment(bytes, `hestia ${i + 1}`) : bytes) as BlobPart]),
           headers: { Authorization: `Bearer ${await bearer()}`, "Content-Type": "application/octet-stream", "X-Goog-Upload-Content-Type": "image/jpeg", "X-Goog-Upload-Protocol": "raw" },
         });
         if (!r.ok) throw new Error(`Google Photos : envoi refusé (${r.status})`);
@@ -61,8 +73,12 @@ export function photosClient(client: OAuthClient, refreshToken: string, fetcher:
       const out = await call("/mediaItems:batchCreate", {
         albumId, newMediaItems: tokens.map((uploadToken, i) => ({ description, simpleMediaItem: { uploadToken, fileName: `${name}-${i + 1}.jpg` } })),
       });
-      const ids = (out.newMediaItemResults || []).map((x: any) => x.mediaItem?.id).filter(Boolean);
-      if (ids.length !== copies) throw new Error("Google Photos : la photo n'a pas été ajoutée");
+      const results: any[] = out.newMediaItemResults || [];
+      const ids = [...new Set(results.map((x) => x.mediaItem?.id).filter(Boolean))] as string[];
+      if (ids.length !== copies) {
+        const why = results.map((x) => x.status?.message).filter((m) => m && m !== "Success" && m !== "OK").join(" ; ");
+        throw new Error(`Google Photos : la photo n'a pas été ajoutée (${ids.length}/${copies}${why ? ` : ${why}` : ""})`);
+      }
       return ids;
     },
     remove: (albumId: string, ids: string[]) => call(`/albums/${albumId}:batchRemoveMediaItems`, { mediaItemIds: ids }),
@@ -73,23 +89,25 @@ export type PhotosClient = ReturnType<typeof photosClient>;
 
 // Puts a new picture in the TV album and moves the previous ones to the album to empty. The albums are made the first
 // time, and again if someone deleted them. Returns the ids to remember for next time.
+// `made` is told of each album as soon as it exists, so that a failure later does not leave an album nobody remembers.
 export async function replacePicture(p: PhotosClient, state: { tv: string | null; trash: string | null; previous: string[] },
-  bytes: Uint8Array, name: string, description: string) {
-  let tv = state.tv ?? await p.createAlbum(ALBUM_TV);
+  bytes: Uint8Array, name: string, description: string, made: (which: "tv" | "trash", id: string) => Promise<unknown> = async () => {}) {
+  const album = async (which: "tv" | "trash") => { const id = await p.createAlbum(which === "tv" ? ALBUM_TV : ALBUM_TRASH); await made(which, id); return id; };
+  let tv = state.tv ?? await album("tv");
   let ids: string[];
   try {
     ids = await p.addPicture(tv, bytes, name, description);
   } catch (e) {
     if (![400, 403, 404].includes((e as { status?: number }).status ?? 0) || !state.tv) throw e;
-    tv = await p.createAlbum(ALBUM_TV); // the album is gone: a new one (to be chosen again on the TV)
+    tv = await album("tv"); // the album is gone: a new one (to be chosen again on the TV)
     ids = await p.addPicture(tv, bytes, name, description);
   }
   let trash = state.trash;
   if (state.previous.length) {
     await p.remove(tv, state.previous).catch(() => {}); // already removed by hand: fine
-    trash ??= await p.createAlbum(ALBUM_TRASH);
+    trash ??= await album("trash");
     await p.add(trash, state.previous).catch(async () => {
-      trash = await p.createAlbum(ALBUM_TRASH); // the album to empty was deleted: a new one
+      trash = await album("trash"); // the album to empty was deleted: a new one
       await p.add(trash, state.previous).catch(() => {});
     });
   }
