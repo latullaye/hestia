@@ -3,12 +3,13 @@ import react from "@vitejs/plugin-react";
 import { defineConfig, type Plugin } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
 
-// The built pages only talk to the Supabase project and the weather service (not applied in dev: Vite needs inline scripts)
+// The built pages only talk to the Supabase project, the weather service, and for "Je rentre" the bike router and the
+// map tiles (not applied in dev: Vite needs inline scripts)
 const csp = (): Plugin => ({
   name: "hestia-csp",
   apply: "build",
   transformIndexHtml: (html) => html.replace("<!--csp-->",
-    `<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.open-meteo.com; worker-src 'self'; manifest-src 'self'; base-uri 'self'; form-action 'none'">`),
+    `<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.basemaps.cartocdn.com; font-src 'self'; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.open-meteo.com https://routing.openstreetmap.de; worker-src 'self'; manifest-src 'self'; base-uri 'self'; form-action 'none'">`),
 });
 
 export default defineConfig({

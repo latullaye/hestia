@@ -4,11 +4,12 @@
 //   POST { task: "reminders" }                    from pg_cron every 15 minutes: morning summary, evening reminder,
 //                                                 "in one hour" before an event (times in settings.reminders);
 //                                                 also sends the pushes held during someone's quiet hours
-//   POST { task: "action", token, action }        from a notification's buttons: approve | decline, without opening the app
+//   POST { task: "action", token, action }        from a notification's buttons, without opening the app (see ACTIONS)
 //   POST { task: "test" }                         from the app (signed in): a test notification on one's own devices
 import { type Db, type Member, householdTz, loadMembers, uuids } from "../_shared/db.ts";
 import { isInternal, json, memberFromToken, preflight, rememberFunctionsUrl } from "../_shared/http.ts";
 import { type PushPayload, sendPush, vapid } from "../_shared/push.ts";
+import { type Shown, act, buttons } from "../_shared/notify-actions.ts";
 import { type NotifyPrefs, decide, eventLead } from "../_shared/notify-prefs.ts";
 import { db, env } from "../_shared/runtime.ts";
 import { addDays, fmtTime, instant, partsIn } from "../_shared/time.ts";
@@ -22,9 +23,10 @@ const notify = (d: Db, memberId: string, kind: string, title: string, body: stri
     [memberId, kind, title, body, url, JSON.stringify(data)]);
 
 async function push(notificationId: string) {
-  // Taken once: a second call for the same row sends nothing
-  const [n] = await db.exec(`update public.notifications set pushed_at = now() where id = $1::uuid and pushed_at is null
-    returning id, member_id, kind, title, body, url, action_token`, [notificationId]);
+  // Taken once: a second call for the same row sends nothing. Not before its time (a reminder put off, a trip's news).
+  const [n] = await db.exec(`update public.notifications set pushed_at = now()
+    where id = $1::uuid and pushed_at is null and (send_after is null or send_after <= now())
+    returning id, member_id, kind, title, body, url, data, action_token`, [notificationId]);
   if (!n) return { sent: 0 };
   // What the person chose (Réglages): a muted topic is not pushed (the row stays in the inbox); during their quiet hours
   // the row is handed back, and the next reminders run tries again
@@ -35,11 +37,7 @@ async function push(notificationId: string) {
     await db.exec(`update public.notifications set pushed_at = null where id = $1::uuid`, [n.id]);
     return { sent: 0, held: true };
   }
-  const payload: PushPayload = { title: n.title, body: n.body || "", url: n.url || "#/", tag: n.id, kind: n.kind };
-  if (n.kind === "approval_request") {
-    payload.token = n.action_token;
-    payload.actions = [{ action: "approve", title: "Approuver" }, { action: "decline", title: "Refuser" }];
-  }
+  const payload: PushPayload = { title: n.title, body: n.body || "", url: n.url || "#/", tag: n.id, kind: n.kind, ...(await buttons(db, n as unknown as Shown)) };
   return await sendPush(db, [n.member_id], payload, subject());
 }
 
@@ -55,7 +53,8 @@ async function reminders() {
   // Pushes held during quiet hours (or lost on the way): sent now if their time has come. Not older than 12 hours, not
   // already read in the app.
   const held = await db.all(`select id from public.notifications where pushed_at is null and read_at is null
-    and created_at > now() - interval '12 hours' and created_at < now() - interval '1 minute' order by created_at`);
+    and created_at > now() - interval '12 hours' and created_at < now() - interval '1 minute'
+    and (send_after is null or send_after <= now()) order by created_at`);
   for (const h of held) if ((await push(h.id)).sent) report.held++;
 
   const chores = await db.all(`select id, title, assignee_ids, time_of_day from public.chore_occurrences
@@ -83,7 +82,7 @@ async function reminders() {
   if (at(cfg.evening, "20:00")) {
     for (const m of members) {
       const ch = chores.filter((c) => c.assignee_ids.includes(m.id));
-      if (ch.length && await once(db, `evening:${today}:${m.id}`)) { await notify(db, m.id, "reminder", "Encore à faire", ch.map((c) => c.title).join(", "), "#/chores"); report.evening++; }
+      if (ch.length && await once(db, `evening:${today}:${m.id}`)) { await notify(db, m.id, "reminder", "Encore à faire", ch.map((c) => c.title).join(", "), "#/chores", { occurrence_ids: ch.map((c) => c.id) }); report.evening++; }
     }
   }
   // Each person may choose their own lead (Réglages); the household's is the default
@@ -106,27 +105,16 @@ async function reminders() {
   return report;
 }
 
-// "Approuver" / "Refuser" pressed on the notification itself
-async function action(token: string, what: string) {
-  if (!/^[0-9a-f]{64}$/.test(token) || !["approve", "decline"].includes(what)) return json({ ok: false, message: "Demande invalide." }, 400);
-  const n = await db.one(`select id, member_id, data from public.notifications where action_token = $1 and kind = 'approval_request'`, [token]);
-  if (!n) return json({ ok: false, message: "Cette demande n'existe plus." }, 404);
-  const done = await db.exec(
-    `update public.events set status = $2, approval_decided_by = $3::uuid, approval_decided_at = now(), updated_by = $3::uuid, updated_via = 'app'
-     where id = $1::uuid and status = 'pending' and deleted_at is null and (cardinality(approver_ids) = 0 or $3::uuid = any (approver_ids)) returning title`,
-    [n.data.event_id, what === "approve" ? "confirmed" : "declined", n.member_id]);
-  await db.exec(`update public.notifications set read_at = coalesce(read_at, now()) where id = $1::uuid`, [n.id]);
-  if (!done.length) return json({ ok: false, message: "C'était déjà décidé." });
-  return json({ ok: true, message: `${what === "approve" ? "Approuvé" : "Refusé"} : ${done[0].title}` });
-}
-
 Deno.serve(async (req: Request) => {
   const pre = preflight(req);
   if (pre) return pre;
   await rememberFunctionsUrl(db, env);
   if (req.method === "GET") return json({ key: (await vapid(db)).publicKey });
   const body = await req.json().catch(() => ({}));
-  if (body.task === "action") return await action(String(body.token || ""), String(body.action || ""));
+  if (body.task === "action") {
+    const { status, ...answer } = await act(db, String(body.token || ""), String(body.action || ""));
+    return json(answer, status);
+  }
   if (body.task === "test") {
     const who = await memberFromToken(req, db, env);
     if (!who) return json({ error: "auth" }, 401);

@@ -18,6 +18,8 @@ export function useHousehold() {
       tz: (h.timezone as string) || "America/Toronto",
       weather: (h.weather as { label: string; latitude: number; longitude: number }) || { label: "Montréal", latitude: 45.5019, longitude: -73.5674 },
       reminders: settings.find((s) => s.id === "reminders")?.value || {},
+      home: (h.home as { lat: number; lng: number } | undefined) ?? null, // for "Je rentre": the way home, and arriving
+
     };
   }, [settings]);
 }

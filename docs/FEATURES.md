@@ -85,16 +85,34 @@ Ce que fait chaque partie, et les règles qui ne se voient pas à l'écran. À t
 ## Je rentre
 
 Plus › **Je rentre**, ou un appui long sur l'icône de Hestia sur Android (raccourci du manifeste, `vite.config.ts`).
-Écran : `src/pages/Leaving.tsx`.
+Écrans : `src/pages/Leaving.tsx` (celui qui rentre), `src/pages/Trip.tsx` (les autres).
 
-- Temps de trajet : 30 minutes par défaut, `−5`, `+5`, `+15` ; l'heure d'arrivée se calcule. « Je pars » (du bureau…) et
-  les personnes à prévenir sont retenus sur l'appareil.
-- Envoyer prévient les autres par notification : « Arthur rentre · Part du bureau · arrivée vers 17 h 32 (30 min) ».
-  En route, on peut ajouter ou retirer du temps (un écart de 5 minutes ou plus est envoyé), dire qu'on est à la maison ou
-  annuler.
-- Chez les autres, l'écran d'accueil montre « Arthur arrive vers 17 h 32 » et les minutes qui restent ; le kiosque aussi,
-  en haut. Un compte à rebours dans la notification elle-même n'est pas possible pour une app web (sur iPhone, il faut une
-  app native : « Live Activities ») : c'est l'app et le kiosque qui comptent.
+- **Une heure ronde** : l'heure d'arrivée est toujours sur 5 minutes (17 h 30, jamais 17 h 33). Proposée à partir du
+  *trajet habituel* (25 min par défaut, réglable sur l'écran et retenu sur l'appareil), arrondie aux 5 minutes du dessus,
+  avec « dans 29 min » à côté ; `−5`, `+5`, `+15` la déplacent de 5 en 5. « Je pars » (du bureau…), les personnes à
+  prévenir et le choix de partager sa position sont retenus sur l'appareil.
+- **Un mot** pour les autres, au départ ou en route (« Je passe chercher les pizzas ») : il part avec la nouvelle.
+- **Une seule notification par série d'ajustements** : la nouvelle part 45 secondes après le dernier changement, et
+  compare avec ce que les autres savaient déjà : « Arthur rentre · arrivée vers 17 h 30 », « Arthur arrivera un peu plus
+  tard · Nouvelle heure : 17 h 45 (au lieu de 17 h 30) », « Arthur a laissé un mot ». Revenir à l'heure déjà annoncée
+  n'envoie rien. Toucher la notification ouvre le trajet.
+- **Où il est, en direct** : pendant le trajet, ceux qu'on prévient (et le kiosque, en touchant la pastille du haut)
+  voient une carte : sa position, le chemin à vélo jusqu'à la maison, la distance qui reste et le temps à vélo, depuis
+  quand la position date (grisée au-delà de 3 minutes). Le chemin vient du serveur d'itinéraires OpenStreetMap (FOSSGIS,
+  profil vélo) ; les fonds de carte de CARTO (OpenStreetMap). Sans réseau vers eux : une ligne droite en pointillés.
+- **D'où vient la position** :
+  - de Hestia, tant qu'elle est ouverte (n'importe quel écran ; l'écran reste allumé) : un point toutes les 20 secondes
+    au plus, ou après 60 m (`src/components/TripSharer.tsx`) ;
+  - d'**OwnTracks**, une app gratuite qui envoie la position même téléphone verrouillé : chacun crée son adresse secrète
+    dans **Réglages › Position en arrière-plan** et la colle une fois dans OwnTracks ([SETUP.md](SETUP.md)). Hors d'un
+    trajet, ce qu'envoie OwnTracks est ignoré.
+- **Vie privée** : seul le dernier point est gardé, et seulement pendant le trajet. Il est effacé à l'arrivée, à
+  l'annulation, et une heure après l'heure annoncée.
+- **La maison sur la carte** : **Réglages › La maison › Je suis à la maison : la placer ici** (une fois). Elle sert au
+  chemin et à l'arrivée : à moins de 150 m de la maison (passé les 2 premières minutes), le trajet se termine tout seul.
+- En route : changer l'heure, ajouter un mot, couper le partage, « Je suis à la maison », ou annuler.
+- Chez les autres, l'écran d'accueil montre « Arthur arrive vers 17 h 30 », les minutes qui restent et le mot ; le
+  kiosque aussi, en haut. Un compte à rebours dans la notification elle-même n'est pas possible pour une app web.
 
 ## Absences : séjours et vacances
 
@@ -180,6 +198,22 @@ Plus › **Cadeaux** (adultes seulement ; le kiosque ne les voit pas). Écran : 
 | Rappel du soir | Qui a encore des tâches |
 | Avant un événement | Les adultes concernés ou accompagnateurs |
 | Quelqu'un rentre, une absence proposée ou changée | Les autres adultes |
+
+### Boutons des notifications
+
+Sur Android et ordinateur, certaines notifications ont des boutons qui agissent sans ouvrir l'app (l'iPhone n'affiche pas
+de boutons pour une app web : la notification ouvre l'écran concerné). Deux au plus : c'est ce qu'Android affiche.
+
+| Notification | Boutons |
+|---|---|
+| Demande d'approbation | *Approuver*, *Refuser* |
+| Tâches du soir | *Tout est fait* (coche les tâches nommées), *Demain* (encore à faire demain) |
+| Nouvelle tâche | *Fait*, *Demain* |
+| Quelqu'un rentre | *Voir le trajet* (ouvre la carte), *OK, vu* |
+| Rappel d'événement | *Itinéraire* (Google Maps vers le lieu, s'il y en a un), *Dans 10 min* (la même notification revient) |
+
+*Demain* : une tâche ponctuelle passe au lendemain ; une tâche récurrente reste à faire un jour de plus. Une réponse
+courte confirme (« Fait : Vaisselle, Litière »). Code : `supabase/functions/_shared/notify-actions.ts`, `src/sw.ts`.
 
 ### Ce que chacun reçoit
 

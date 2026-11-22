@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import { toggleOccurrence } from "../components/ChoreSheets";
 import { ArrivalBanners, StaySheet } from "../components/Away";
 import { EventSheet } from "../components/EventSheet";
+import { TripView } from "./Trip";
 import { Glyph } from "../components/icons";
 import { IntercomPanel } from "../components/Intercom";
 import { MealSheet } from "../components/MealSheet";
@@ -49,6 +50,8 @@ export function Kiosk() {
   const [meal, setMeal] = useState<{ date: string; slot: MealSlot } | null>(null);
   const drag = useMealDrag({ instant: true });
   const [item, setItem] = useState<ShoppingItem | null>(null);
+  const [tripId, setTripId] = useState<string | null>(null); // someone on the way home, shown on a map
+  const trip = useTable("arrivals").find((a) => a.id === tripId);
   const [intercom, setIntercom] = useState(false);
 
   useEffect(() => keepAwake(), []);
@@ -132,7 +135,7 @@ export function Kiosk() {
           <span className="kweather"><w.Icon className="e" /><span className="big">{Math.round(weather.current.temperature)}°</span>
             <span className="small"><b>{w.text}</b><br /><span className="muted">Ressenti {Math.round(weather.current.feels)}° · {place.label}</span></span></span>
         )}
-        <span className="grow karrivals"><ArrivalBanners tz={tz} compact /></span>
+        <span className="grow karrivals"><ArrivalBanners tz={tz} compact onOpen={(a) => setTripId(a.id)} /></span>
         <div className="kwho" title="Qui est là ?">
           <UserRound size={18} className="muted" />
           {members.family.filter((m) => !m.needs_caregiver).map((m) => (
@@ -212,6 +215,7 @@ export function Kiosk() {
       {meal && <MealSheet {...meal} onClose={() => setMeal(null)} />}
       {stay && <StaySheet stay={stay} onClose={() => setStay(null)} />}
       {intercom && <IntercomPanel onClose={() => setIntercom(false)} />}
+      {trip && <Sheet title="Sur le chemin" onClose={() => setTripId(null)}><TripView trip={trip} mapHeight={380} /></Sheet>}
       {item && (
         <Sheet title={item.name} onClose={() => setItem(null)}>
           <button className="btn ok" onClick={() => { buy(item); toast(`${item.name} : acheté`); setItem(null); }}>Acheté</button>

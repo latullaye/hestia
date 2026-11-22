@@ -21,7 +21,9 @@ export function inboxOf(events: CalEvent[], notifications: Notification[], me: M
   const decided = mine.filter((e) => e.status !== "pending" && e.approval_decided_by && e.approval_decided_at
     && (e.created_by === id || e.approver_ids.includes(id) || e.approval_decided_by === id))
     .sort((a, b) => b.approval_decided_at!.localeCompare(a.approval_decided_at!));
-  const received = notifications.filter((n) => n.member_id === id).sort((a, b) => b.created_at.localeCompare(a.created_at));
+  // (a notification due later, like the news of a trip still being adjusted, shows once it is sent)
+  const now = Date.now();
+  const received = notifications.filter((n) => n.member_id === id && !(n.send_after && Date.parse(n.send_after) > now)).sort((a, b) => b.created_at.localeCompare(a.created_at));
   const unread = received.filter((n) => !n.read_at);
   return { toAnswer, asked, decided, received, unread, badge: toAnswer.length + unread.length };
 }

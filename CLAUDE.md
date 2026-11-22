@@ -57,7 +57,7 @@ supabase/
     tools*.ts, registry.ts  les outils de Claude (MCP + interphone)
     gcal*.ts, calendar-codec.ts  le miroir Google Agenda
     schedule.ts           rythmes des tâches (même règle que private.chore_matches en SQL)
-  functions/mcp|intercom|gcal-sync|notify/   les quatre points d'entrée
+  functions/mcp|intercom|gcal-sync|notify|location/   les cinq points d'entrée
   seed/family.example.sql le modèle des données de la famille
 scripts/                  tests de base, vérification des fonctions, icônes
 tests/                    tests (vitest)
@@ -79,7 +79,7 @@ docs/                     la documentation
   Postgres donne `execute` à tout le monde par défaut.
 - Une colonne dont la valeur par défaut appelle une fonction de `private` (ex. `chores.start_date`) exige que
   `authenticated` puisse exécuter cette fonction.
-- Les quatre `deno.json` des fonctions sont identiques : les garder en phase, et en phase avec les versions de `package.json`.
+- Les cinq `deno.json` des fonctions sont identiques : les garder en phase, et en phase avec les versions de `package.json`.
 - Les fonctions sont déployées avec `verify_jwt = false` et vérifient elles-mêmes l'appelant (`_shared/http.ts`).
 - Créer un formateur `Intl` (ou appeler `toLocaleDateString`/`toLocaleTimeString` avec des options) est lent : le kiosque
   en faisait des milliers par rendu, ce qui figeait les balayages sur tablette. Pour les dates et heures affichées en

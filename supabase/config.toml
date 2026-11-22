@@ -15,3 +15,6 @@ verify_jwt = false
 
 [functions.notify]
 verify_jwt = false
+
+[functions.location]
+verify_jwt = false

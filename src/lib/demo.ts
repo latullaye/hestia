@@ -110,7 +110,7 @@ export function demoTables(): Partial<{ [T in keyof Tables]: Tables[T][] }> {
     { id: "cd-2", title: "Vacances", emoji: "umbrella", target_date: d(47), yearly: false, show_on_kiosk: true },
   ];
   const settings: Tables["settings"][] = [
-    { id: "household", value: { name: "Hestia", timezone: TZ, locale: "fr-CA", weather: { label: "Montréal", latitude: 45.5019, longitude: -73.5674 } } },
+    { id: "household", value: { name: "Hestia", timezone: TZ, locale: "fr-CA", weather: { label: "Montréal", latitude: 45.5019, longitude: -73.5674 }, home: { lat: 45.5268, lng: -73.5695 } } },
     { id: "reminders", value: { morning: "07:30", evening: "20:00", event_minutes_before: 60 } },
   ];
   const notifications: Tables["notifications"][] = [
@@ -138,12 +138,14 @@ export function demoTables(): Partial<{ [T in keyof Tables]: Tables[T][] }> {
     gift("g-jo", "Cadre photo", sam, { occasion: "christmas", year: xmas }), gift("g-jo", "Plaid", alex),
   ];
   const arrivals: Tables["arrivals"][] = [{ id: "a-1", member_id: sam, from_label: "du bureau", left_at: new Date(Date.now() - 12 * 60_000).toISOString(),
-    eta: new Date(Date.now() + 18 * 60_000).toISOString(), notify_ids: [alex], arrived_at: null }];
+    eta: new Date(Math.ceil((Date.now() + 18 * 60_000) / 300_000) * 300_000).toISOString(), notify_ids: [alex], arrived_at: null, note: "Je passe chercher le pain" }];
+  // Sam on the way, a little over 2 km from home (a park in the demo city, not a real address)
+  const arrival_locations: Tables["arrival_locations"][] = [{ id: "a-1", lat: 45.5105, lng: -73.5570, accuracy: 12, located_at: new Date(Date.now() - 40_000).toISOString(), via: "app" }];
   const stays: Tables["stays"][] = [
     { id: "s-1", kind: "visit", status: "confirmed", place: "Chez Mamie Jo", start_date: d(5), end_date: d(7), member_ids: [], transport: "car", carshare: true, carshare_booked: false, note: "fête de Noah" },
     { id: "s-2", kind: "vacation", status: "planned", place: "Portugal", start_date: d(40), end_date: d(52), member_ids: [], transport: "plane", carshare: false, carshare_booked: false, note: null },
   ];
-  return { arrivals, stays, members, settings, events, event_comments, birthdays, countdowns, dishes, meal_plan, shopping_lists: lists, shopping_sections: sections, shopping_items, chores, chore_occurrences, notifications, gift_people, gifts };
+  return { arrivals, arrival_locations, stays, members, settings, events, event_comments, birthdays, countdowns, dishes, meal_plan, shopping_lists: lists, shopping_sections: sections, shopping_items, chores, chore_occurrences, notifications, gift_people, gifts };
 }
 
 export function demoWeather(): Weather {

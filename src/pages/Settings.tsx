@@ -4,6 +4,7 @@ import { Copy, Plus, RefreshCw, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Glyph, IconPicker } from "../components/icons";
 import { NotifyPrefsCard } from "../components/NotifyPrefs";
+import { OwnTracksCard } from "../components/OwnTracks";
 import { Avatar, Field, Segmented, Sheet, SyncPill, toast } from "../components/ui";
 import { APP_VERSION, BUILD_TIME, FUNCTIONS_URL } from "../config";
 import { disablePush, enablePush, isIOS, isStandalone, pushState, type PushState } from "../lib/device";
@@ -63,6 +64,16 @@ export function Settings() {
     setFresh(`${FUNCTIONS_URL}/mcp?cle=${data}`);
     void loadTokens();
   };
+  // Home on the map, for "Je rentre": the way home, and a trip that ends by itself on arriving. Taken where one stands.
+  const placeHome = () => {
+    if (!("geolocation" in navigator)) return toast("Position non disponible sur cet appareil");
+    navigator.geolocation.getCurrentPosition((pos) => {
+      const current = store.byId("settings", "household");
+      const r = (x: number) => Math.round(x * 1e5) / 1e5;
+      store.put("settings", { id: "household", value: { ...(current?.value || {}), home: { lat: r(pos.coords.latitude), lng: r(pos.coords.longitude) } } });
+      toast(`Maison placée (à ${Math.round(pos.coords.accuracy)} m près)`);
+    }, () => toast("Position refusée : à autoriser dans les réglages du téléphone"), { enableHighAccuracy: true, timeout: 20_000 });
+  };
   const saveHousehold = () => {
     const current = store.byId("settings", "household");
     store.put("settings", { id: "household", value: { ...(current?.value || {}), weather: { label: place.label, latitude: Number(place.latitude), longitude: Number(place.longitude) } } });
@@ -91,6 +102,8 @@ export function Settings() {
       {isAdult && me && <>
         <span className="label">Mes notifications</span>
         <NotifyPrefsCard memberId={me.id} />
+        <span className="label">Position en arrière-plan (OwnTracks)</span>
+        {demo ? <div className="card small muted">Non disponible en démonstration.</div> : <OwnTracksCard />}
       </>}
 
       <span className="label">La famille</span>
@@ -118,6 +131,8 @@ export function Settings() {
               {[...new Set(["15", "30", "60", "120", rem.before])].sort((a, b) => Number(a) - Number(b)).map((m) => <option key={m} value={m}>{m === "0" ? "Aucun rappel" : Number(m) < 60 ? `${m} min` : `${Number(m) / 60} h`}{m === "0" ? "" : " avant"}</option>)}
             </select>
           </Field>
+          <div className="row"><span className="grow small">{household.home ? "La maison est placée sur la carte de « Je rentre »." : "La maison n'est pas encore placée sur la carte de « Je rentre »."}</span>
+            <button className="btn small" onClick={placeHome}>{household.home ? "La replacer ici" : "Je suis à la maison : la placer ici"}</button></div>
           <button className="btn primary" onClick={saveHousehold}>Enregistrer</button>
         </div>
 

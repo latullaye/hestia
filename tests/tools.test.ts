@@ -4,6 +4,7 @@ import postgres from "postgres";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { loadMembers, makeDb, type Db } from "../supabase/functions/_shared/db.ts";
 import { anthropicTools, instructions, runTool, tools, type Ctx } from "../supabase/functions/_shared/registry.ts";
+import { act, buttons, type Shown } from "../supabase/functions/_shared/notify-actions.ts";
 import { addDays, partsIn } from "../supabase/functions/_shared/time.ts";
 
 const host = process.env.HESTIA_TEST_PG_HOST, port = Number(process.env.HESTIA_TEST_PG_PORT);
@@ -175,6 +176,44 @@ describe("chores", () => {
     const n = await db.one(`select body from public.notifications where kind = 'task_assigned' order by created_at desc limit 1`);
     expect(n!.body).toContain("Sam : Réparer la poignée");
     expect(await ok(c, "tache_cocher", { tache: "poignée" })).toContain("Fait");
+  });
+});
+
+describe("notification buttons", () => {
+  const latest = async (kind: string) => (await db.one(`select id, kind, url, data, action_token from public.notifications where kind = $1 order by created_at desc limit 1`, [kind])) as unknown as Shown & { id: string };
+  it("a new task: Demain, then Fait, from the notification", async () => {
+    await ok(sam, "tache_ajouter", { titre: "Arroser les plantes", pour: ["Alex"] });
+    const n = await latest("task_assigned");
+    expect((await buttons(db, n)).actions?.map((a) => a.action)).toEqual(["done", "tomorrow"]);
+    expect((await act(db, n.action_token, "tomorrow")).message).toBe("Pour demain : Arroser les plantes");
+    expect((await db.one(`select due_date::text as d from public.chore_occurrences where title = 'Arroser les plantes'`))!.d).toBe(addDays(today, 1));
+    expect((await act(db, n.action_token, "done")).message).toBe("Fait : Arroser les plantes");
+    const o = await db.one(`select status, done_by, updated_via from public.chore_occurrences where title = 'Arroser les plantes'`);
+    expect(o).toMatchObject({ status: "done", done_by: c.actor!.id, updated_via: "app" });
+    expect((await act(db, n.action_token, "done")).message).toBe("C'était déjà fait.");
+    expect((await db.one(`select read_at is not null as r from public.notifications where id = $1::uuid`, [n.id]))!.r).toBe(true);
+  });
+  it("an event reminder: the way there, and again in 10 minutes", async () => {
+    const e = await db.one(`select id from public.events where deleted_at is null and location is not null limit 1`)
+      ?? await db.one(`update public.events set location = '1 rue du Parc, Montréal' where id = (select id from public.events where deleted_at is null limit 1) returning id`);
+    await db.exec(`insert into public.notifications (member_id, kind, title, url, data) values ($1::uuid, 'reminder', 'Bientôt', $2, $3::text::jsonb)`,
+      [c.actor!.id, `#/event/${e!.id}`, JSON.stringify({ event_id: e!.id })]);
+    const n = await latest("reminder");
+    const b = await buttons(db, n);
+    expect(b.actions?.map((a) => a.action)).toEqual(["directions", "snooze"]);
+    expect(b.links?.directions).toMatch(/^https:\/\/www\.google\.com\/maps\/dir\/\?api=1&destination=/);
+    expect((await act(db, n.action_token, "snooze")).message).toMatch(/^Je te le rappelle à \d+ h/);
+    const again = await db.one(`select pushed_at, extract(epoch from send_after - now())::int as wait from public.notifications where id = $1::uuid`, [n.id]);
+    expect(again!.pushed_at).toBeNull();
+    expect(again!.wait).toBeGreaterThan(540);
+  });
+  it("someone coming home: see where, or just OK", async () => {
+    await db.exec(`insert into public.notifications (member_id, kind, title, url, data) values ($1::uuid, 'arrival', 'Sam rentre', '#/trip/x', '{}')`, [c.actor!.id]);
+    const n = await latest("arrival");
+    expect(await buttons(db, n)).toMatchObject({ links: { open: "#/trip/x" } });
+    expect(await act(db, n.action_token, "seen")).toMatchObject({ ok: true, quiet: true });
+    expect((await act(db, n.action_token, "drop_table")).status).toBe(400);
+    expect((await act(db, "0".repeat(64), "seen")).status).toBe(404);
   });
 });
 
