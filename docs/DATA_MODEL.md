@@ -94,7 +94,7 @@ select at::date, actor from public.purchases where name_key = 'oeufs' order by a
 
 | Objet | Rôle |
 |---|---|
-| `config (key, value)` | `internal_secret`, `functions_url`, `vapid_public`, `vapid_private`, `gcal_last_sync`, et valeurs de repli des secrets (`anthropic_api_key`, `google_calendar_id`, `google_service_account_json`, `google_oauth_*`). |
+| `config (key, value)` | `internal_secret`, `functions_url`, `vapid_public`, `vapid_private`, `gcal_last_sync`, et valeurs de repli des secrets (`anthropic_api_key`, `google_calendar_id`, `google_service_account_json`, `google_oauth_*`) ; pour l'affiche de la télé : `poster_key_sha256`, `photos_refresh_token`, `photos_album_tv`, `photos_album_trash`, `poster_items`, `poster_hash`, `poster_at`. |
 | `mcp_tokens` | Empreintes des jetons du connecteur Claude. |
 | `sent` | Rappels déjà envoyés (pas de doublon). |
 | `is_family()`, `is_adult()`, `current_member_id()` | Utilisées par les règles d'accès. |

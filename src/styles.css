@@ -418,6 +418,8 @@ button.link { background: none; border: 0; padding: 4px 8px; margin: -4px 0; min
 .p-line { display: flex; align-items: center; gap: 14px; font-size: 28px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .p-line b { font-family: var(--font-display); color: var(--accent); min-width: 2.6em; }
 .p-line.muted, .p-item.muted { color: var(--muted); }
+.p-menu { display: flex; flex-direction: column; gap: 6px; }
+.p-menu .p-line em { font-style: normal; font-size: 20px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); min-width: 5.4em; }
 .p-aujourdhui .p-soon { margin-top: -6px; }
 
 /* C · a calm list */

@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { Glyph, IconPicker } from "../components/icons";
 import { NotifyPrefsCard } from "../components/NotifyPrefs";
 import { OwnTracksCard } from "../components/OwnTracks";
+import { TvPosterCard } from "../components/TvPoster";
 import { Avatar, Field, Segmented, Sheet, SyncPill, toast } from "../components/ui";
 import { APP_VERSION, BUILD_TIME, FUNCTIONS_URL } from "../config";
 import { disablePush, enablePush, isIOS, isStandalone, pushState, type PushState } from "../lib/device";
@@ -141,6 +142,9 @@ export function Settings() {
           {countdowns.map((c) => { const x = countdownsFrom([c], today)[0]; return <button key={c.id} onClick={() => setCountdown(c)}><span className="grow"><Glyph name={c.emoji} />{c.title}<span className="small muted"> · {fmtDay(x?.date ?? c.target_date, { year: "numeric" })}{c.yearly ? " · chaque année" : ""}</span></span>{x && <span className="tag accent">{x.in} j</span>}</button>; })}
           <button onClick={() => setCountdown("new")}><Plus size={18} /><span className="grow">Ajouter un décompte</span></button>
         </div>
+
+        <span className="label">Télé (écran de veille)</span>
+        {demo ? <div className="card small muted">Non disponible en démonstration.</div> : <TvPosterCard />}
 
         <span className="label">Google Agenda « Family »</span>
         <div className="card col">

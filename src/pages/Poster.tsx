@@ -123,14 +123,18 @@ function Aujourdhui() {
           <Soon soon={soon} />
         </section>
         <section className="p-next">
-          {next.map(({ d, i, events, birthdays, stay, dinner }) => (
+          {next.map(({ d, i, events, birthdays, stay, lunch, dinner }) => (
             <div key={d} className="p-nextday">
               <div className="p-dayhead"><b>{dayName(d, i)}</b><span>{dayDate(d)}</span></div>
               {stay && <span className="p-line"><Glyph name={STAY_ICON[stay.kind]} />{stayLabel(stay)}</span>}
               {birthdays.map((b) => <span key={b.id} className="p-line"><Glyph name={BIRTHDAY_ICON[b.kind] ?? "cake"} />{b.name}</span>)}
-              {events.slice(0, 3).map((e) => <span key={e.id} className="p-line"><b>{e.all_day ? "Journée" : startTime(e, tz)}</b>{e.title}</span>)}
-              {events.length > 3 && <span className="p-line muted">et {events.length - 3} autre{events.length > 4 ? "s" : ""}</span>}
-              {dinner.length > 0 && <span className="p-line muted"><Glyph name="pot-steam" />{dinner.map(dish).join(", ")}</span>}
+              {events.slice(0, 2).map((e) => <span key={e.id} className="p-line"><b>{e.all_day ? "Journée" : startTime(e, tz)}</b>{e.title}</span>)}
+              {events.length > 2 && <span className="p-line muted">et {events.length - 2} autre{events.length > 3 ? "s" : ""}</span>}
+              {!events.length && !stay && !birthdays.length && !lunch.length && !dinner.length && <span className="p-line muted">Rien de prévu</span>}
+              {(lunch.length > 0 || dinner.length > 0) && <span className="p-menu">
+                {lunch.length > 0 && <span className="p-line"><em>Dîner</em>{lunch.map(dish).join(", ")}</span>}
+                {dinner.length > 0 && <span className="p-line"><em>Souper</em>{dinner.map(dish).join(", ")}</span>}
+              </span>}
             </div>
           ))}
         </section>
@@ -166,7 +170,7 @@ function Epure() {
 
 export function Poster() {
   const [params] = useSearchParams();
-  const v = (params.get("v") as Variant) || "semaine";
+  const v = (params.get("v") as Variant) || "aujourdhui"; // the family chose "aujourdhui"; the others stay to try
   const theme = params.get("theme") === "light" ? "light" : "dark"; // a TV in a dim room: dark by default
   useEffect(() => {
     const root = document.documentElement, before = root.dataset.theme;

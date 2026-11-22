@@ -21,7 +21,9 @@ type Session = {
 const Ctx = createContext<Session>(null as unknown as Session);
 export const useSession = () => useContext(Ctx);
 
-// "?demo" (or "?demo=kiosk") in the address: a fictional family, nothing leaves the page
+// "?demo" (or "?demo=kiosk") in the address: a fictional family, nothing leaves the page.
+// "?demo=snapshot": the rows given in window.__HESTIA_SNAPSHOT__, nothing leaves the page either: how the TV poster is
+// drawn by the scheduled workflow (scripts/poster.mjs), with the family's rows of the moment, without signing in.
 export const demoMode = () => new URLSearchParams(location.search).get("demo");
 
 export function SessionProvider({ children }: { children: ReactNode }) {
@@ -35,8 +37,9 @@ export function SessionProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (demo !== null) {
-      store.initDemo(demoTables());
-      setUserId(demo === "kiosk" ? "demo-kiosk" : "demo-adult");
+      const snapshot = demo === "snapshot" ? (window as { __HESTIA_SNAPSHOT__?: Parameters<typeof store.initDemo>[0] }).__HESTIA_SNAPSHOT__ : null;
+      store.initDemo(snapshot ?? demoTables());
+      setUserId(snapshot ? "poster" : demo === "kiosk" ? "demo-kiosk" : "demo-adult");
       setLoading(false);
       return;
     }
