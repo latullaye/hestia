@@ -361,3 +361,77 @@ body.dragging * { cursor: grabbing !important; }
 .trip-note { margin: 0; font-style: italic; }
 /* A small button that reads like a link (the usual trip's −5 / +5) */
 button.link { background: none; border: 0; padding: 4px 8px; margin: -4px 0; min-height: 32px; color: var(--accent); font-weight: 700; cursor: pointer; }
+
+/* ---------- The TV poster (src/pages/Poster.tsx): 1920 × 1080, taken at 2x for 4K ---------- */
+/* The bottom-right corner stays empty: the TV draws its clock and weather there. */
+.poster { --free-w: 560px; --free-h: 210px; width: 1920px; height: 1080px; overflow: hidden; box-sizing: border-box; padding: 60px 84px 64px;
+  display: flex; flex-direction: column; gap: 34px; background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 28px; line-height: 1.25; }
+.poster .gi, .poster svg.lucide { width: 1em; height: 1em; flex: none; }
+.poster .avatar.sm { width: 36px; height: 36px; font-size: 17px; }
+.poster .avatars .avatar + .avatar { margin-left: -9px; box-shadow: 0 0 0 3px var(--surface); }
+.p-head { display: flex; align-items: center; gap: 32px; }
+.p-logo { color: var(--ink); display: inline-flex; }
+.p-date { margin-left: auto; font-family: var(--font-display); font-size: 40px; color: var(--muted); }
+.p-label { font-size: 21px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.p-chip { display: inline-flex; align-items: center; gap: 12px; padding: 10px 20px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--surface); font-size: 26px; white-space: nowrap; }
+.p-chip.soft { background: var(--accent-soft); border-color: transparent; color: var(--accent); align-self: flex-start; }
+.p-chip em { font-style: normal; color: var(--muted); font-size: 22px; }
+.p-empty { color: var(--muted); }
+.p-event { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 14px; }
+.p-event .p-time { display: inline-flex; align-items: center; gap: 8px; font-family: var(--font-display); font-weight: 700; color: var(--accent); font-size: 26px; min-width: 2.6em; }
+.p-event .p-title { font-weight: 700; }
+.p-event .avatars { align-self: center; }
+.p-event.pending .p-time { color: var(--warn); }
+.p-events { display: flex; flex-direction: column; gap: 18px; }
+.p-meal { display: flex; flex-direction: column; gap: 6px; }
+.p-meal-label { font-size: 20px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.p-dish { display: inline-flex; align-items: center; gap: 12px; font-weight: 700; }
+.p-dish .gi { color: var(--accent); }
+.p-dayhead { display: flex; align-items: baseline; gap: 14px; }
+.p-dayhead b { font-family: var(--font-display); font-size: 36px; }
+.p-dayhead span { color: var(--muted); font-size: 24px; }
+.p-soon, .p-chores { display: flex; align-items: center; gap: 14px; overflow: hidden; } /* one line each, never into the TV's corner */
+.p-soon .gi, .p-chores .gi { color: var(--accent); }
+
+/* A · the days side by side */
+.p-cols { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(5, 1fr); gap: 22px; }
+.p-col { display: flex; flex-direction: column; gap: 22px; padding: 28px 26px; min-width: 0; overflow: hidden;
+  background: var(--surface); border: 1.5px solid var(--line); border-radius: 28px; }
+.p-col.today { border-color: color-mix(in srgb, var(--accent) 60%, var(--line)); }
+.p-col.today .p-dayhead b { color: var(--accent); }
+.p-col .p-dayhead { flex-direction: column; gap: 2px; }
+.p-col .p-event { flex-direction: column; align-items: flex-start; gap: 6px; }
+.p-col .p-event .avatars { align-self: flex-start; }
+.p-col .p-meal { margin-top: auto; padding-top: 18px; border-top: 1.5px solid var(--line); }
+.p-foot { height: 120px; max-width: calc(100% - var(--free-w)); display: flex; flex-direction: column; justify-content: center; gap: 16px; }
+
+/* B · today large, the next days beside it */
+.p-split { flex: 1; min-height: 0; display: grid; grid-template-columns: 1.3fr 1fr; gap: 44px; }
+.p-today { display: flex; flex-direction: column; gap: 26px; padding: 40px 44px; background: var(--surface); border: 1.5px solid var(--line); border-radius: 32px; min-height: 0; }
+.p-events.big { gap: 24px; font-size: 38px; }
+.p-events.big .p-time { font-size: 34px; }
+.p-today .p-meals { display: flex; gap: 48px; margin-top: auto; padding-top: 24px; border-top: 1.5px solid var(--line); font-size: 32px; }
+.p-today .p-chips-row { display: flex; gap: 14px; }
+.p-next { display: flex; flex-direction: column; gap: 30px; padding-bottom: var(--free-h); min-height: 0; overflow: hidden; }
+.p-nextday { display: flex; flex-direction: column; gap: 10px; padding-bottom: 26px; border-bottom: 1.5px solid var(--line); }
+.p-nextday:last-of-type { border-bottom: 0; }
+.p-line { display: flex; align-items: center; gap: 14px; font-size: 28px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.p-line b { font-family: var(--font-display); color: var(--accent); min-width: 2.6em; }
+.p-line.muted, .p-item.muted { color: var(--muted); }
+.p-menu { display: flex; flex-direction: column; gap: 6px; }
+.p-menu .p-line em { font-style: normal; font-size: 20px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); min-width: 5.4em; }
+.p-aujourdhui .p-soon { margin-top: -6px; }
+
+/* C · a calm list */
+.p-epure { gap: 40px; }
+.p-rows { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.p-row { flex: 1; display: grid; grid-template-columns: 420px 1fr; gap: 40px; align-items: start; padding: 30px 0; border-top: 1.5px solid var(--line); }
+.p-rowhead { display: flex; flex-direction: column; gap: 4px; }
+.p-rowhead b { font-family: var(--font-display); font-size: 58px; line-height: 1; }
+.p-rowhead span { color: var(--muted); font-size: 28px; }
+.p-row:first-child .p-rowhead b { color: var(--accent); }
+.p-rowbody { display: flex; flex-direction: column; gap: 12px; font-size: 38px; }
+.p-item { display: flex; align-items: center; gap: 18px; }
+.p-item b { font-family: var(--font-display); color: var(--accent); min-width: 3em; }
+.p-item .gi { color: var(--accent); }
+.p-epure .p-soon { max-width: calc(100% - var(--free-w)); }

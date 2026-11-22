@@ -15,6 +15,7 @@
  GitHub Pages                 │   gcal-sync  miroir Google Agenda
    └ sert l'app (statique)    │   notify     notifications push et rappels
                               │   location   position d'OwnTracks pendant « Je rentre »
+                              │   poster     l'affiche de la télé dans Google Photos
                               └ pg_cron + pg_net (horaires, appels base → fonctions)
                                          │
                                          └──► API Anthropic (interphone) · services push · Open-Meteo, itinéraires
@@ -110,6 +111,14 @@ premier appel et gardées en base). Rappels par `pg_cron` : résumé du matin, r
 notification peut attendre (`send_after`) : `private.push_due`, toutes les 15 secondes, envoie ce qui arrive à échéance.
 Les boutons (approuver, fait, demain, dans 10 min…) reviennent à `notify` avec le jeton de la notification
 (`_shared/notify-actions.ts`).
+
+### Affiche de la télé (`poster`)
+
+Une tâche GitHub planifiée (`.github/workflows/poster.yml`) demande à `poster` les lignes du moment (clé
+`HESTIA_POSTER_KEY`, dont le serveur ne garde que l'empreinte), dessine `#/poster` dans Chromium avec ces lignes
+(`?demo=snapshot` : aucune connexion, rien ne sort de la page), et renvoie l'image JPEG seulement si son texte a changé.
+`poster` la met deux fois dans l'album « Hestia · Télé » et déplace les anciennes dans « Hestia · À supprimer »
+(`_shared/photos.ts`) ; l'accès à Google Photos est le consentement du propriétaire, demandé depuis Réglages.
 
 ### Position pendant « Je rentre » (`location`)
 

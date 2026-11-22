@@ -252,6 +252,23 @@ décider et les notifications non lues.
 
 Plus › Journal : qui a fait quoi, quand, et d'où (app, kiosque, interphone, Claude, Google Agenda), filtrable par domaine.
 
+## Affiche pour la télé (écran de veille de la Chromecast)
+
+Les jours qui viennent en une image 4K (3840 × 2160), dans l'album Google Photos que l'écran de veille de la Chromecast
+projette. Écran : `src/pages/Poster.tsx` (`#/poster`) ; réglages : **Réglages › Télé**.
+
+- **Ce qu'elle montre** (variante « Aujourd'hui en grand », thème sombre, choisie par la famille) : la journée en grand
+  (événements, dîner, souper, tâches, « Bientôt »), et les trois jours suivants (deux événements au plus, puis dîner et
+  souper). Le logo en haut à gauche, la date en haut à droite. Ni heure ni météo : la télé les affiche elle-même en bas
+  à droite, coin laissé vide. Les autres variantes restent pour essayer : `?v=semaine`, `?v=epure`, `&theme=light`.
+- **Quand elle change** : toutes les 30 minutes, une tâche GitHub (`.github/workflows/poster.yml`, `scripts/poster.mjs`)
+  dessine l'affiche avec les données du moment et ne l'envoie que si son texte a changé (et donc au moins chaque matin,
+  avec la date). Les journaux de cette tâche ne montrent jamais les données de la famille.
+- **Les albums** : une app ne peut remplir qu'un album qu'elle a créé, et ne peut supprimer aucune photo. Hestia crée
+  donc deux albums dans le compte relié : « Hestia · Télé » (l'image du moment, deux fois) et « Hestia · À supprimer »
+  (les anciennes, à vider à la main de temps en temps : ouvrir l'album, tout sélectionner, supprimer).
+- Fonction : `supabase/functions/poster` (`_shared/photos.ts` pour Google Photos). Mise en place : [SETUP.md](SETUP.md).
+
 ## Comme une app
 
 Sur téléphone et tablette, Hestia se comporte comme une app et non comme une page web : un doigt ne sélectionne pas le

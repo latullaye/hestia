@@ -18,3 +18,6 @@ verify_jwt = false
 
 [functions.location]
 verify_jwt = false
+
+[functions.poster]
+verify_jwt = false

@@ -1,0 +1,46 @@
+# The TV poster: every 30 minutes, draws the days ahead and, when they changed, puts the picture in the Google Photos
+# album the Chromecast shows (scripts/poster.mjs, supabase/functions/poster). Needs, in Settings › Secrets and
+# variables › Actions: the secret HESTIA_POSTER_KEY (made in the app: Réglages › Télé). Without it, nothing happens.
+# The logs never show the family's data (the repository is public).
+name: TV poster
+on:
+  schedule:
+    - cron: "4,34 * * * *"
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "Envoyer une nouvelle image même si rien n'a changé"
+        type: boolean
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: poster
+  cancel-in-progress: false
+jobs:
+  poster:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      HESTIA_POSTER_KEY: ${{ secrets.HESTIA_POSTER_KEY }}
+      HESTIA_POSTER_FORCE: ${{ inputs.force && '1' || '' }}
+    steps:
+      - id: ready
+        run: |
+          if [ -n "$HESTIA_POSTER_KEY" ]; then echo "ok=true" >> "$GITHUB_OUTPUT"
+          else echo "::warning::No poster: the secret HESTIA_POSTER_KEY is missing (Réglages › Télé, docs/SETUP.md)."; fi
+      - uses: actions/checkout@v4
+        if: steps.ready.outputs.ok == 'true'
+      - uses: actions/setup-node@v4
+        if: steps.ready.outputs.ok == 'true'
+        with:
+          node-version: 22
+          cache: npm
+      - if: steps.ready.outputs.ok == 'true'
+        run: npm ci
+      - if: steps.ready.outputs.ok == 'true'
+        run: npm install --no-save playwright@1 && npx playwright install --with-deps chromium
+      - if: steps.ready.outputs.ok == 'true'
+        run: npm run build
+      - if: steps.ready.outputs.ok == 'true'
+        run: node scripts/poster.mjs

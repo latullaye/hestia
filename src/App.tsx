@@ -18,6 +18,7 @@ import { Inbox, inboxOf } from "./pages/Inbox";
 import { Kiosk } from "./pages/Kiosk";
 import { Leaving } from "./pages/Leaving";
 import { Trip } from "./pages/Trip";
+import { Poster } from "./pages/Poster";
 import { TripSharer } from "./components/TripSharer";
 import { Login, NotLinked } from "./pages/Login";
 import { Meals } from "./pages/Meals";
@@ -68,6 +69,7 @@ function Routed() {
   return (
     <Routes>
       <Route path="/kiosk" element={<Kiosk />} />
+      <Route path="/poster" element={<Poster />} />
       <Route element={<Shell />}>
         <Route path="/" element={home} />
         <Route path="/calendar" element={<Calendar />} />

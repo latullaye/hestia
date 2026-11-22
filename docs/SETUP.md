@@ -24,7 +24,7 @@ ils se saisissent directement dans GitHub, Supabase ou Google.
 
 ## 2. Déployer la base et les fonctions (Supabase)
 
-Le flux « Deploy Supabase » applique les migrations (`supabase/migrations/`) et déploie les cinq fonctions.
+Le flux « Deploy Supabase » applique les migrations (`supabase/migrations/`) et déploie les six fonctions.
 
 1. **Jeton d'accès Supabase** : [supabase.com/dashboard/account/tokens](https://supabase.com/dashboard/account/tokens) › *Generate new token*. Le copier.
 2. **Mot de passe de la base** : celui choisi à la création du projet. Oublié ? Projet › *Project Settings › Database › Reset database password*.
@@ -149,7 +149,29 @@ Pour « Je rentre » :
    **tout le temps** ; mode de suivi « Important » (économe) ou « Déplacement » (plus précis). Hestia ignore ce
    qu'OwnTracks envoie hors d'un trajet.
 
-## 8 et 9. Tablette, Claude
+## 8. Télé : l'affiche dans l'écran de veille de la Chromecast
+
+Une fois. Il faut un client OAuth Google (le même que pour Google Agenda, voie B, s'il existe), et ces étapes :
+
+1. [console.cloud.google.com](https://console.cloud.google.com) › projet « Hestia » › *API et services › Bibliothèque* ›
+   activer **Photos Library API**.
+2. *Écran de consentement OAuth* (type **Externe**, **En production** : en mode test, l'accès expire au bout de 7 jours)
+   › *Accès aux données* › ajouter les scopes `.../auth/photoslibrary.appendonly` et
+   `.../auth/photoslibrary.edit.appcreateddata`.
+3. *Identifiants › ID client OAuth* de type **Application Web** (celui de la voie B, ou un nouveau) › *URI de
+   redirection autorisés* : ajouter `https://<projet>.supabase.co/functions/v1/poster/callback`.
+4. S'il n'y a pas déjà `GOOGLE_OAUTH_CLIENT_ID` et `GOOGLE_OAUTH_CLIENT_SECRET` dans Supabase › Edge Functions ›
+   Secrets : y mettre l'ID et le secret de ce client (ou `GOOGLE_PHOTOS_CLIENT_ID` / `GOOGLE_PHOTOS_CLIENT_SECRET`).
+5. Dans Hestia : **Réglages › Télé › Google Photos › Relier**, accepter (l'avertissement « application non validée » est
+   normal : *Paramètres avancés › Accéder à Hestia*). L'accès est gardé dans `private.config`.
+6. **Réglages › Télé › Clé pour GitHub › Créer**, copier la clé. GitHub › dépôt › *Settings › Secrets and variables ›
+   Actions › New repository secret* : nom `HESTIA_POSTER_KEY`, valeur : la clé.
+7. GitHub › *Actions › TV poster › Run workflow* (cocher *Envoyer… même si rien n'a changé*) : l'album « Hestia · Télé »
+   apparaît dans Google Photos avec l'image.
+8. App Google Home › la Chromecast › *Écran de veille* (Ambient) › **Google Photos** › choisir l'album
+   « Hestia · Télé » (et seulement lui). Si l'image n'apparaît pas : *Personal photo curation* › « Live albums only ».
+
+## 9. Tablette, Claude
 
 Voir [KIOSK.md](KIOSK.md) et [MCP.md](MCP.md).
 
