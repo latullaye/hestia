@@ -16,6 +16,7 @@ export type PushPayload = {
   title: string; body?: string; url?: string; tag?: string; kind?: string;
   token?: string;                                   // lets the notification's buttons act (see functions/notify)
   actions?: { action: string; title: string }[];
+  links?: Record<string, string>;                   // actions that open an address instead of coming back to the server
 };
 
 // Sends to every device of these members; forgets the devices that are gone. Returns how many were reached.

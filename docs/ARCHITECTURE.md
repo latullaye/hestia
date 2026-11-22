@@ -14,9 +14,11 @@
                               │   intercom   une phrase → Claude + les mêmes outils → actions
  GitHub Pages                 │   gcal-sync  miroir Google Agenda
    └ sert l'app (statique)    │   notify     notifications push et rappels
+                              │   location   position d'OwnTracks pendant « Je rentre »
                               └ pg_cron + pg_net (horaires, appels base → fonctions)
                                          │
-                                         └──► API Anthropic (interphone) · services push · Open-Meteo (depuis l'app)
+                                         └──► API Anthropic (interphone) · services push · Open-Meteo, itinéraires
+                                              OpenStreetMap et tuiles CARTO (depuis l'app)
 ```
 
 Une seule base, une seule app. La tablette n'est pas une deuxième application : c'est la même, connectée avec un compte
@@ -104,7 +106,16 @@ Le code commun est dans `_shared/`, écrit sans dépendance à Deno (sauf `runti
 ### Notifications (`notify`)
 
 Une ligne dans `notifications` = une entrée dans la boîte de l'app + un envoi push (Web Push, clés VAPID générées au
-premier appel et gardées en base). Rappels par `pg_cron` : résumé du matin, rappel du soir, « dans une heure ».
+premier appel et gardées en base). Rappels par `pg_cron` : résumé du matin, rappel du soir, « dans une heure ». Une
+notification peut attendre (`send_after`) : `private.push_due`, toutes les 15 secondes, envoie ce qui arrive à échéance.
+Les boutons (approuver, fait, demain, dans 10 min…) reviennent à `notify` avec le jeton de la notification
+(`_shared/notify-actions.ts`).
+
+### Position pendant « Je rentre » (`location`)
+
+OwnTracks (app libre, sur le téléphone) envoie sa position en HTTP à `location?cle=…` ; la clé dit de qui il s'agit
+(`private.location_keys`). L'app ouverte passe par `public.share_location`. Les deux aboutissent à
+`private.record_location`, qui ne garde un point que pendant un trajet et termine le trajet près de la maison.
 
 ## Déploiement
 

@@ -311,13 +311,76 @@ end $$;
 reset role;
 do $$ begin
   assert (select count(*) from public.notifications where kind = 'arrival') = 1, 'one person told (not the one coming)';
-  assert (select body from public.notifications where kind = 'arrival') like 'Part du bureau · arrivée vers % (30 min)', 'body: ' || (select body from public.notifications where kind = 'arrival');
+  assert (select body from public.notifications where kind = 'arrival') like 'Part du bureau · arrivée vers %', 'body: ' || (select body from public.notifications where kind = 'arrival');
+  assert (select send_after > now() + interval '40 seconds' from public.notifications where kind = 'arrival'), 'the news waits 45 seconds';
+  assert (select url from public.notifications where kind = 'arrival') = '#/trip/71000000-0000-0000-0000-000000000001', 'opens the trip';
 end $$;
+-- Adjusting while it waits: still one notification, with the last time
 update public.arrivals set eta = eta + interval '2 minutes' where id = '71000000-0000-0000-0000-000000000001';
 update public.arrivals set eta = eta + interval '10 minutes' where id = '71000000-0000-0000-0000-000000000001';
 do $$ begin
-  assert (select count(*) from public.notifications where kind = 'arrival') = 2, 'only the real change is told';
-  assert (select title from public.notifications where kind = 'arrival' order by created_at desc, id limit 1) like '% plus tard', 'later';
+  assert (select count(*) from public.notifications where kind = 'arrival') = 1, 'adjustments are told once';
+  assert (select (data ->> 'eta')::timestamptz from public.notifications where kind = 'arrival')
+    = (select eta from public.arrivals where id = '71000000-0000-0000-0000-000000000001'), 'with the final time';
+end $$;
+-- Sent (as if 45 seconds went by); then a later time is new news, compared with what was told
+update public.notifications set send_after = now() - interval '1 second' where kind = 'arrival';
+update public.arrivals set eta = eta + interval '10 minutes' where id = '71000000-0000-0000-0000-000000000001';
+do $$ begin
+  assert (select count(*) from public.notifications where kind = 'arrival') = 2, 'a real change is told';
+  assert (select title from public.notifications where kind = 'arrival' and send_after > now()) like '% plus tard', 'later';
+  assert (select body from public.notifications where kind = 'arrival' and send_after > now()) like 'Nouvelle heure : % (au lieu de %)%', 'new time and old one: ' || (select body from public.notifications where kind = 'arrival' and send_after > now());
+end $$;
+-- Back to the time they know before it went out: nothing to say
+update public.arrivals set eta = eta - interval '10 minutes' where id = '71000000-0000-0000-0000-000000000001';
+do $$ begin
+  assert (select count(*) from public.notifications where kind = 'arrival') = 1, 'nothing new: the pending news is dropped';
+end $$;
+update public.arrivals set note = 'Je passe chercher les pizzas' where id = '71000000-0000-0000-0000-000000000001';
+do $$ begin
+  assert (select title from public.notifications where kind = 'arrival' and send_after > now()) like '% a laissé un mot', 'a word alone';
+  assert (select body from public.notifications where kind = 'arrival' and send_after > now()) like '« Je passe chercher les pizzas »%', 'the word';
+end $$;
+
+-- ---------- Where someone on the way home is: during the trip only, by them only; home ends the trip ----------
+update public.settings set value = value || '{"home": {"lat": 45.5, "lng": -73.6}}' where id = 'household';
+set role authenticated;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-0000000000a2', false);
+do $$ begin
+  assert public.share_location(45.6, -73.6, 10) = 'ok', 'on a trip: kept';
+  assert (select lat from public.arrival_locations where id = '71000000-0000-0000-0000-000000000001') = 45.6, 'the family sees it';
+end $$;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-0000000000a1', false);
+do $$ begin
+  assert public.share_location(45.7, -73.6, 10) = 'no_trip', 'no trip: nothing kept';
+  begin
+    update public.arrival_locations set lat = 1 where id = '71000000-0000-0000-0000-000000000001';
+    assert (select lat from public.arrival_locations where id = '71000000-0000-0000-0000-000000000001') = 45.6, 'nobody writes it directly';
+  exception when insufficient_privilege then null;
+  end;
+end $$;
+create temp table k as select public.create_location_key() as tok;
+reset role;
+do $$ begin
+  assert private.location_key_member((select tok from k)) = '10000000-0000-0000-0000-000000000001', 'the key says whose it is';
+  assert private.location_key_member('hsl_nope') is null, 'an unknown key is nobody';
+  assert private.record_location('10000000-0000-0000-0000-000000000002', 45.8, -73.6, 5, now() - interval '5 minutes', 'owntracks') = 'ok', 'late point';
+  assert (select lat from public.arrival_locations where id = '71000000-0000-0000-0000-000000000001') = 45.6, 'an older point does not replace a newer one';
+  assert private.record_location('10000000-0000-0000-0000-000000000002', 45.8, -73.6, 5, now() - interval '20 minutes', 'owntracks') = 'old', 'stale point';
+  -- At the door, just after saying "je rentre": not home yet
+  assert private.record_location('10000000-0000-0000-0000-000000000002', 45.5005, -73.6, 5, now(), 'owntracks') = 'ok', 'not in the first minutes';
+end $$;
+update public.arrivals set left_at = now() - interval '20 minutes', updated_via = 'system' where id = '71000000-0000-0000-0000-000000000001';
+do $$ begin
+  assert private.record_location('10000000-0000-0000-0000-000000000002', 45.5005, -73.6, 5, now(), 'owntracks') = 'home', 'home';
+  assert (select arrived_at is not null from public.arrivals where id = '71000000-0000-0000-0000-000000000001'), 'the trip ends by itself';
+  assert (select lat is null and deleted_at is not null from public.arrival_locations where id = '71000000-0000-0000-0000-000000000001'), 'and the point is wiped';
+  assert (select count(*) from public.notifications where kind = 'arrival' and send_after > now()) = 0, 'news not sent is dropped';
+end $$;
+
+-- ---------- Notifications due later: not pushed at once, sent by the 15-second job ----------
+do $$ begin
+  perform private.push_due(); -- (no functions address in tests: it only must not fail)
 end $$;
 
 -- ---------- Gifts: hidden from the person they are for, unless they wrote it; the kiosk sees none ----------

@@ -17,6 +17,8 @@ import { Gifts } from "./pages/Gifts";
 import { Inbox, inboxOf } from "./pages/Inbox";
 import { Kiosk } from "./pages/Kiosk";
 import { Leaving } from "./pages/Leaving";
+import { Trip } from "./pages/Trip";
+import { TripSharer } from "./components/TripSharer";
 import { Login, NotLinked } from "./pages/Login";
 import { Meals } from "./pages/Meals";
 import { Journal, More } from "./pages/More";
@@ -49,6 +51,7 @@ function Shell() {
       <InstallBanner />
       <Outlet />
       <IntercomFab />
+      {!isKiosk && <TripSharer />}
       <div className="tabbar"><nav>
         {tabs.map((t, i) => <NavLink key={t.to} to={t.to} end={t.to === "/"} className={({ isActive }) => (isActive ? "active" : "")}>{t.icon}{t.label}{i === 0 && badge > 0 && <span className="dot">{badge}</span>}</NavLink>)}
       </nav></div>
@@ -77,6 +80,7 @@ function Routed() {
         <Route path="/inbox" element={<Inbox />} />
         <Route path="/gifts" element={<Gifts />} />
         <Route path="/leaving" element={<Leaving />} />
+        <Route path="/trip/:id" element={<Trip />} />
         <Route path="/journal" element={<Journal />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/more" element={<More />} />

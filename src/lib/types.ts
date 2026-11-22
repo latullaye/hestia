@@ -30,7 +30,9 @@ export type ShoppingItem = Sync & { list_id: string; section_id: string | null; 
 export type TimeOfDay = "morning" | "afternoon" | "evening" | "anytime";
 export type Chore = Sync & { title: string; emoji: string | null; description: string | null; assignee_ids: string[]; assignment: "fixed" | "rotate"; schedule: Schedule; time_of_day: TimeOfDay; start_date: string; end_date: string | null; active: boolean; sort_order: number };
 export type Occurrence = Sync & { chore_id: string | null; title: string; emoji: string | null; due_date: string; due_until: string | null; time_of_day: TimeOfDay; assignee_ids: string[]; status: "todo" | "done" | "skipped"; done_by: string | null; done_at: string | null; note: string | null; created_by?: string | null; stay_id?: string | null };
-export type Arrival = Sync & { member_id: string; from_label: string | null; left_at: string; eta: string; notify_ids: string[]; arrived_at: string | null };
+export type Arrival = Sync & { member_id: string; from_label: string | null; left_at: string; eta: string; notify_ids: string[]; arrived_at: string | null; note?: string | null };
+// Where someone on the way home is: only the latest point, only during the trip (id = the trip's id)
+export type ArrivalLocation = { id: string; lat: number | null; lng: number | null; accuracy: number | null; located_at: string | null; via: "app" | "owntracks" | null; updated_at?: string; deleted_at?: string | null };
 export type Transport = "car" | "bus" | "train" | "plane" | "other";
 export type Stay = Sync & {
   kind: "visit" | "vacation"; status: "planned" | "confirmed"; place: string; start_date: string; end_date: string; member_ids: string[];
@@ -43,13 +45,13 @@ export type Gift = Sync & {
   bought_at: string | null; bought_by: string | null; wish_id: string | null; created_by?: string | null; kind?: GiftKind | null;
 };
 export type GiftKind = "main" | "stocking";
-export type Notification = { id: string; member_id: string; kind: string; title: string; body: string | null; url: string | null; data: Record<string, any>; read_at: string | null; created_at: string; updated_at?: string };
+export type Notification = { id: string; member_id: string; kind: string; title: string; body: string | null; url: string | null; data: Record<string, any>; read_at: string | null; created_at: string; updated_at?: string; send_after?: string | null };
 
 export type Tables = {
   members: Member; settings: Setting; events: CalEvent; event_comments: EventComment; birthdays: Birthday; countdowns: Countdown; dishes: Dish;
   meal_plan: Meal; shopping_lists: ShoppingList; shopping_sections: ShoppingSection; shopping_items: ShoppingItem; chores: Chore;
-  chore_occurrences: Occurrence; notifications: Notification; gift_people: GiftPerson; gifts: Gift; arrivals: Arrival; stays: Stay;
+  chore_occurrences: Occurrence; notifications: Notification; gift_people: GiftPerson; gifts: Gift; arrivals: Arrival; stays: Stay; arrival_locations: ArrivalLocation;
 };
 export type TableName = keyof Tables;
 export const TABLES: TableName[] = ["members", "settings", "events", "event_comments", "birthdays", "countdowns", "dishes", "meal_plan", "shopping_lists",
-  "shopping_sections", "shopping_items", "chores", "chore_occurrences", "notifications", "gift_people", "gifts", "arrivals", "stays"];
+  "shopping_sections", "shopping_items", "chores", "chore_occurrences", "notifications", "gift_people", "gifts", "arrivals", "stays", "arrival_locations"];

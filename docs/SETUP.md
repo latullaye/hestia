@@ -24,7 +24,7 @@ ils se saisissent directement dans GitHub, Supabase ou Google.
 
 ## 2. Déployer la base et les fonctions (Supabase)
 
-Le flux « Deploy Supabase » applique les migrations (`supabase/migrations/`) et déploie les quatre fonctions.
+Le flux « Deploy Supabase » applique les migrations (`supabase/migrations/`) et déploie les cinq fonctions.
 
 1. **Jeton d'accès Supabase** : [supabase.com/dashboard/account/tokens](https://supabase.com/dashboard/account/tokens) › *Generate new token*. Le copier.
 2. **Mot de passe de la base** : celui choisi à la création du projet. Oublié ? Projet › *Project Settings › Database › Reset database password*.
@@ -138,6 +138,16 @@ dans Hestia. L'état et la dernière erreur s'affichent au même endroit.
 3. **Plus › Réglages › Notifications › Activer**, puis *Envoyer une notification de test*.
 
 Sur iPhone, les notifications n'existent que pour l'app installée (iOS 16.4 ou plus récent).
+
+Pour « Je rentre » :
+
+4. Une fois, à la maison : **Réglages › La maison › Je suis à la maison : la placer ici** (le chemin à vélo et l'arrivée
+   automatique en ont besoin).
+5. Facultatif, pour que la position parte même téléphone verrouillé : installer **OwnTracks** (Play Store, App Store),
+   puis dans Hestia **Réglages › Position en arrière-plan › Créer mon adresse OwnTracks**. Dans OwnTracks :
+   *Préférences › Connexion*, mode **HTTP**, coller l'adresse comme URL, sans identifiant ; autoriser la localisation
+   **tout le temps** ; mode de suivi « Important » (économe) ou « Déplacement » (plus précis). Hestia ignore ce
+   qu'OwnTracks envoie hors d'un trajet.
 
 ## 8 et 9. Tablette, Claude
 

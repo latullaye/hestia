@@ -21,11 +21,11 @@ const SERVER_COLUMNS: Partial<Record<TableName, string[]>> & { all: string[] } =
   shopping_items: ["name_key", "purchase_count", "needed_at"],
   dishes: ["name_key"],
   chore_occurrences: ["done_at", "created_by", "stay_id"],
-  notifications: ["action_token", "pushed_at", "created_at"],
+  notifications: ["action_token", "pushed_at", "created_at", "send_after"],
   gifts: ["created_by"], // decides who may see the present: set by the server only
   birthdays: ["gcal_recurring_id"],
 };
-const NO_AUTHOR: TableName[] = ["notifications"]; // tables without updated_by / updated_via
+const NO_AUTHOR: TableName[] = ["notifications", "arrival_locations"]; // tables without updated_by / updated_via
 
 class Store {
   private data = new Map<TableName, Map<string, Row>>(TABLES.map((t) => [t, new Map()]));
