@@ -115,6 +115,7 @@ function Aujourdhui() {
   const [t, ...next] = days;
   return (
     <div className="poster p-aujourdhui">
+      <span className="p-orb one" /><span className="p-orb two" /><span className="p-orb three" />
       <Head today={today} counts={counts} />
       <div className="p-split">
         <section className="p-today">

@@ -261,7 +261,10 @@ projette. Écran : `src/pages/Poster.tsx` (`#/poster`) ; réglages : **Réglages
   (événements, dîner, souper, tâches, « Bientôt »), et les trois jours suivants (deux événements au plus, puis dîner et
   souper). Le logo en haut à gauche ; en haut à droite la date et les décomptes affichés sur le kiosque (« Noël dans
   33 jours »). Le bas de l'image reste vide : la télé l'assombrit (un dégradé) et y affiche son heure et sa météo. Les
-  noms longs passent à la ligne ou sont coupés, jamais la mise en page. Les autres variantes restent pour essayer : `?v=semaine`, `?v=epure`, `&theme=light`.
+  noms longs passent à la ligne ou sont coupés, jamais la mise en page.
+- **Effet verre** (demandé pour la télé seulement) : la carte du jour est une plaque de verre dépoli sur un fond sombre
+  où passent de grandes taches douces de bleu-vert et de braise ; reflet sur l'arête du haut, étiquettes en verre aussi.
+  Ailleurs, l'app garde ses cartes unies. Les autres variantes restent pour essayer : `?v=semaine`, `?v=epure`, `&theme=light`.
 - **Quand elle change** : toutes les 30 minutes, une tâche GitHub (`.github/workflows/poster.yml`, `scripts/poster.mjs`)
   dessine l'affiche avec les données du moment et ne l'envoie que si son texte a changé (et donc au moins chaque matin,
   avec la date). Les journaux de cette tâche ne montrent jamais les données de la famille.
