@@ -257,11 +257,13 @@ Plus › Journal : qui a fait quoi, quand, et d'où (app, kiosque, interphone, C
 Les jours qui viennent en une image 4K (3840 × 2160), dans l'album Google Photos que l'écran de veille de la Chromecast
 projette. Écran : `src/pages/Poster.tsx` (`#/poster`) ; réglages : **Réglages › Télé**.
 
-- **Ce qu'elle montre** (variante « Aujourd'hui en grand », thème sombre, choisie par la famille) : la journée en grand
-  (événements, dîner, souper, tâches, « Bientôt »), et les trois jours suivants (deux événements au plus, puis dîner et
-  souper). Le logo en haut à gauche ; en haut à droite la date et les décomptes affichés sur le kiosque (« Noël dans
+- **Ce qu'elle montre** (variante « Aujourd'hui en grand », thème sombre, choisie par la famille) : la carte du jour ne
+  porte que l'essentiel, les rendez-vous et le menu (dîner, souper) ; dessous, deux lignes discrètes, sans étiquettes :
+  les tâches du jour, puis les anniversaires des trois semaines à venir (prénom et initiale). À droite, les trois jours
+  suivants (deux événements au plus, puis dîner et souper). Le logo en haut à gauche ; en haut à droite la date et les décomptes affichés sur le kiosque (« Noël dans
   33 jours »). Le bas de l'image reste vide : la télé l'assombrit (un dégradé) et y affiche son heure et sa météo. Les
-  noms longs passent à la ligne ou sont coupés, jamais la mise en page.
+  noms longs passent à la ligne ou sont coupés, jamais la mise en page. Chaque rendez-vous porte les pastilles des
+  personnes concernées, et « avec » celle de l'adulte qui accompagne (« Pédiatre · L avec S »).
 - **Effet verre** (demandé pour la télé seulement) : la carte du jour est une plaque de verre dépoli sur un fond sombre
   où passent de grandes taches douces de bleu-vert et de braise ; reflet sur l'arête du haut, étiquettes en verre aussi.
   Ailleurs, l'app garde ses cartes unies. Les autres variantes restent pour essayer : `?v=semaine`, `?v=epure`, `&theme=light`.
