@@ -481,3 +481,10 @@ button.link { background: none; border: 0; padding: 4px 8px; margin: -4px 0; min
 .p-who { display: inline-flex; align-items: center; gap: 10px; flex: none; }
 .p-who em { font-style: normal; font-size: 0.8em; color: var(--muted); }
 .p-line .p-who .avatar.sm { width: 32px; height: 32px; font-size: 15px; }
+/* B: the glass card holds the appointments and the menu; the chores and the birthdays are two quiet lines beneath */
+.p-left { display: flex; flex-direction: column; gap: 22px; min-width: 0; min-height: 0; }
+.p-left .p-today { flex: 1; }
+.p-aside { display: flex; flex-direction: column; gap: 10px; padding: 0 8px; flex: none; }
+.p-aside p { margin: 0; display: flex; align-items: center; gap: 14px; font-size: 25px; color: var(--muted); white-space: nowrap; }
+.p-aside p > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.p-aside .gi { opacity: 0.8; }
