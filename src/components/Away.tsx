@@ -25,7 +25,7 @@ export function activeArrivals(arrivals: Arrival[], now: number) {
     .sort((a, b) => a.eta.localeCompare(b.eta));
 }
 
-// "Arthur arrive vers 17 h 32 · dans 23 min", for the others; for oneself, a way back to the trip
+// "Alex arrive vers 17 h 32 · dans 23 min", for the others; for oneself, a way back to the trip
 export function ArrivalBanners({ tz, compact, onOpen }: { tz: string; compact?: boolean; onOpen?: (a: Arrival) => void }) {
   const now = useNow(20_000), members = useMembers(), { me } = useSession();
   const list = activeArrivals(useTable("arrivals"), now);
