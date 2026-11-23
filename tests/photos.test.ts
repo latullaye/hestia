@@ -1,6 +1,7 @@
 // The TV poster's albums, against a fake Google: the new picture goes in twice, the previous ones move to the album to empty.
 import { describe, expect, it } from "vitest";
-import { ALBUM_TRASH, ALBUM_TV, photosClient, replacePicture, withComment } from "../supabase/functions/_shared/photos.ts";
+import { crc32 as zcrc } from "node:zlib";
+import { ALBUM_TRASH, ALBUM_TV, mimeOf, photosClient, replacePicture, withComment, withPngText } from "../supabase/functions/_shared/photos.ts";
 
 function fakeGoogle(opts: { goneAlbum?: string } = {}) {
   const albums = new Map<string, { title: string; items: string[] }>();
@@ -43,6 +44,16 @@ describe("TV poster albums", () => {
     expect(new TextDecoder().decode(c.subarray(6, 14))).toBe("hestia 2");
     expect([...c.subarray(14)]).toEqual([...jpeg.subarray(2)]);
   });
+  it("a PNG copy gets a valid text chunk after its header", () => {
+    const png = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, ...new Array(25).fill(7), 9, 9, 9]);
+    expect(mimeOf(png)).toBe("image/png");
+    const c = withPngText(png, "hestia 2"), v = new DataView(c.buffer);
+    const len = v.getUint32(33), type = new TextDecoder().decode(c.subarray(37, 41));
+    expect(type).toBe("tEXt");
+    expect(new TextDecoder().decode(c.subarray(41, 41 + len))).toBe("Comment\0hestia 2");
+    expect(v.getUint32(41 + len)).toBe(zcrc(c.subarray(37, 41 + len)) >>> 0);
+    expect([...c.subarray(45 + len)]).toEqual([9, 9, 9]);
+  });
   it("albums are remembered as soon as they exist", async () => {
     const g = fakeGoogle(), seen: string[] = [];
     await replacePicture(photosClient({ clientId: "c", clientSecret: "s" }, "r", g.fetcher), { tv: null, trash: null, previous: ["old-1"] },
@@ -71,5 +82,20 @@ describe("TV poster albums", () => {
       new Uint8Array([0xff, 0xd8]), "c", "c");
     expect(out.tv).not.toBe("album-old");
     expect(g.albums.get(out.tv)!.items).toHaveLength(2);
+  });
+});
+
+import { drawPosterNow } from "../supabase/functions/_shared/github.ts";
+describe("drawing the poster now", () => {
+  it("asks GitHub for the poster workflow, only when both secrets are there", async () => {
+    const calls: { url: string; init?: RequestInit }[] = [];
+    const fetcher = (async (url: RequestInfo | URL, init?: RequestInit) => { calls.push({ url: String(url), init }); return new Response(null, { status: 204 }); }) as typeof fetch;
+    const env = (vars: Record<string, string>) => (k: string) => vars[k];
+    expect(await drawPosterNow(env({}), fetcher)).toBe(false);
+    expect(await drawPosterNow(env({ GITHUB_POSTER_TOKEN: "t", GITHUB_POSTER_REPO: "not a repo" }), fetcher)).toBe(false);
+    expect(await drawPosterNow(env({ GITHUB_POSTER_TOKEN: "t", GITHUB_POSTER_REPO: "family/hestia" }), fetcher)).toBe(true);
+    expect(calls).toHaveLength(1);
+    expect(calls[0].url).toBe("https://api.github.com/repos/family/hestia/actions/workflows/poster.yml/dispatches");
+    expect(JSON.parse(String(calls[0].init?.body))).toEqual({ ref: "main" });
   });
 });

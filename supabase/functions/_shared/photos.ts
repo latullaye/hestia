@@ -14,8 +14,12 @@ const API = "https://photoslibrary.googleapis.com/v1";
 
 export type OAuthClient = { clientId: string; clientSecret: string };
 
-// The same picture with a JPEG comment in it (invisible): Google Photos merges identical files into one photo, so each
-// copy must differ by a few bytes to be its own photo in the album
+// The same picture with an invisible note in it: Google Photos merges identical files into one photo, so each copy must
+// differ by a few bytes to be its own photo in the album. JPEG: a comment segment; PNG: a text chunk.
+export type Mime = "image/jpeg" | "image/png";
+export const mimeOf = (b: Uint8Array): Mime | null =>
+  b[0] === 0xff && b[1] === 0xd8 ? "image/jpeg" : b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4e && b[3] === 0x47 ? "image/png" : null;
+
 export function withComment(jpeg: Uint8Array, text: string): Uint8Array {
   const note = new TextEncoder().encode(text), len = note.length + 2;
   const out = new Uint8Array(jpeg.length + 2 + len);
@@ -25,6 +29,23 @@ export function withComment(jpeg: Uint8Array, text: string): Uint8Array {
   out.set(jpeg.subarray(2), 6 + note.length);
   return out;
 }
+
+const CRC = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+const crc32 = (b: Uint8Array) => { let c = 0xffffffff; for (const x of b) c = CRC[(c ^ x) & 0xff] ^ (c >>> 8); return (c ^ 0xffffffff) >>> 0; };
+// A tEXt chunk ("Comment") right after the header chunk (8-byte signature + 25-byte IHDR)
+export function withPngText(png: Uint8Array, text: string): Uint8Array {
+  const body = new TextEncoder().encode(`tEXtComment\0${text}`), at = 33;
+  const chunk = new Uint8Array(12 + body.length - 4);
+  const v = new DataView(chunk.buffer);
+  v.setUint32(0, body.length - 4);
+  chunk.set(body, 4);
+  v.setUint32(4 + body.length, crc32(body));
+  const out = new Uint8Array(png.length + chunk.length);
+  out.set(png.subarray(0, at), 0); out.set(chunk, at); out.set(png.subarray(at), at + chunk.length);
+  return out;
+}
+const distinct = (bytes: Uint8Array, mime: Mime, i: number) =>
+  i === 0 ? bytes : mime === "image/png" ? withPngText(bytes, `hestia ${i + 1}`) : withComment(bytes, `hestia ${i + 1}`);
 
 export function consentUrl(client: OAuthClient, redirectUri: string, state: string): string {
   const q = new URLSearchParams({
@@ -61,17 +82,18 @@ export function photosClient(client: OAuthClient, refreshToken: string, fetcher:
     createAlbum: async (title: string): Promise<string> => (await call("/albums", { album: { title } })).id,
     // One picture, put in the album as `copies` separate photos (an upload token is good for one photo only)
     async addPicture(albumId: string, bytes: Uint8Array, name: string, description: string, copies = 2): Promise<string[]> {
+      const mime = mimeOf(bytes) ?? "image/jpeg", ext = mime === "image/png" ? "png" : "jpg";
       const tokens: string[] = [];
       for (let i = 0; i < copies; i++) {
         const r = await fetcher(`${API}/uploads`, {
-          method: "POST", body: new Blob([(i ? withComment(bytes, `hestia ${i + 1}`) : bytes) as BlobPart]),
-          headers: { Authorization: `Bearer ${await bearer()}`, "Content-Type": "application/octet-stream", "X-Goog-Upload-Content-Type": "image/jpeg", "X-Goog-Upload-Protocol": "raw" },
+          method: "POST", body: new Blob([distinct(bytes, mime, i) as BlobPart]),
+          headers: { Authorization: `Bearer ${await bearer()}`, "Content-Type": "application/octet-stream", "X-Goog-Upload-Content-Type": mime, "X-Goog-Upload-Protocol": "raw" },
         });
         if (!r.ok) throw new Error(`Google Photos : envoi refusé (${r.status})`);
         tokens.push(await r.text());
       }
       const out = await call("/mediaItems:batchCreate", {
-        albumId, newMediaItems: tokens.map((uploadToken, i) => ({ description, simpleMediaItem: { uploadToken, fileName: `${name}-${i + 1}.jpg` } })),
+        albumId, newMediaItems: tokens.map((uploadToken, i) => ({ description, simpleMediaItem: { uploadToken, fileName: `${name}-${i + 1}.${ext}` } })),
       });
       const results: any[] = out.newMediaItemResults || [];
       const ids = [...new Set(results.map((x) => x.mediaItem?.id).filter(Boolean))] as string[];

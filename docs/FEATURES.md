@@ -258,17 +258,24 @@ Les jours qui viennent en une image 4K (3840 × 2160), dans l'album Google Photo
 projette. Écran : `src/pages/Poster.tsx` (`#/poster`) ; réglages : **Réglages › Télé**.
 
 - **Ce qu'elle montre** (variante « Aujourd'hui en grand », thème sombre, choisie par la famille) : la carte du jour ne
-  porte que l'essentiel, les rendez-vous et le menu (dîner, souper) ; dessous, deux lignes discrètes, sans étiquettes :
-  les tâches du jour, puis les anniversaires des trois semaines à venir (prénom et initiale). À droite, les trois jours
-  suivants (deux événements au plus, puis dîner et souper). Le logo en haut à gauche ; en haut à droite la date et les décomptes affichés sur le kiosque (« Noël dans
+  porte que l'essentiel, les rendez-vous **encore à venir** (ceux qui sont passés s'en vont) et le menu (dîner et souper,
+  seulement le souper à partir de 16 h). Quand il ne reste plus rien à venir aujourd'hui, la carte du jour se réduit à
+  une ligne (« Ce soir · Souper ») et une seconde carte montre **demain** (rendez-vous et menu) ; la colonne de droite
+  commence alors au surlendemain. Dessous, deux lignes discrètes, sans étiquettes : les tâches du jour à ne pas oublier
+  (pas celles de tous les jours, comme la vaisselle), puis les anniversaires des trois semaines à venir (prénom et initiale). À droite, les trois jours suivants (deux événements au
+  plus, puis dîner et souper).
+- **Quelqu'un rentre** (« Je rentre ») : une carte en verre plus claire, tout en haut, « Arthur arrive vers 17 h 30 »,
+  avec le départ et son mot. L'image est refaite dès que la nouvelle part (45 s après le dernier ajustement), sans
+  attendre la demi-heure ; la carte s'en va une demi-heure après l'heure annoncée (au passage suivant). Le logo en haut à gauche ; en haut à droite la date et les décomptes affichés sur le kiosque (« Noël dans
   33 jours »). Le bas de l'image reste vide : la télé l'assombrit (un dégradé) et y affiche son heure et sa météo. Les
   noms longs passent à la ligne ou sont coupés, jamais la mise en page. Chaque rendez-vous porte les pastilles des
   personnes concernées, et « avec » celle de l'adulte qui accompagne (« Pédiatre · L avec S »).
 - **Effet verre** (demandé pour la télé seulement) : la carte du jour est une plaque de verre dépoli sur un fond sombre
   où passent de grandes taches douces de bleu-vert et de braise ; reflet sur l'arête du haut, étiquettes en verre aussi.
   Ailleurs, l'app garde ses cartes unies. Les autres variantes restent pour essayer : `?v=semaine`, `?v=epure`, `&theme=light`.
-- **Quand elle change** : toutes les 30 minutes, une tâche GitHub (`.github/workflows/poster.yml`, `scripts/poster.mjs`)
-  dessine l'affiche avec les données du moment et ne l'envoie que si son texte a changé (et donc au moins chaque matin,
+- **Quand elle change** : à la nouvelle d'un trajet (voir ci-dessus), et toutes les 30 minutes : une tâche GitHub (`.github/workflows/poster.yml`, `scripts/poster.mjs`)
+  dessine l'affiche avec les données du moment (une image PNG, sans perte : pas de halo autour des lettres) et ne
+  l'envoie que si son texte a changé (et donc au moins chaque matin,
   avec la date). Les journaux de cette tâche ne montrent jamais les données de la famille.
 - **Les albums** : une app ne peut remplir qu'un album qu'elle a créé, et ne peut supprimer aucune photo. Hestia crée
   donc deux albums dans le compte relié : « Hestia · Télé » (l'image du moment, deux fois) et « Hestia · À supprimer »
