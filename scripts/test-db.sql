@@ -443,6 +443,13 @@ do $$ begin
   end;
 end $$;
 
+-- ---------- The TV poster's clock (20261123100000): a pg_cron job only, absent from this test database ----------
+do $$ declare n int; begin
+  if to_regclass('cron.job') is null then return; end if;
+  execute $q$select count(*) from cron.job where jobname = 'hestia-poster'$q$ into n;
+  assert n = 1, 'with pg_cron, the poster is asked for every 30 minutes';
+end $$;
+
 -- ---------- A member removed for good: nothing blocks, their name leaves the rows ----------
 -- (rolled back: the tool tests that follow use the same family)
 begin;
