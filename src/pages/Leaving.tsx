@@ -8,6 +8,7 @@ import { Minus, Plus } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { activeArrivals, hhmm, minutesLeft } from "../components/Away";
+import { useOwnTracks } from "../components/OwnTracks";
 import { isSharing, setSharing } from "../components/TripSharer";
 import { TripMap } from "../components/TripMap";
 import { Field, MemberChips, SyncPill, toast } from "../components/ui";
@@ -36,6 +37,7 @@ function OnTheWay({ trip }: { trip: Arrival }) {
   const household = useHousehold(), members = useMembers(), navigate = useNavigate(), now = useNow(10_000);
   const [note, setNote] = useState(trip.note ?? "");
   const [sharing, setOn] = useState(isSharing(trip.id));
+  const ownTracks = useOwnTracks(useSession().demo);
   const loc = useTable("arrival_locations").find((l) => l.id === trip.id);
   const home = homeOf(household);
   const me: Point | null = loc?.lat != null && loc?.lng != null ? { lat: loc.lat, lng: loc.lng } : null;
@@ -74,7 +76,10 @@ function OnTheWay({ trip }: { trip: Arrival }) {
             {loc?.located_at ? `Envoyée ${ago(loc.located_at, now)}${loc.via === "owntracks" ? " par OwnTracks" : ""}` : "En attente de ta position…"}
             {route && !route.straight ? ` · ${fmtDistance(route.meters)} jusqu'à la maison` : ""}
           </span>
-          <span className="tiny muted">Garde Hestia ouverte (l'écran reste allumé). Téléphone verrouillé : seule OwnTracks peut l'envoyer (Réglages).
+          <span className="tiny muted">
+            {ownTracks === "used" ? "OwnTracks l'envoie même téléphone verrouillé : tu peux fermer Hestia."
+              : ownTracks === "set" ? "OwnTracks n'a encore rien envoyé : ouvre-le pour vérifier. D'ici là, garde Hestia ouverte."
+              : "Garde Hestia ouverte (l'écran reste allumé). Téléphone verrouillé : seule OwnTracks peut l'envoyer (Réglages)."}
             {!home && " La maison n'est pas encore placée : Réglages › La maison."}</span>
         </>}
       </div>

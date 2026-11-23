@@ -7,12 +7,31 @@ import { supabase } from "../lib/supabase";
 import { toast } from "./ui";
 
 type Info = { created_at: string; last_used_at: string | null } | null;
+
+// Does OwnTracks send my position? "used": an address exists and OwnTracks has sent through it; "set": an address, nothing
+// received yet; "none". Kept on the phone, so that the app knows it at once (TripSharer, without the network).
+export type OwnTracksState = "used" | "set" | "none";
+const OT_KEY = "hestia:owntracks";
+export const ownTracksState = (): OwnTracksState => (localStorage.getItem(OT_KEY) as OwnTracksState) || "none";
+const keep = (info: Info) => localStorage.setItem(OT_KEY, !info ? "none" : info.last_used_at ? "used" : "set");
+export function useOwnTracks(demo = false): OwnTracksState {
+  const [state, setState] = useState(ownTracksState);
+  useEffect(() => {
+    if (demo) return;
+    void supabase.rpc("location_key_info").then(({ data, error }) => {
+      if (error) return;
+      keep(((data as any[]) || [])[0] ?? null);
+      setState(ownTracksState());
+    });
+  }, [demo]);
+  return state;
+}
 const day = (iso: string) => new Date(iso).toLocaleString("fr-CA", { dateStyle: "medium", timeStyle: "short" });
 
 export function OwnTracksCard() {
   const [info, setInfo] = useState<Info | undefined>(undefined);
   const [fresh, setFresh] = useState<string | null>(null);
-  const load = async () => { const { data } = await supabase.rpc("location_key_info"); setInfo(((data as any[]) || [])[0] ?? null); };
+  const load = async () => { const { data } = await supabase.rpc("location_key_info"); const i = ((data as any[]) || [])[0] ?? null; keep(i); setInfo(i); };
   useEffect(() => { void load(); }, []);
   const make = async () => {
     if (info && !confirm("Remplacer l'adresse ? L'ancienne cessera de fonctionner : il faudra coller la nouvelle dans OwnTracks.")) return;

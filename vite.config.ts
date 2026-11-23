@@ -9,7 +9,7 @@ const csp = (): Plugin => ({
   name: "hestia-csp",
   apply: "build",
   transformIndexHtml: (html) => html.replace("<!--csp-->",
-    `<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.basemaps.cartocdn.com; font-src 'self'; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.open-meteo.com https://routing.openstreetmap.de; worker-src 'self'; manifest-src 'self'; base-uri 'self'; form-action 'none'">`),
+    `<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://tile.openstreetmap.org; font-src 'self'; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.open-meteo.com https://routing.openstreetmap.de; worker-src 'self'; manifest-src 'self'; base-uri 'self'; form-action 'none'">`),
 });
 
 export default defineConfig({

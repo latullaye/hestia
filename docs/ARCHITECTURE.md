@@ -19,7 +19,7 @@
                               └ pg_cron + pg_net (horaires, appels base → fonctions)
                                          │
                                          └──► API Anthropic (interphone) · services push · Open-Meteo, itinéraires
-                                              OpenStreetMap et tuiles CARTO (depuis l'app)
+                                              OpenStreetMap et ses tuiles (depuis l'app)
 ```
 
 Une seule base, une seule app. La tablette n'est pas une deuxième application : c'est la même, connectée avec un compte

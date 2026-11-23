@@ -1,5 +1,6 @@
 // While I am on my way home and chose to share where I am, the app sends my position (it runs on every screen, as long
-// as Hestia is open; the screen is kept on). With the phone locked, only OwnTracks can (Réglages, docs/SETUP.md).
+// as Hestia is open). With the phone locked, only OwnTracks can (Réglages, docs/SETUP.md): without it, the screen is
+// kept on; with it, the phone may sleep, OwnTracks takes over.
 // A point every 20 seconds at most, or sooner after 60 m. Being near home ends the trip (the server decides).
 import { useEffect, useReducer, useRef } from "react";
 import { keepAwake } from "../lib/device";
@@ -9,6 +10,7 @@ import { store } from "../lib/store";
 import { supabase } from "../lib/supabase";
 import { distanceM, type Point } from "../lib/trip";
 import { activeArrivals } from "./Away";
+import { ownTracksState } from "./OwnTracks";
 import { toast } from "./ui";
 
 const EVERY_MS = 20_000, MOVED_M = 60;
@@ -29,7 +31,7 @@ export function TripSharer() {
 
   useEffect(() => {
     if (!on || !trip) return;
-    const awake = keepAwake();
+    const awake = ownTracksState() === "used" ? () => {} : keepAwake();
     const watch = navigator.geolocation.watchPosition(async (pos) => {
       const p = { lat: pos.coords.latitude, lng: pos.coords.longitude }, t = Date.now();
       if (last.current && t - last.current.at < EVERY_MS && distanceM(last.current.p, p) < MOVED_M) return;
