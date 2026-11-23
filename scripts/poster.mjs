@@ -1,7 +1,7 @@
 // Draws the TV poster and sends it to the album when it changed (.github/workflows/poster.yml, every 30 minutes).
 //   1. asks the "poster" function for the rows of the moment (HESTIA_POSTER_KEY);
 //   2. draws the app's #/poster screen with them, from dist/ (npm run build), in Chromium, at 3840 × 2160;
-//   3. if what it says changed since the last picture (a fingerprint of its text), sends the JPEG back.
+//   3. if what it says changed since the last picture (a fingerprint of its text), sends the PNG back.
 // It never prints the family's data: the repository is public, and so are the workflow's logs.
 //   HESTIA_POSTER_VARIANT  aujourdhui (default) | semaine | epure      HESTIA_POSTER_FORCE=1  send even if unchanged
 import { createHash } from "node:crypto";
@@ -43,8 +43,9 @@ try {
   await page.waitForTimeout(500);
   const hash = createHash("sha256").update(`${VARIANT}\n${await page.locator(".poster").innerText()}`).digest("hex");
   if (hash === last && !process.env.HESTIA_POSTER_FORCE) { console.log("Affiche inchangée : rien à envoyer."); process.exit(0); }
-  const jpeg = await page.screenshot({ type: "jpeg", quality: 92 });
-  const up = await fetch(`${FUNCTIONS}/poster/upload?hash=${hash}`, { method: "POST", headers: { ...auth, "Content-Type": "image/jpeg" }, body: jpeg });
+  // PNG, not JPEG: no compression halo around the letters, which shows on a dark background on a large screen
+  const png = await page.screenshot({ type: "png" });
+  const up = await fetch(`${FUNCTIONS}/poster/upload?hash=${hash}`, { method: "POST", headers: { ...auth, "Content-Type": "image/png" }, body: png });
   const out = await up.json().catch(() => ({}));
   if (!up.ok) { console.error(`L'affiche n'a pas pu être envoyée (${up.status}) : ${out.error || "?"}`); process.exit(1); }
   console.log(`Nouvelle affiche envoyée : ${out.photos} photos dans l'album, ${out.moved} anciennes déplacées.`);

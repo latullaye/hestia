@@ -10,7 +10,7 @@
 //   GET  /poster/callback       (Google)      the end of the consent: keeps the access, back to the app
 import { type Db, config, householdTz, setConfig } from "../_shared/db.ts";
 import { json, memberFromToken, preflight, rememberFunctionsUrl } from "../_shared/http.ts";
-import { type OAuthClient, consentUrl, exchangeCode, photosClient, replacePicture } from "../_shared/photos.ts";
+import { type OAuthClient, consentUrl, exchangeCode, mimeOf, photosClient, replacePicture } from "../_shared/photos.ts";
 import { db, env } from "../_shared/runtime.ts";
 import { addDays, partsIn } from "../_shared/time.ts";
 
@@ -35,7 +35,7 @@ async function keyOk(req: Request, d: Db): Promise<boolean> {
 // The rows the poster needs, nothing more: today and the next days
 async function snapshot(d: Db) {
   const tz = await householdTz(d), today = partsIn(Date.now(), tz).day, end = addDays(today, DAYS);
-  const [members, settings, events, meals, occurrences, birthdays, countdowns, stays, arrivals] = await Promise.all([
+  const [members, settings, events, meals, occurrences, birthdays, countdowns, stays, arrivals, chores] = await Promise.all([
     d.all(`select * from public.members where active and deleted_at is null`),
     d.all(`select * from public.settings where id = 'household'`),
     d.all(`select * from public.events where deleted_at is null and status in ('confirmed', 'pending')
@@ -48,6 +48,8 @@ async function snapshot(d: Db) {
     d.all(`select * from public.stays where deleted_at is null and end_date >= $1::date and start_date <= $2::date`, [today, end]),
     // Someone on the way home (shown until half an hour after the time given)
     d.all(`select * from public.arrivals where deleted_at is null and arrived_at is null and eta > now() - interval '1 hour'`),
+    // The rules, to leave out the chores done every day
+    d.all(`select * from public.chores where deleted_at is null`),
   ]);
   const dishIds = [...new Set(meals.map((m) => m.dish_id).filter(Boolean))];
   const dishes = dishIds.length ? await d.all(`select * from public.dishes where id = any ($1::text::uuid[])`, [`{${dishIds.join(",")}}`]) : [];
@@ -56,7 +58,7 @@ async function snapshot(d: Db) {
     color: "#6b7a78", emoji: null, aliases: [], birth_date: null, sort_order: 999, active: true });
   return {
     tz, hash: await config(d, "poster_hash"),
-    tables: { members, settings, events, meal_plan: meals, dishes, chore_occurrences: occurrences, birthdays, countdowns, stays, arrivals },
+    tables: { members, settings, events, meal_plan: meals, dishes, chore_occurrences: occurrences, birthdays, countdowns, stays, arrivals, chores },
   };
 }
 
@@ -64,7 +66,7 @@ async function upload(req: Request, d: Db) {
   const c = client(), refresh = await config(d, "photos_refresh_token");
   if (!c || !refresh) return json({ error: "Google Photos n'est pas relié (Réglages › Télé)." }, 409);
   const bytes = new Uint8Array(await req.arrayBuffer());
-  if (bytes.length < 1000 || bytes.length > 15_000_000 || bytes[0] !== 0xff || bytes[1] !== 0xd8) return json({ error: "Image JPEG attendue." }, 400);
+  if (bytes.length < 1000 || bytes.length > 15_000_000 || !mimeOf(bytes)) return json({ error: "Image PNG ou JPEG attendue." }, 400);
   const tz = await householdTz(d), now = partsIn(Date.now(), tz);
   const previous = JSON.parse((await config(d, "poster_items")) || "[]") as string[];
   const out = await replacePicture(photosClient(c, refresh),

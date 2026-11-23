@@ -261,8 +261,8 @@ projette. Écran : `src/pages/Poster.tsx` (`#/poster`) ; réglages : **Réglages
   porte que l'essentiel, les rendez-vous **encore à venir** (ceux qui sont passés s'en vont) et le menu (dîner et souper,
   seulement le souper à partir de 16 h). Quand il ne reste plus rien à venir aujourd'hui, la carte du jour se réduit à
   une ligne (« Ce soir · Souper ») et une seconde carte montre **demain** (rendez-vous et menu) ; la colonne de droite
-  commence alors au surlendemain. Dessous, deux lignes discrètes, sans étiquettes : les tâches du jour, puis les
-  anniversaires des trois semaines à venir (prénom et initiale). À droite, les trois jours suivants (deux événements au
+  commence alors au surlendemain. Dessous, deux lignes discrètes, sans étiquettes : les tâches du jour à ne pas oublier
+  (pas celles de tous les jours, comme la vaisselle), puis les anniversaires des trois semaines à venir (prénom et initiale). À droite, les trois jours suivants (deux événements au
   plus, puis dîner et souper).
 - **Quelqu'un rentre** (« Je rentre ») : une carte en verre plus claire, tout en haut, « Arthur arrive vers 17 h 30 »,
   avec le départ et son mot. L'image est refaite dès que la nouvelle part (45 s après le dernier ajustement), sans
@@ -274,7 +274,8 @@ projette. Écran : `src/pages/Poster.tsx` (`#/poster`) ; réglages : **Réglages
   où passent de grandes taches douces de bleu-vert et de braise ; reflet sur l'arête du haut, étiquettes en verre aussi.
   Ailleurs, l'app garde ses cartes unies. Les autres variantes restent pour essayer : `?v=semaine`, `?v=epure`, `&theme=light`.
 - **Quand elle change** : à la nouvelle d'un trajet (voir ci-dessus), et toutes les 30 minutes : une tâche GitHub (`.github/workflows/poster.yml`, `scripts/poster.mjs`)
-  dessine l'affiche avec les données du moment et ne l'envoie que si son texte a changé (et donc au moins chaque matin,
+  dessine l'affiche avec les données du moment (une image PNG, sans perte : pas de halo autour des lettres) et ne
+  l'envoie que si son texte a changé (et donc au moins chaque matin,
   avec la date). Les journaux de cette tâche ne montrent jamais les données de la famille.
 - **Les albums** : une app ne peut remplir qu'un album qu'elle a créé, et ne peut supprimer aucune photo. Hestia crée
   donc deux albums dans le compte relié : « Hestia · Télé » (l'image du moment, deux fois) et « Hestia · À supprimer »

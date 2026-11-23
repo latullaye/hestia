@@ -29,7 +29,10 @@ function useDays(n: number) {
       lunch: mealsOn(meals, d, "lunch"), dinner: mealsOn(meals, d, "dinner"),
     };
   });
-  const chores = occurrencesOn(occurrences, today, tz, today).filter((o) => o.status === "todo");
+  // The chores worth a reminder: not those done every single day (nobody forgets the dishes), the others
+  const rules = useTable("chores");
+  const everyDay = new Set(rules.filter((c) => c.schedule.type === "daily" && (c.schedule.every ?? 1) <= 1).map((c) => c.id));
+  const chores = occurrencesOn(occurrences, today, tz, today).filter((o) => o.status === "todo" && !(o.chore_id && everyDay.has(o.chore_id)));
   const soon = [
     ...upcomingBirthdays(birthdaysAll, today).filter((b) => b.in >= n && b.in <= 30 && b.kind !== "memorial")
       .map((b) => ({ key: b.id, icon: BIRTHDAY_ICON[b.kind] ?? "cake", text: shortName(b.name), in: b.in })),
