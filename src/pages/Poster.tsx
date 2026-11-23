@@ -2,7 +2,7 @@
 // Laid out at 1920 × 1080 and taken at twice the scale: a 3840 × 2160 (4K) picture. No clock and no weather: the TV
 // draws them itself in the bottom-right corner, which is left empty. Read from across the room, so large type.
 //   #/poster?v=semaine | aujourdhui | epure    (three looks, to choose from)
-import { useEffect } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Glyph, Wordmark } from "../components/icons";
 import { hhmm } from "../components/Away";
@@ -85,13 +85,28 @@ function EventLine({ e, tz, members }: { e: CalEvent; tz: string; members: Retur
   );
 }
 
+// For whom a dish is (nothing when it is for everyone), and who cooks it (a chef's hat, then their badge): as on the kiosk
+function MealWho({ m }: { m: Meal }) {
+  const members = useMembers();
+  if (!m.member_ids.length && !m.cook_ids.length) return null;
+  return (
+    <span className="p-who">
+      {m.member_ids.length > 0 && <Avatars ids={m.member_ids} members={members} size="sm" />}
+      {m.cook_ids.length > 0 && <span className="p-cook"><Glyph name="chef-hat" /><Avatars ids={m.cook_ids} members={members} size="sm" /></span>}
+    </span>
+  );
+}
+
 function Meals({ list, dish, label }: { list: Meal[]; dish: (m: Meal) => string; label: string }) {
   if (!list.length) return null;
   return (
     <div className="p-meal"><span className="p-meal-label">{label}</span>
-      {list.map((m) => <span key={m.id} className="p-dish"><Glyph name={KIND_ICON[m.kind]} />{dish(m)}</span>)}</div>
+      {list.map((m) => <span key={m.id} className="p-dish"><Glyph name={KIND_ICON[m.kind]} />{dish(m)}<MealWho m={m} /></span>)}</div>
   );
 }
+// The dishes of a meal on one line (the next days): "Soupe ⓐ, Pain"
+const dishLine = (list: Meal[], dish: (m: Meal) => string) =>
+  <span className="p-dishes">{list.map((m, i) => <span key={m.id}>{i > 0 && ", "}{dish(m)}<MealWho m={m} /></span>)}</span>;
 
 function Soon({ soon, max = 3 }: { soon: ReturnType<typeof useDays>["soon"]; max?: number }) {
   if (!soon.length) return null;
@@ -137,10 +152,27 @@ function Semaine() {
 //   - when nothing is left to come today, today keeps only its menu and a second panel shows tomorrow; the column on the
 //     right then starts the day after.
 const EVENING = "16:00", ARRIVAL_SHOWN_MS = 30 * 60_000;
+
+// Keeps only the days that fit whole in the column (at least one), so that none is cut at the bottom; the hidden ones
+// are not in the picture's text either, so the fingerprint follows what is seen
+function fitDays(column: HTMLElement | null) {
+  if (!column) return;
+  const days = [...column.children] as HTMLElement[];
+  days.forEach((d) => { d.style.display = ""; });
+  const bottom = column.getBoundingClientRect().bottom;
+  let hide = false;
+  days.forEach((d, i) => {
+    if (!hide && i > 0 && d.getBoundingClientRect().bottom > bottom + 0.5) hide = true;
+    if (hide) d.style.display = "none";
+  });
+  // the last day shown has no rule under it
+  const shown = days.filter((d) => d.style.display !== "none");
+  shown.forEach((d, i) => d.classList.toggle("last", i === shown.length - 1));
+}
 const notOver = (e: CalEvent, now: number) => e.all_day || (e.ends_at ? Date.parse(e.ends_at) : Date.parse(e.starts_at) + 3_600_000) > now;
 
 function Aujourdhui() {
-  const { tz, today, members, days, chores, birthdays, counts, dish } = useDays(5);
+  const { tz, today, members, days, chores, birthdays, counts, dish } = useDays(10);
   const now = Date.now(), evening = partsIn(now, tz).time >= EVENING;
   const arrivals = useTable("arrivals").filter((a) => !a.deleted_at && !a.arrived_at && Date.parse(a.eta) + ARRIVAL_SHOWN_MS > now)
     .sort((a, b) => a.eta.localeCompare(b.eta));
@@ -148,7 +180,10 @@ function Aujourdhui() {
   const toCome = t.events.filter((e) => notOver(e, now));
   const lunch = evening ? [] : t.lunch;
   const showTomorrow = !toCome.length && !t.stay;
-  const next = showTomorrow ? days.slice(2, 5) : days.slice(1, 4);
+  // As many next days as the column holds whole: a quiet week shows more of them, a busy one fewer (see fitDays)
+  const next = showTomorrow ? days.slice(2, 10) : days.slice(1, 9);
+  const column = useRef<HTMLElement>(null);
+  useLayoutEffect(() => fitDays(column.current));
   const when = (n: number) => (n === 0 ? "aujourd'hui" : n === 1 ? "demain" : `dans ${n} jours`);
   const menu = (l: Meal[], d: Meal[]) => (l.length || d.length) ? <div className="p-meals"><Meals list={l} dish={dish} label="Dîner" /><Meals list={d} dish={dish} label="Souper" /></div> : null;
   return (
@@ -169,7 +204,7 @@ function Aujourdhui() {
           ))}
           {/* Today: what is still to come, and the menu */}
           <section className={`p-today ${showTomorrow ? "compact" : "main"}`}>
-            <span className="p-label">{showTomorrow ? "Ce soir" : "Aujourd'hui"}</span>
+            <span className="p-label">{showTomorrow && evening ? "Ce soir" : "Aujourd'hui"}</span>
             {t.stay && <span className="p-chip soft"><Glyph name={STAY_ICON[t.stay.kind]} />{stayLabel(t.stay)}</span>}
             {!showTomorrow && <div className="p-events big">{toCome.map((e) => <EventLine key={e.id} e={e} tz={tz} members={members} />)}</div>}
             {menu(lunch, t.dinner) ?? (showTomorrow && <span className="p-empty">Rien d'autre aujourd'hui</span>)}
@@ -180,7 +215,11 @@ function Aujourdhui() {
               <span className="p-label">Demain · {dayDate(tomorrow.d)}</span>
               {tomorrow.stay && <span className="p-chip soft"><Glyph name={STAY_ICON[tomorrow.stay.kind]} />{stayLabel(tomorrow.stay)}</span>}
               <div className="p-events big">{tomorrow.events.length ? tomorrow.events.map((e) => <EventLine key={e.id} e={e} tz={tz} members={members} />) : <span className="p-empty">Rien de prévu</span>}</div>
-              {menu(tomorrow.lunch, tomorrow.dinner)}
+              {/* Two compact lines: tomorrow shares the column, and a meal may have several dishes */}
+              {(tomorrow.lunch.length > 0 || tomorrow.dinner.length > 0) && <div className="p-meals lines">
+                {tomorrow.lunch.length > 0 && <span className="p-line"><em>Dîner</em>{dishLine(tomorrow.lunch, dish)}</span>}
+                {tomorrow.dinner.length > 0 && <span className="p-line"><em>Souper</em>{dishLine(tomorrow.dinner, dish)}</span>}
+              </div>}
             </section>
           )}
           {/* Beneath, quieter: the day's chores and the birthdays to come, as plain lines */}
@@ -189,7 +228,7 @@ function Aujourdhui() {
             {birthdays.length > 0 && <p><Glyph name="cake" /><span>{birthdays.map((x) => `${x.text} ${when(x.in)}`).join(" · ")}</span></p>}
           </div>}
         </div>
-        <section className="p-next">
+        <section className="p-next" ref={column}>
           {next.map(({ d, i, events, stay, lunch: l, dinner }) => (
             <div key={d} className="p-nextday">
               <div className="p-dayhead"><b>{dayName(d, i)}</b><span>{dayDate(d)}</span></div>
@@ -198,8 +237,8 @@ function Aujourdhui() {
               {events.length > 2 && <span className="p-line muted">et {events.length - 2} autre{events.length > 3 ? "s" : ""}</span>}
               {!events.length && !stay && !l.length && !dinner.length && <span className="p-line muted">Rien de prévu</span>}
               {(l.length > 0 || dinner.length > 0) && <span className="p-menu">
-                {l.length > 0 && <span className="p-line"><em>Dîner</em>{l.map(dish).join(", ")}</span>}
-                {dinner.length > 0 && <span className="p-line"><em>Souper</em>{dinner.map(dish).join(", ")}</span>}
+                {l.length > 0 && <span className="p-line"><em>Dîner</em>{dishLine(l, dish)}</span>}
+                {dinner.length > 0 && <span className="p-line"><em>Souper</em>{dishLine(dinner, dish)}</span>}
               </span>}
             </div>
           ))}

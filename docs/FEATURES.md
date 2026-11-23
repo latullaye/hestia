@@ -264,14 +264,17 @@ variable de dépôt GitHub `HESTIA_POSTER_SCALE` = `2` (Settings › Secrets and
   seulement le souper à partir de 16 h). Quand il ne reste plus rien à venir aujourd'hui, la carte du jour se réduit à
   une ligne (« Ce soir · Souper ») et une seconde carte montre **demain** (rendez-vous et menu) ; la colonne de droite
   commence alors au surlendemain. Dessous, deux lignes discrètes, sans étiquettes : les tâches du jour à ne pas oublier
-  (pas celles de tous les jours, comme la vaisselle), puis les anniversaires des trois semaines à venir (prénom et initiale). À droite, les trois jours suivants (deux événements au
-  plus, puis dîner et souper).
+  (pas celles de tous les jours, comme la vaisselle), puis les anniversaires des trois semaines à venir (prénom et
+  initiale). À droite, les jours suivants : autant qu'il en tient en entier (une semaine calme en montre 4 ou 5, une
+  semaine chargée 2), jamais un jour coupé ; deux événements au plus par jour, puis dîner et souper.
 - **Quelqu'un rentre** (« Je rentre ») : une carte en verre plus claire, tout en haut, « Arthur arrive vers 17 h 30 »,
   avec le départ et son mot. L'image est refaite dès que la nouvelle part (45 s après le dernier ajustement), sans
   attendre la demi-heure ; la carte s'en va une demi-heure après l'heure annoncée (au passage suivant). Le logo en haut à gauche ; en haut à droite la date et les décomptes affichés sur le kiosque (« Noël dans
   33 jours »). Le bas de l'image reste vide : la télé l'assombrit (un dégradé) et y affiche son heure et sa météo. Les
   noms longs passent à la ligne ou sont coupés, jamais la mise en page. Chaque rendez-vous porte les pastilles des
   personnes concernées, et « avec » celle de l'adulte qui accompagne (« Pédiatre · L avec S »).
+  Chaque plat porte les pastilles de ceux à qui il est destiné (rien s'il est pour tout le monde), puis une toque et la
+  pastille de qui le cuisine, comme sur le kiosque.
 - **Effet verre** (demandé pour la télé seulement) : la carte du jour est une plaque de verre dépoli sur un fond sombre
   où passent de grandes taches douces de bleu-vert et de braise ; reflet sur l'arête du haut, étiquettes en verre aussi.
   Ailleurs, l'app garde ses cartes unies. Les autres variantes restent pour essayer : `?v=semaine`, `?v=epure`, `&theme=light`.

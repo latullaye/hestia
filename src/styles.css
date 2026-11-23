@@ -422,7 +422,7 @@ button.link { background: none; border: 0; padding: 4px 8px; margin: -4px 0; min
 .p-today .p-chips-row { display: flex; gap: 14px; }
 .p-next { display: flex; flex-direction: column; gap: 26px; min-width: 0; min-height: 0; overflow: hidden; }
 .p-nextday { display: flex; flex-direction: column; gap: 10px; padding-bottom: 26px; border-bottom: 1px solid var(--line); }
-.p-nextday:last-of-type { border-bottom: 0; }
+.p-nextday:last-of-type, .p-nextday.last { border-bottom: 0; }
 .p-line { display: flex; align-items: center; gap: 14px; font-size: 28px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .p-line b { font-family: var(--font-display); color: var(--accent); min-width: 2.6em; }
 .p-line.muted, .p-item.muted { color: var(--muted); }
@@ -514,3 +514,20 @@ button.link { background: none; border: 0; padding: 4px 8px; margin: -4px 0; min
 :root[data-theme="dark"] .p-aujourdhui .p-arrival-icon { background: rgb(255 255 255 / 0.14); color: #c9eef0; box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.3); }
 :root[data-theme="dark"] .p-aujourdhui .p-arrival-text b { color: #e6f7f8; }
 :root[data-theme="dark"] .p-aujourdhui .p-arrival-text em { color: rgb(230 247 248 / 0.72); }
+/* Who a dish is for, and who cooks it (chef's hat), on the poster */
+.p-dish .p-who { margin-left: 4px; }
+.p-cook { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); }
+.p-dishes { display: inline-flex; align-items: center; min-width: 0; overflow: hidden; white-space: nowrap; }
+.p-dishes > span { display: inline-flex; align-items: center; gap: 8px; }
+.p-dishes .p-who { margin-left: 2px; margin-right: 4px; }
+:root[data-theme="dark"] .p-aujourdhui .p-today .p-cook .gi { color: #9fdde1; }
+.p-today .p-meals.lines { flex-direction: column; gap: 8px; font-size: 30px; font-weight: 700; }
+.p-today .p-meals.lines .p-line em { font-style: normal; font-size: 20px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); min-width: 5.4em; }
+/* When the column is full (someone coming home, today, tomorrow), tomorrow tightens a little more */
+.p-today.compact .p-dish { white-space: nowrap; }
+.p-today.tomorrow { gap: 12px; padding: 24px 44px; }
+.p-today.tomorrow .p-events.big { font-size: 32px; gap: 12px; }
+.p-today.tomorrow .p-meals.lines { gap: 4px; font-size: 28px; padding-top: 12px; }
+.p-next > .p-nextday { flex: none; } /* a day keeps its height: fitDays leaves out those that do not fit */
+/* An icon alone in a round badge: none of the margin that separates icons from text, so it sits in the middle */
+.p-arrival-icon .gi, .trip-home .gi { margin: 0; vertical-align: 0; opacity: 1; }
