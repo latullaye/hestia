@@ -422,7 +422,7 @@ button.link { background: none; border: 0; padding: 4px 8px; margin: -4px 0; min
 .p-today .p-chips-row { display: flex; gap: 14px; }
 .p-next { display: flex; flex-direction: column; gap: 26px; min-width: 0; min-height: 0; overflow: hidden; }
 .p-nextday { display: flex; flex-direction: column; gap: 10px; padding-bottom: 26px; border-bottom: 1px solid var(--line); }
-.p-nextday:last-of-type { border-bottom: 0; }
+.p-nextday:last-of-type, .p-nextday.last { border-bottom: 0; }
 .p-line { display: flex; align-items: center; gap: 14px; font-size: 28px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .p-line b { font-family: var(--font-display); color: var(--accent); min-width: 2.6em; }
 .p-line.muted, .p-item.muted { color: var(--muted); }
@@ -528,3 +528,4 @@ button.link { background: none; border: 0; padding: 4px 8px; margin: -4px 0; min
 .p-today.tomorrow { gap: 12px; padding: 24px 44px; }
 .p-today.tomorrow .p-events.big { font-size: 32px; gap: 12px; }
 .p-today.tomorrow .p-meals.lines { gap: 4px; font-size: 28px; padding-top: 12px; }
+.p-next > .p-nextday { flex: none; } /* a day keeps its height: fitDays leaves out those that do not fit */

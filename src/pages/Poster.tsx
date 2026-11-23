@@ -2,7 +2,7 @@
 // Laid out at 1920 × 1080 and taken at twice the scale: a 3840 × 2160 (4K) picture. No clock and no weather: the TV
 // draws them itself in the bottom-right corner, which is left empty. Read from across the room, so large type.
 //   #/poster?v=semaine | aujourdhui | epure    (three looks, to choose from)
-import { useEffect } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Glyph, Wordmark } from "../components/icons";
 import { hhmm } from "../components/Away";
@@ -152,10 +152,27 @@ function Semaine() {
 //   - when nothing is left to come today, today keeps only its menu and a second panel shows tomorrow; the column on the
 //     right then starts the day after.
 const EVENING = "16:00", ARRIVAL_SHOWN_MS = 30 * 60_000;
+
+// Keeps only the days that fit whole in the column (at least one), so that none is cut at the bottom; the hidden ones
+// are not in the picture's text either, so the fingerprint follows what is seen
+function fitDays(column: HTMLElement | null) {
+  if (!column) return;
+  const days = [...column.children] as HTMLElement[];
+  days.forEach((d) => { d.style.display = ""; });
+  const bottom = column.getBoundingClientRect().bottom;
+  let hide = false;
+  days.forEach((d, i) => {
+    if (!hide && i > 0 && d.getBoundingClientRect().bottom > bottom + 0.5) hide = true;
+    if (hide) d.style.display = "none";
+  });
+  // the last day shown has no rule under it
+  const shown = days.filter((d) => d.style.display !== "none");
+  shown.forEach((d, i) => d.classList.toggle("last", i === shown.length - 1));
+}
 const notOver = (e: CalEvent, now: number) => e.all_day || (e.ends_at ? Date.parse(e.ends_at) : Date.parse(e.starts_at) + 3_600_000) > now;
 
 function Aujourdhui() {
-  const { tz, today, members, days, chores, birthdays, counts, dish } = useDays(5);
+  const { tz, today, members, days, chores, birthdays, counts, dish } = useDays(10);
   const now = Date.now(), evening = partsIn(now, tz).time >= EVENING;
   const arrivals = useTable("arrivals").filter((a) => !a.deleted_at && !a.arrived_at && Date.parse(a.eta) + ARRIVAL_SHOWN_MS > now)
     .sort((a, b) => a.eta.localeCompare(b.eta));
@@ -163,7 +180,10 @@ function Aujourdhui() {
   const toCome = t.events.filter((e) => notOver(e, now));
   const lunch = evening ? [] : t.lunch;
   const showTomorrow = !toCome.length && !t.stay;
-  const next = showTomorrow ? days.slice(2, 5) : days.slice(1, 4);
+  // As many next days as the column holds whole: a quiet week shows more of them, a busy one fewer (see fitDays)
+  const next = showTomorrow ? days.slice(2, 10) : days.slice(1, 9);
+  const column = useRef<HTMLElement>(null);
+  useLayoutEffect(() => fitDays(column.current));
   const when = (n: number) => (n === 0 ? "aujourd'hui" : n === 1 ? "demain" : `dans ${n} jours`);
   const menu = (l: Meal[], d: Meal[]) => (l.length || d.length) ? <div className="p-meals"><Meals list={l} dish={dish} label="Dîner" /><Meals list={d} dish={dish} label="Souper" /></div> : null;
   return (
@@ -208,7 +228,7 @@ function Aujourdhui() {
             {birthdays.length > 0 && <p><Glyph name="cake" /><span>{birthdays.map((x) => `${x.text} ${when(x.in)}`).join(" · ")}</span></p>}
           </div>}
         </div>
-        <section className="p-next">
+        <section className="p-next" ref={column}>
           {next.map(({ d, i, events, stay, lunch: l, dinner }) => (
             <div key={d} className="p-nextday">
               <div className="p-dayhead"><b>{dayName(d, i)}</b><span>{dayDate(d)}</span></div>
