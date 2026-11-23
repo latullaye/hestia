@@ -170,6 +170,10 @@ Une fois. Il faut un client OAuth Google (le même que pour Google Agenda, voie 
    apparaît dans Google Photos avec l'image.
 8. App Google Home › la Chromecast › *Écran de veille* (Ambient) › **Google Photos** › choisir l'album
    « Hestia · Télé » (et seulement lui). Si l'image n'apparaît pas : *Personal photo curation* › « Live albums only ».
+9. Facultatif, pour que « Je rentre » s'affiche tout de suite sur la télé (sinon : au plus 30 minutes après) : GitHub ›
+   *Settings* (du compte) › *Developer settings › Personal access tokens › Fine-grained tokens › Generate new token* :
+   accès au seul dépôt de Hestia, permission **Actions : Read and write**, rien d'autre. Dans Supabase › Edge Functions ›
+   Secrets : `GITHUB_POSTER_TOKEN` = ce jeton, `GITHUB_POSTER_REPO` = `propriétaire/dépôt`.
 
 ## 9. Tablette, Claude
 

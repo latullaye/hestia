@@ -73,3 +73,18 @@ describe("TV poster albums", () => {
     expect(g.albums.get(out.tv)!.items).toHaveLength(2);
   });
 });
+
+import { drawPosterNow } from "../supabase/functions/_shared/github.ts";
+describe("drawing the poster now", () => {
+  it("asks GitHub for the poster workflow, only when both secrets are there", async () => {
+    const calls: { url: string; init?: RequestInit }[] = [];
+    const fetcher = (async (url: RequestInfo | URL, init?: RequestInit) => { calls.push({ url: String(url), init }); return new Response(null, { status: 204 }); }) as typeof fetch;
+    const env = (vars: Record<string, string>) => (k: string) => vars[k];
+    expect(await drawPosterNow(env({}), fetcher)).toBe(false);
+    expect(await drawPosterNow(env({ GITHUB_POSTER_TOKEN: "t", GITHUB_POSTER_REPO: "not a repo" }), fetcher)).toBe(false);
+    expect(await drawPosterNow(env({ GITHUB_POSTER_TOKEN: "t", GITHUB_POSTER_REPO: "family/hestia" }), fetcher)).toBe(true);
+    expect(calls).toHaveLength(1);
+    expect(calls[0].url).toBe("https://api.github.com/repos/family/hestia/actions/workflows/poster.yml/dispatches");
+    expect(JSON.parse(String(calls[0].init?.body))).toEqual({ ref: "main" });
+  });
+});

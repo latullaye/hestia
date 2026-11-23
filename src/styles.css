@@ -483,8 +483,33 @@ button.link { background: none; border: 0; padding: 4px 8px; margin: -4px 0; min
 .p-line .p-who .avatar.sm { width: 32px; height: 32px; font-size: 15px; }
 /* B: the glass card holds the appointments and the menu; the chores and the birthdays are two quiet lines beneath */
 .p-left { display: flex; flex-direction: column; gap: 22px; min-width: 0; min-height: 0; }
-.p-left .p-today { flex: 1; }
+.p-left .p-today.main { flex: 1; }
+.p-left .p-today.compact, .p-left .p-arrival { flex: none; }
+/* "Ce soir", when tomorrow has its own panel: one line, the label then the menu */
+.p-today.compact { flex-direction: row; align-items: center; gap: 36px; padding: 22px 44px; }
+.p-today.compact .p-meals { margin-top: 0; padding-top: 0; border-top: 0; font-size: 30px; gap: 40px; }
+.p-today.compact .p-meal { flex-direction: row; align-items: center; gap: 16px; }
+/* Tomorrow shares the column with tonight (and maybe someone coming home): a little smaller, so its menu fits */
+.p-today.tomorrow { gap: 16px; padding: 28px 44px; }
+.p-today.tomorrow .p-events.big { font-size: 34px; gap: 16px; }
+.p-today.tomorrow .p-events.big .p-time { font-size: 30px; }
+.p-today.tomorrow .p-meals { padding-top: 16px; font-size: 30px; }
+/* Someone on the way home: the most visible thing on the screen while it lasts */
+.p-arrival { flex-direction: row !important; align-items: center; gap: 28px !important; padding: 18px 36px !important; }
+.p-arrival-icon { width: 76px; height: 76px; border-radius: 50%; display: grid; place-items: center; flex: none; font-size: 40px;
+  background: var(--accent-soft); color: var(--accent); }
+.p-arrival-text { display: flex; flex-direction: column; min-width: 0; }
+.p-arrival-text > span { font-size: 30px; font-weight: 700; }
+.p-arrival-text b { font-family: var(--font-display); font-size: 66px; line-height: 1.02; color: var(--accent); }
+.p-arrival-text em { font-style: normal; font-size: 26px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .p-aside { display: flex; flex-direction: column; gap: 10px; padding: 0 8px; flex: none; }
 .p-aside p { margin: 0; display: flex; align-items: center; gap: 14px; font-size: 25px; color: var(--muted); white-space: nowrap; }
 .p-aside p > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .p-aside .gi { opacity: 0.8; }
+
+:root[data-theme="dark"] .p-aujourdhui .p-arrival {
+  background: linear-gradient(150deg, rgb(110 200 206 / 0.34), rgb(95 184 191 / 0.10) 60%, rgb(255 255 255 / 0.06));
+  border-color: rgb(159 221 225 / 0.45); }
+:root[data-theme="dark"] .p-aujourdhui .p-arrival-icon { background: rgb(255 255 255 / 0.14); color: #c9eef0; box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.3); }
+:root[data-theme="dark"] .p-aujourdhui .p-arrival-text b { color: #e6f7f8; }
+:root[data-theme="dark"] .p-aujourdhui .p-arrival-text em { color: rgb(230 247 248 / 0.72); }

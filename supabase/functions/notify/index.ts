@@ -9,6 +9,7 @@
 import { type Db, type Member, householdTz, loadMembers, uuids } from "../_shared/db.ts";
 import { isInternal, json, memberFromToken, preflight, rememberFunctionsUrl } from "../_shared/http.ts";
 import { type PushPayload, sendPush, vapid } from "../_shared/push.ts";
+import { drawPosterNow } from "../_shared/github.ts";
 import { type Shown, act, buttons } from "../_shared/notify-actions.ts";
 import { type NotifyPrefs, decide, eventLead } from "../_shared/notify-prefs.ts";
 import { db, env } from "../_shared/runtime.ts";
@@ -28,6 +29,8 @@ async function push(notificationId: string) {
     where id = $1::uuid and pushed_at is null and (send_after is null or send_after <= now())
     returning id, member_id, kind, title, body, url, data, action_token`, [notificationId]);
   if (!n) return { sent: 0 };
+  // The news of a trip home just went out: the TV poster shows it at once (whatever the person's own choices below)
+  if (n.kind === "arrival") await drawPosterNow(env);
   // What the person chose (Réglages): a muted topic is not pushed (the row stays in the inbox); during their quiet hours
   // the row is handed back, and the next reminders run tries again
   const prefs = (await db.one(`select notify_prefs from public.members where id = $1::uuid`, [n.member_id]))?.notify_prefs as NotifyPrefs | undefined;

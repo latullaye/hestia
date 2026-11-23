@@ -35,7 +35,7 @@ async function keyOk(req: Request, d: Db): Promise<boolean> {
 // The rows the poster needs, nothing more: today and the next days
 async function snapshot(d: Db) {
   const tz = await householdTz(d), today = partsIn(Date.now(), tz).day, end = addDays(today, DAYS);
-  const [members, settings, events, meals, occurrences, birthdays, countdowns, stays] = await Promise.all([
+  const [members, settings, events, meals, occurrences, birthdays, countdowns, stays, arrivals] = await Promise.all([
     d.all(`select * from public.members where active and deleted_at is null`),
     d.all(`select * from public.settings where id = 'household'`),
     d.all(`select * from public.events where deleted_at is null and status in ('confirmed', 'pending')
@@ -46,6 +46,8 @@ async function snapshot(d: Db) {
     d.all(`select * from public.birthdays where deleted_at is null`),
     d.all(`select * from public.countdowns where deleted_at is null`),
     d.all(`select * from public.stays where deleted_at is null and end_date >= $1::date and start_date <= $2::date`, [today, end]),
+    // Someone on the way home (shown until half an hour after the time given)
+    d.all(`select * from public.arrivals where deleted_at is null and arrived_at is null and eta > now() - interval '1 hour'`),
   ]);
   const dishIds = [...new Set(meals.map((m) => m.dish_id).filter(Boolean))];
   const dishes = dishIds.length ? await d.all(`select * from public.dishes where id = any ($1::text::uuid[])`, [`{${dishIds.join(",")}}`]) : [];
@@ -54,7 +56,7 @@ async function snapshot(d: Db) {
     color: "#6b7a78", emoji: null, aliases: [], birth_date: null, sort_order: 999, active: true });
   return {
     tz, hash: await config(d, "poster_hash"),
-    tables: { members, settings, events, meal_plan: meals, dishes, chore_occurrences: occurrences, birthdays, countdowns, stays },
+    tables: { members, settings, events, meal_plan: meals, dishes, chore_occurrences: occurrences, birthdays, countdowns, stays, arrivals },
   };
 }
 

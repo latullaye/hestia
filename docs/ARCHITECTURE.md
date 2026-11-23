@@ -118,7 +118,8 @@ Une tâche GitHub planifiée (`.github/workflows/poster.yml`) demande à `poster
 `HESTIA_POSTER_KEY`, dont le serveur ne garde que l'empreinte), dessine `#/poster` dans Chromium avec ces lignes
 (`?demo=snapshot` : aucune connexion, rien ne sort de la page), et renvoie l'image JPEG seulement si son texte a changé.
 `poster` la met deux fois dans l'album « Hestia · Télé » et déplace les anciennes dans « Hestia · À supprimer »
-(`_shared/photos.ts`) ; l'accès à Google Photos est le consentement du propriétaire, demandé depuis Réglages.
+(`_shared/photos.ts`) ; l'accès à Google Photos est le consentement du propriétaire, demandé depuis Réglages. Quand la
+nouvelle d'un trajet part, `notify` demande aussitôt une image à GitHub (`_shared/github.ts`, jeton `GITHUB_POSTER_TOKEN`).
 
 ### Position pendant « Je rentre » (`location`)
 
