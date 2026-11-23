@@ -1,6 +1,8 @@
 // A small map of a trip home: the rider, the way home by bike, home. Drawn without a map library: the view is fitted
 // once to what it shows (no panning, no zooming), so a few map tiles and an SVG line are all it takes.
-// Tiles: CARTO's quiet "Positron" style (light) or its dark twin, from OpenStreetMap data, with their attribution.
+// Tiles: OpenStreetMap's own (no key needed), turned grey and tinted with Hestia's accent by CSS (.trip-map img and
+// .trip-tint), darkened in the dark theme. OSM's tile policy asks for a Referer: the app sends none by default
+// (index.html), so the tiles ask for the origin only. CARTO's quieter tiles now want a key.
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { Point, Route } from "../lib/trip";
 import { Glyph } from "./icons";
@@ -55,13 +57,13 @@ export function TripMap({ rider, home, route, fresh = true, height = 260 }: { ri
   const at = (p: Point) => { const w = world(p, z); return { x: w.x - left, y: w.y - top }; };
 
   const tiles: { x: number; y: number; key: string; src: string }[] = [];
-  const n = 2 ** z, style = dark ? "dark_all" : "light_all";
+  const n = 2 ** z;
   if (width) {
     for (let ty = Math.floor(top / TILE); ty <= Math.floor((top + height) / TILE); ty++) {
       if (ty < 0 || ty >= n) continue;
       for (let tx = Math.floor(left / TILE); tx <= Math.floor((left + width) / TILE); tx++) {
         const wx = ((tx % n) + n) % n;
-        tiles.push({ x: tx * TILE - left, y: ty * TILE - top, key: `${z}/${tx}/${ty}`, src: `https://${"abcd"[(wx + ty) % 4]}.basemaps.cartocdn.com/${style}/${z}/${wx}/${ty}@2x.png` });
+        tiles.push({ x: tx * TILE - left, y: ty * TILE - top, key: `${z}/${tx}/${ty}`, src: `https://tile.openstreetmap.org/${z}/${wx}/${ty}.png` });
       }
     }
   }
@@ -69,14 +71,15 @@ export function TripMap({ rider, home, route, fresh = true, height = 260 }: { ri
   const r = rider && at(rider), h = home && at(home);
 
   return (
-    <div ref={box} className="trip-map" style={{ height }} aria-label="Carte du trajet">
-      {tiles.map((t) => <img key={t.key} src={t.src} alt="" draggable={false} style={{ left: t.x, top: t.y }} />)}
+    <div ref={box} className={`trip-map ${dark ? "dark" : ""}`} style={{ height }} aria-label="Carte du trajet">
+      {tiles.map((t) => <img key={t.key} src={t.src} alt="" draggable={false} referrerPolicy="strict-origin-when-cross-origin" style={{ left: t.x, top: t.y }} />)}
+      <span className="trip-tint" />
       <svg width={width} height={height}>
         {line && <polyline points={line} className={`trip-route ${route?.straight ? "straight" : ""}`} />}
       </svg>
       {h && <span className="trip-home" style={{ left: h.x, top: h.y }}><Glyph name="home" /></span>}
       {r && <span className={`trip-rider ${fresh ? "fresh" : ""}`} style={{ left: r.x, top: r.y }} />}
-      <span className="trip-credit">© OpenStreetMap · © CARTO</span>
+      <span className="trip-credit">© les contributeurs d'OpenStreetMap</span>
     </div>
   );
 }

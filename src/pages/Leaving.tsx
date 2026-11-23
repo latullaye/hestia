@@ -8,7 +8,8 @@ import { Minus, Plus } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { activeArrivals, hhmm, minutesLeft } from "../components/Away";
-import { isSharing, setSharing } from "../components/TripSharer";
+import { useOwnTracks } from "../components/OwnTracks";
+import { isSharing } from "../components/TripSharer";
 import { TripMap } from "../components/TripMap";
 import { Field, MemberChips, SyncPill, toast } from "../components/ui";
 import { useHousehold, useMembers, useNow, useTable } from "../lib/hooks";
@@ -35,7 +36,8 @@ function Stepper({ onMinus, onPlus, minusOff }: { onMinus: () => void; onPlus: (
 function OnTheWay({ trip }: { trip: Arrival }) {
   const household = useHousehold(), members = useMembers(), navigate = useNavigate(), now = useNow(10_000);
   const [note, setNote] = useState(trip.note ?? "");
-  const [sharing, setOn] = useState(isSharing(trip.id));
+  const sharing = isSharing(trip);
+  const ownTracks = useOwnTracks(useSession().demo);
   const loc = useTable("arrival_locations").find((l) => l.id === trip.id);
   const home = homeOf(household);
   const me: Point | null = loc?.lat != null && loc?.lng != null ? { lat: loc.lat, lng: loc.lng } : null;
@@ -44,7 +46,7 @@ function OnTheWay({ trip }: { trip: Arrival }) {
   const told = members.names(trip.notify_ids.filter((id) => id !== trip.member_id), "personne");
   const move = (steps: number) => store.put("arrivals", { ...trip, eta: new Date(shiftSlot(eta, steps, now)).toISOString() });
   const saveNote = () => { if ((trip.note ?? "") !== note.trim()) { store.put("arrivals", { ...trip, note: note.trim() || null }); toast("Mot envoyé dans 45 s"); } };
-  const share = (on: boolean) => { setSharing(trip.id, on); setOn(on); };
+  const share = (on: boolean) => store.put("arrivals", { ...trip, share_location: on });
 
   return (
     <>
@@ -74,7 +76,10 @@ function OnTheWay({ trip }: { trip: Arrival }) {
             {loc?.located_at ? `Envoyée ${ago(loc.located_at, now)}${loc.via === "owntracks" ? " par OwnTracks" : ""}` : "En attente de ta position…"}
             {route && !route.straight ? ` · ${fmtDistance(route.meters)} jusqu'à la maison` : ""}
           </span>
-          <span className="tiny muted">Garde Hestia ouverte (l'écran reste allumé). Téléphone verrouillé : seule OwnTracks peut l'envoyer (Réglages).
+          <span className="tiny muted">
+            {ownTracks === "used" ? "OwnTracks l'envoie même téléphone verrouillé : tu peux fermer Hestia."
+              : ownTracks === "set" ? "OwnTracks n'a encore rien envoyé : ouvre-le pour vérifier. D'ici là, garde Hestia ouverte."
+              : "Garde Hestia ouverte (l'écran reste allumé). Téléphone verrouillé : seule OwnTracks peut l'envoyer (Réglages)."}
             {!home && " La maison n'est pas encore placée : Réglages › La maison."}</span>
         </>}
       </div>
@@ -102,9 +107,8 @@ export function Leaving() {
     if (!me) return;
     if (!to.length) return toast("Choisis qui prévenir.");
     remember("from", from.trim()); remember("to", to); remember("share", share);
-    const row = store.put("arrivals", { member_id: me.id, from_label: from.trim() || null, left_at: new Date().toISOString(), eta: new Date(eta).toISOString(),
-      notify_ids: to, arrived_at: null, note: note.trim() || null });
-    setSharing(row.id, share);
+    store.put("arrivals", { member_id: me.id, from_label: from.trim() || null, left_at: new Date().toISOString(), eta: new Date(eta).toISOString(),
+      notify_ids: to, arrived_at: null, note: note.trim() || null, share_location: share });
     toast(`${members.names(to)} ${to.length > 1 ? "le sauront" : "le saura"} dans 45 s`);
   };
 

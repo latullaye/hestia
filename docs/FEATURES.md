@@ -99,13 +99,18 @@ Plus › **Je rentre**, ou un appui long sur l'icône de Hestia sur Android (rac
 - **Où il est, en direct** : pendant le trajet, ceux qu'on prévient (et le kiosque, en touchant la pastille du haut)
   voient une carte : sa position, le chemin à vélo jusqu'à la maison, la distance qui reste et le temps à vélo, depuis
   quand la position date (grisée au-delà de 3 minutes). Le chemin vient du serveur d'itinéraires OpenStreetMap (FOSSGIS,
-  profil vélo) ; les fonds de carte de CARTO (OpenStreetMap). Sans réseau vers eux : une ligne droite en pointillés.
+  profil vélo) ; le fond de carte est celui d'OpenStreetMap, passé en gris et teinté de la couleur d'accent (sans clé).
+  Sans réseau vers eux : une ligne droite en pointillés.
 - **D'où vient la position** :
-  - de Hestia, tant qu'elle est ouverte (n'importe quel écran ; l'écran reste allumé) : un point toutes les 20 secondes
-    au plus, ou après 60 m (`src/components/TripSharer.tsx`) ;
+  - de Hestia, tant qu'elle est ouverte (n'importe quel écran ; l'écran reste allumé, sauf si OwnTracks a déjà envoyé
+    une position : il prend le relais) : un point toutes les 20 secondes au plus, ou après 60 m
+    (`src/components/TripSharer.tsx`) ;
   - d'**OwnTracks**, une app gratuite qui envoie la position même téléphone verrouillé : chacun crée son adresse secrète
     dans **Réglages › Position en arrière-plan** et la colle une fois dans OwnTracks ([SETUP.md](SETUP.md)). Hors d'un
     trajet, ce qu'envoie OwnTracks est ignoré.
+- **Partager ma position** : un interrupteur du trajet (`arrivals.share_location`). Coupé, le point déjà gardé est
+  effacé et plus rien n'est gardé, ni depuis Hestia ni depuis OwnTracks ; les autres lisent « ne partage pas sa
+  position ». L'arrivée près de la maison termine quand même le trajet (le point est lu, pas gardé).
 - **Vie privée** : seul le dernier point est gardé, et seulement pendant le trajet. Il est effacé à l'arrivée, à
   l'annulation, et une heure après l'heure annoncée.
 - **La maison sur la carte** : **Réglages › La maison › Je suis à la maison : la placer ici** (une fois). Elle sert au
