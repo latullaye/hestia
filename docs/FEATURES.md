@@ -275,7 +275,9 @@ variable de dépôt GitHub `HESTIA_POSTER_SCALE` = `2` (Settings › Secrets and
 - **Effet verre** (demandé pour la télé seulement) : la carte du jour est une plaque de verre dépoli sur un fond sombre
   où passent de grandes taches douces de bleu-vert et de braise ; reflet sur l'arête du haut, étiquettes en verre aussi.
   Ailleurs, l'app garde ses cartes unies. Les autres variantes restent pour essayer : `?v=semaine`, `?v=epure`, `&theme=light`.
-- **Quand elle change** : à la nouvelle d'un trajet (voir ci-dessus), et toutes les 30 minutes : une tâche GitHub (`.github/workflows/poster.yml`, `scripts/poster.mjs`)
+- **Quand elle change** : à la nouvelle d'un trajet (voir ci-dessus), et toutes les 30 minutes (l'horloge de la base,
+  `hestia-poster`, demande l'affiche à GitHub : le calendrier de GitHub saute des passages quand ses serveurs sont
+  chargés, et ne reste qu'en secours) : une tâche GitHub (`.github/workflows/poster.yml`, `scripts/poster.mjs`)
   dessine l'affiche avec les données du moment (une image PNG, sans perte : pas de halo autour des lettres ; des traits de pixels entiers) et ne
   l'envoie que si son texte a changé (et donc au moins chaque matin,
   avec la date). Les journaux de cette tâche ne montrent jamais les données de la famille.

@@ -1,6 +1,7 @@
 // The TV poster: the days ahead as a picture in a Google Photos album, which the Chromecast's ambient screen shows.
 // The picture is taken by a scheduled GitHub workflow (.github/workflows/poster.yml): it asks here for the rows to show,
 // draws the app's #/poster screen with them, and sends the picture back only when it changed.
+//   POST /poster                (database)    every 30 minutes, from pg_cron: asks GitHub to draw the poster now
 //   GET  /poster/snapshot       (poster key)  the rows the poster shows, and the fingerprint of the last picture sent
 //   POST /poster/upload?hash=…  (poster key)  a new picture (JPEG): twice into "Hestia · Télé", the previous ones moved
 //                                             to "Hestia · À supprimer" (see _shared/photos.ts)
@@ -9,7 +10,8 @@
 //   POST /poster/connect        (an adult)    the Google consent address; { back } is where to come back to
 //   GET  /poster/callback       (Google)      the end of the consent: keeps the access, back to the app
 import { type Db, config, householdTz, setConfig } from "../_shared/db.ts";
-import { json, memberFromToken, preflight, rememberFunctionsUrl } from "../_shared/http.ts";
+import { drawPosterNow } from "../_shared/github.ts";
+import { isInternal, json, memberFromToken, preflight, rememberFunctionsUrl } from "../_shared/http.ts";
 import { type OAuthClient, consentUrl, exchangeCode, mimeOf, photosClient, replacePicture } from "../_shared/photos.ts";
 import { db, env } from "../_shared/runtime.ts";
 import { addDays, partsIn } from "../_shared/time.ts";
@@ -88,6 +90,11 @@ Deno.serve(async (req: Request) => {
   const url = new URL(req.url), action = url.pathname.split("/").filter(Boolean).pop();
 
   try {
+    // From the database's clock (pg_cron, every 30 minutes): ask GitHub to draw the poster. GitHub's own schedule skips
+    // runs when its servers are busy (hours at a time), so the database keeps the time instead.
+    if (action === "poster" && req.method === "POST" && await isInternal(req, db)) {
+      return json({ asked: await drawPosterNow(env) });
+    }
     if (action === "snapshot" || action === "upload") {
       if (!(await keyOk(req, db))) return json({ error: "auth" }, 401);
       return action === "snapshot" ? json(await snapshot(db)) : await upload(req, db);
