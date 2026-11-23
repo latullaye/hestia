@@ -272,6 +272,8 @@ variable de dépôt GitHub `HESTIA_POSTER_SCALE` = `2` (Settings › Secrets and
   33 jours »). Le bas de l'image reste vide : la télé l'assombrit (un dégradé) et y affiche son heure et sa météo. Les
   noms longs passent à la ligne ou sont coupés, jamais la mise en page. Chaque rendez-vous porte les pastilles des
   personnes concernées, et « avec » celle de l'adulte qui accompagne (« Pédiatre · L avec S »).
+  Chaque plat porte les pastilles de ceux à qui il est destiné (rien s'il est pour tout le monde), puis une toque et la
+  pastille de qui le cuisine, comme sur le kiosque.
 - **Effet verre** (demandé pour la télé seulement) : la carte du jour est une plaque de verre dépoli sur un fond sombre
   où passent de grandes taches douces de bleu-vert et de braise ; reflet sur l'arête du haut, étiquettes en verre aussi.
   Ailleurs, l'app garde ses cartes unies. Les autres variantes restent pour essayer : `?v=semaine`, `?v=epure`, `&theme=light`.

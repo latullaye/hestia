@@ -514,3 +514,17 @@ button.link { background: none; border: 0; padding: 4px 8px; margin: -4px 0; min
 :root[data-theme="dark"] .p-aujourdhui .p-arrival-icon { background: rgb(255 255 255 / 0.14); color: #c9eef0; box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.3); }
 :root[data-theme="dark"] .p-aujourdhui .p-arrival-text b { color: #e6f7f8; }
 :root[data-theme="dark"] .p-aujourdhui .p-arrival-text em { color: rgb(230 247 248 / 0.72); }
+/* Who a dish is for, and who cooks it (chef's hat), on the poster */
+.p-dish .p-who { margin-left: 4px; }
+.p-cook { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); }
+.p-dishes { display: inline-flex; align-items: center; min-width: 0; overflow: hidden; white-space: nowrap; }
+.p-dishes > span { display: inline-flex; align-items: center; gap: 8px; }
+.p-dishes .p-who { margin-left: 2px; margin-right: 4px; }
+:root[data-theme="dark"] .p-aujourdhui .p-today .p-cook .gi { color: #9fdde1; }
+.p-today .p-meals.lines { flex-direction: column; gap: 8px; font-size: 30px; font-weight: 700; }
+.p-today .p-meals.lines .p-line em { font-style: normal; font-size: 20px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); min-width: 5.4em; }
+/* When the column is full (someone coming home, today, tomorrow), tomorrow tightens a little more */
+.p-today.compact .p-dish { white-space: nowrap; }
+.p-today.tomorrow { gap: 12px; padding: 24px 44px; }
+.p-today.tomorrow .p-events.big { font-size: 32px; gap: 12px; }
+.p-today.tomorrow .p-meals.lines { gap: 4px; font-size: 28px; padding-top: 12px; }

@@ -85,13 +85,28 @@ function EventLine({ e, tz, members }: { e: CalEvent; tz: string; members: Retur
   );
 }
 
+// For whom a dish is (nothing when it is for everyone), and who cooks it (a chef's hat, then their badge): as on the kiosk
+function MealWho({ m }: { m: Meal }) {
+  const members = useMembers();
+  if (!m.member_ids.length && !m.cook_ids.length) return null;
+  return (
+    <span className="p-who">
+      {m.member_ids.length > 0 && <Avatars ids={m.member_ids} members={members} size="sm" />}
+      {m.cook_ids.length > 0 && <span className="p-cook"><Glyph name="chef-hat" /><Avatars ids={m.cook_ids} members={members} size="sm" /></span>}
+    </span>
+  );
+}
+
 function Meals({ list, dish, label }: { list: Meal[]; dish: (m: Meal) => string; label: string }) {
   if (!list.length) return null;
   return (
     <div className="p-meal"><span className="p-meal-label">{label}</span>
-      {list.map((m) => <span key={m.id} className="p-dish"><Glyph name={KIND_ICON[m.kind]} />{dish(m)}</span>)}</div>
+      {list.map((m) => <span key={m.id} className="p-dish"><Glyph name={KIND_ICON[m.kind]} />{dish(m)}<MealWho m={m} /></span>)}</div>
   );
 }
+// The dishes of a meal on one line (the next days): "Soupe ⓐ, Pain"
+const dishLine = (list: Meal[], dish: (m: Meal) => string) =>
+  <span className="p-dishes">{list.map((m, i) => <span key={m.id}>{i > 0 && ", "}{dish(m)}<MealWho m={m} /></span>)}</span>;
 
 function Soon({ soon, max = 3 }: { soon: ReturnType<typeof useDays>["soon"]; max?: number }) {
   if (!soon.length) return null;
@@ -169,7 +184,7 @@ function Aujourdhui() {
           ))}
           {/* Today: what is still to come, and the menu */}
           <section className={`p-today ${showTomorrow ? "compact" : "main"}`}>
-            <span className="p-label">{showTomorrow ? "Ce soir" : "Aujourd'hui"}</span>
+            <span className="p-label">{showTomorrow && evening ? "Ce soir" : "Aujourd'hui"}</span>
             {t.stay && <span className="p-chip soft"><Glyph name={STAY_ICON[t.stay.kind]} />{stayLabel(t.stay)}</span>}
             {!showTomorrow && <div className="p-events big">{toCome.map((e) => <EventLine key={e.id} e={e} tz={tz} members={members} />)}</div>}
             {menu(lunch, t.dinner) ?? (showTomorrow && <span className="p-empty">Rien d'autre aujourd'hui</span>)}
@@ -180,7 +195,11 @@ function Aujourdhui() {
               <span className="p-label">Demain · {dayDate(tomorrow.d)}</span>
               {tomorrow.stay && <span className="p-chip soft"><Glyph name={STAY_ICON[tomorrow.stay.kind]} />{stayLabel(tomorrow.stay)}</span>}
               <div className="p-events big">{tomorrow.events.length ? tomorrow.events.map((e) => <EventLine key={e.id} e={e} tz={tz} members={members} />) : <span className="p-empty">Rien de prévu</span>}</div>
-              {menu(tomorrow.lunch, tomorrow.dinner)}
+              {/* Two compact lines: tomorrow shares the column, and a meal may have several dishes */}
+              {(tomorrow.lunch.length > 0 || tomorrow.dinner.length > 0) && <div className="p-meals lines">
+                {tomorrow.lunch.length > 0 && <span className="p-line"><em>Dîner</em>{dishLine(tomorrow.lunch, dish)}</span>}
+                {tomorrow.dinner.length > 0 && <span className="p-line"><em>Souper</em>{dishLine(tomorrow.dinner, dish)}</span>}
+              </div>}
             </section>
           )}
           {/* Beneath, quieter: the day's chores and the birthdays to come, as plain lines */}
@@ -198,8 +217,8 @@ function Aujourdhui() {
               {events.length > 2 && <span className="p-line muted">et {events.length - 2} autre{events.length > 3 ? "s" : ""}</span>}
               {!events.length && !stay && !l.length && !dinner.length && <span className="p-line muted">Rien de prévu</span>}
               {(l.length > 0 || dinner.length > 0) && <span className="p-menu">
-                {l.length > 0 && <span className="p-line"><em>Dîner</em>{l.map(dish).join(", ")}</span>}
-                {dinner.length > 0 && <span className="p-line"><em>Souper</em>{dinner.map(dish).join(", ")}</span>}
+                {l.length > 0 && <span className="p-line"><em>Dîner</em>{dishLine(l, dish)}</span>}
+                {dinner.length > 0 && <span className="p-line"><em>Souper</em>{dishLine(dinner, dish)}</span>}
               </span>}
             </div>
           ))}
