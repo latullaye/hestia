@@ -30,7 +30,8 @@ export function TripView({ trip, mapHeight = 280 }: { trip: Arrival; mapHeight?:
         {!over && <p className="muted" style={{ margin: 0 }}>{left > 0 ? `dans ${left} min` : "devrait être là"}{trip.from_label ? ` · départ ${trip.from_label} à ${hhmm(trip.left_at, household.tz)}` : ""}</p>}
         {trip.note && <p className="trip-note">« {trip.note} »</p>}
       </div>
-      {!over && <>
+      {!over && trip.share_location === false && <p className="small muted" style={{ margin: 0 }}>{name} ne partage pas sa position pour ce trajet.</p>}
+      {!over && trip.share_location !== false && <>
         <TripMap rider={rider} home={home} route={route} fresh={fresh} height={mapHeight} />
         <p className="small muted" style={{ margin: 0 }}>
           {!rider ? "Pas encore de position : elle s'affiche dès que son téléphone l'envoie."

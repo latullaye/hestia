@@ -108,6 +108,9 @@ Plus › **Je rentre**, ou un appui long sur l'icône de Hestia sur Android (rac
   - d'**OwnTracks**, une app gratuite qui envoie la position même téléphone verrouillé : chacun crée son adresse secrète
     dans **Réglages › Position en arrière-plan** et la colle une fois dans OwnTracks ([SETUP.md](SETUP.md)). Hors d'un
     trajet, ce qu'envoie OwnTracks est ignoré.
+- **Partager ma position** : un interrupteur du trajet (`arrivals.share_location`). Coupé, le point déjà gardé est
+  effacé et plus rien n'est gardé, ni depuis Hestia ni depuis OwnTracks ; les autres lisent « ne partage pas sa
+  position ». L'arrivée près de la maison termine quand même le trajet (le point est lu, pas gardé).
 - **Vie privée** : seul le dernier point est gardé, et seulement pendant le trajet. Il est effacé à l'arrivée, à
   l'annulation, et une heure après l'heure annoncée.
 - **La maison sur la carte** : **Réglages › La maison › Je suis à la maison : la placer ici** (une fois). Elle sert au

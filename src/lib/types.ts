@@ -30,7 +30,8 @@ export type ShoppingItem = Sync & { list_id: string; section_id: string | null; 
 export type TimeOfDay = "morning" | "afternoon" | "evening" | "anytime";
 export type Chore = Sync & { title: string; emoji: string | null; description: string | null; assignee_ids: string[]; assignment: "fixed" | "rotate"; schedule: Schedule; time_of_day: TimeOfDay; start_date: string; end_date: string | null; active: boolean; sort_order: number };
 export type Occurrence = Sync & { chore_id: string | null; title: string; emoji: string | null; due_date: string; due_until: string | null; time_of_day: TimeOfDay; assignee_ids: string[]; status: "todo" | "done" | "skipped"; done_by: string | null; done_at: string | null; note: string | null; created_by?: string | null; stay_id?: string | null };
-export type Arrival = Sync & { member_id: string; from_label: string | null; left_at: string; eta: string; notify_ids: string[]; arrived_at: string | null; note?: string | null };
+export type Arrival = Sync & { member_id: string; from_label: string | null; left_at: string; eta: string; notify_ids: string[]; arrived_at: string | null; note?: string | null;
+  share_location?: boolean }; // where I am may be kept and seen (app and OwnTracks); off: nothing is kept
 // Where someone on the way home is: only the latest point, only during the trip (id = the trip's id)
 export type ArrivalLocation = { id: string; lat: number | null; lng: number | null; accuracy: number | null; located_at: string | null; via: "app" | "owntracks" | null; updated_at?: string; deleted_at?: string | null };
 export type Transport = "car" | "bus" | "train" | "plane" | "other";

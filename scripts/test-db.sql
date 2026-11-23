@@ -370,6 +370,19 @@ do $$ begin
   -- At the door, just after saying "je rentre": not home yet
   assert private.record_location('10000000-0000-0000-0000-000000000002', 45.5005, -73.6, 5, now(), 'owntracks') = 'ok', 'not in the first minutes';
 end $$;
+-- The sharing switch is the trip's: off, the point is wiped and OwnTracks' points are not kept (no news for it)
+create temp table n0 as select count(*) as c from public.notifications where kind = 'arrival';
+update public.arrivals set share_location = false where id = '71000000-0000-0000-0000-000000000001';
+do $$ begin
+  assert (select lat is null and deleted_at is not null from public.arrival_locations where id = '71000000-0000-0000-0000-000000000001'), 'off: the point is wiped';
+  assert private.record_location('10000000-0000-0000-0000-000000000002', 45.8, -73.6, 5, now(), 'owntracks') = 'off', 'off: not kept';
+  assert (select lat is null from public.arrival_locations where id = '71000000-0000-0000-0000-000000000001'), 'still nothing kept';
+  assert (select count(*) from public.notifications where kind = 'arrival') = (select c from n0), 'the switch tells nobody';
+end $$;
+update public.arrivals set share_location = true where id = '71000000-0000-0000-0000-000000000001';
+do $$ begin
+  assert private.record_location('10000000-0000-0000-0000-000000000002', 45.8, -73.6, 5, now(), 'owntracks') = 'ok', 'on again: kept';
+end $$;
 update public.arrivals set left_at = now() - interval '20 minutes', updated_via = 'system' where id = '71000000-0000-0000-0000-000000000001';
 do $$ begin
   assert private.record_location('10000000-0000-0000-0000-000000000002', 45.5005, -73.6, 5, now(), 'owntracks') = 'home', 'home';
