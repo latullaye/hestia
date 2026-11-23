@@ -4,6 +4,8 @@
 //   3. if what it says changed since the last picture (a fingerprint of its text), sends the PNG back.
 // It never prints the family's data: the repository is public, and so are the workflow's logs.
 //   HESTIA_POSTER_VARIANT  aujourdhui (default) | semaine | epure      HESTIA_POSTER_FORCE=1  send even if unchanged
+//   HESTIA_POSTER_SCALE    1 (default): 1920 × 1080, what the Chromecast's ambient screen shows (it shows photos in
+//                          1080p, even on a 4K TV: a 4K picture would only be scaled down, a little softer); 2: 4K
 import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { createServer } from "node:http";
@@ -14,6 +16,7 @@ import { fileURLToPath } from "node:url";
 const { chromium } = createRequire(import.meta.url)("playwright");
 const FUNCTIONS = process.env.HESTIA_FUNCTIONS_URL || "https://cjneicknraclualneebb.supabase.co/functions/v1";
 const KEY = process.env.HESTIA_POSTER_KEY, VARIANT = process.env.HESTIA_POSTER_VARIANT || "aujourdhui";
+const SCALE = process.env.HESTIA_POSTER_SCALE === "2" ? 2 : 1;
 if (!KEY) { console.log("::warning::Pas de secret HESTIA_POSTER_KEY : l'affiche n'est pas faite (docs/SETUP.md, « Télé »)."); process.exit(0); }
 const auth = { Authorization: `Bearer ${KEY}` };
 
@@ -35,13 +38,13 @@ await new Promise((r) => server.listen(0, "127.0.0.1", r));
 
 const browser = await chromium.launch();
 try {
-  const page = await browser.newPage({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 2, locale: "fr-CA", timezoneId: tz || "America/Toronto", serviceWorkers: "block" });
+  const page = await browser.newPage({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: SCALE, locale: "fr-CA", timezoneId: tz || "America/Toronto", serviceWorkers: "block" });
   await page.addInitScript((t) => { window.__HESTIA_SNAPSHOT__ = t; }, tables);
   await page.goto(`http://127.0.0.1:${server.address().port}/?demo=snapshot#/poster?v=${VARIANT}`);
   await page.waitForSelector(".poster", { timeout: 30_000 });
   await page.evaluate(() => document.fonts.ready);
   await page.waitForTimeout(500);
-  const hash = createHash("sha256").update(`${VARIANT}\n${await page.locator(".poster").innerText()}`).digest("hex");
+  const hash = createHash("sha256").update(`${VARIANT}@${SCALE}\n${await page.locator(".poster").innerText()}`).digest("hex");
   if (hash === last && !process.env.HESTIA_POSTER_FORCE) { console.log("Affiche inchangée : rien à envoyer."); process.exit(0); }
   // PNG, not JPEG: no compression halo around the letters, which shows on a dark background on a large screen
   const png = await page.screenshot({ type: "png" });

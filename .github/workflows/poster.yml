@@ -24,6 +24,8 @@ jobs:
     env:
       HESTIA_POSTER_KEY: ${{ secrets.HESTIA_POSTER_KEY }}
       HESTIA_POSTER_FORCE: ${{ inputs.force && '1' || '' }}
+      # 1080p by default (the Chromecast's ambient screen); the repository variable HESTIA_POSTER_SCALE = 2 makes it 4K
+      HESTIA_POSTER_SCALE: ${{ vars.HESTIA_POSTER_SCALE }}
     steps:
       - id: ready
         run: |

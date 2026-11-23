@@ -254,8 +254,10 @@ Plus › Journal : qui a fait quoi, quand, et d'où (app, kiosque, interphone, C
 
 ## Affiche pour la télé (écran de veille de la Chromecast)
 
-Les jours qui viennent en une image 4K (3840 × 2160), dans l'album Google Photos que l'écran de veille de la Chromecast
-projette. Écran : `src/pages/Poster.tsx` (`#/poster`) ; réglages : **Réglages › Télé**.
+Les jours qui viennent en une image, dans l'album Google Photos que l'écran de veille de la Chromecast projette. En
+**1080p** (1920 × 1080) : l'écran de veille affiche les photos en 1080p, même sur une télé 4K, et une image 4K n'y
+serait que réduite, un peu moins nette. La mise en page est faite pour 1920 × 1080 et sait aussi se prendre en 4K : la
+variable de dépôt GitHub `HESTIA_POSTER_SCALE` = `2` (Settings › Secrets and variables › Actions › Variables). Écran : `src/pages/Poster.tsx` (`#/poster`) ; réglages : **Réglages › Télé**.
 
 - **Ce qu'elle montre** (variante « Aujourd'hui en grand », thème sombre, choisie par la famille) : la carte du jour ne
   porte que l'essentiel, les rendez-vous **encore à venir** (ceux qui sont passés s'en vont) et le menu (dîner et souper,
@@ -274,7 +276,7 @@ projette. Écran : `src/pages/Poster.tsx` (`#/poster`) ; réglages : **Réglages
   où passent de grandes taches douces de bleu-vert et de braise ; reflet sur l'arête du haut, étiquettes en verre aussi.
   Ailleurs, l'app garde ses cartes unies. Les autres variantes restent pour essayer : `?v=semaine`, `?v=epure`, `&theme=light`.
 - **Quand elle change** : à la nouvelle d'un trajet (voir ci-dessus), et toutes les 30 minutes : une tâche GitHub (`.github/workflows/poster.yml`, `scripts/poster.mjs`)
-  dessine l'affiche avec les données du moment (une image PNG, sans perte : pas de halo autour des lettres) et ne
+  dessine l'affiche avec les données du moment (une image PNG, sans perte : pas de halo autour des lettres ; des traits de pixels entiers) et ne
   l'envoie que si son texte a changé (et donc au moins chaque matin,
   avec la date). Les journaux de cette tâche ne montrent jamais les données de la famille.
 - **Les albums** : une app ne peut remplir qu'un album qu'elle a créé, et ne peut supprimer aucune photo. Hestia crée
