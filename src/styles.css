@@ -505,7 +505,9 @@ button.link { background: none; border: 0; padding: 4px 8px; margin: -4px 0; min
 .p-arrival-text em { font-style: normal; font-size: 26px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .p-aside { display: flex; flex-direction: column; gap: 10px; padding: 0 8px; flex: none; }
 .p-aside p { margin: 0; display: flex; align-items: center; gap: 14px; font-size: 25px; color: var(--muted); white-space: nowrap; }
-.p-aside p > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.p-aside .p-items { display: flex; min-width: 0; flex: 1; overflow: hidden; }
+.p-aside .p-it { flex: none; }
+.p-aside .p-it + .p-it::before { content: "·"; margin: 0 12px; }
 .p-aside .gi { opacity: 0.8; }
 
 :root[data-theme="dark"] .p-aujourdhui .p-arrival {

@@ -93,8 +93,8 @@ Plus › **Je rentre**, ou un appui long sur l'icône de Hestia sur Android (rac
   prévenir et le choix de partager sa position sont retenus sur l'appareil.
 - **Un mot** pour les autres, au départ ou en route (« Je passe chercher les pizzas ») : il part avec la nouvelle.
 - **Une seule notification par série d'ajustements** : la nouvelle part 45 secondes après le dernier changement, et
-  compare avec ce que les autres savaient déjà : « Arthur rentre · arrivée vers 17 h 30 », « Arthur arrivera un peu plus
-  tard · Nouvelle heure : 17 h 45 (au lieu de 17 h 30) », « Arthur a laissé un mot ». Revenir à l'heure déjà annoncée
+  compare avec ce que les autres savaient déjà : « Alex rentre · arrivée vers 17 h 30 », « Alex arrivera un peu plus
+  tard · Nouvelle heure : 17 h 45 (au lieu de 17 h 30) », « Alex a laissé un mot ». Revenir à l'heure déjà annoncée
   n'envoie rien. Toucher la notification ouvre le trajet.
 - **Où il est, en direct** : pendant le trajet, ceux qu'on prévient (et le kiosque, en touchant la pastille du haut)
   voient une carte : sa position, le chemin à vélo jusqu'à la maison, la distance qui reste et le temps à vélo, depuis
@@ -111,7 +111,7 @@ Plus › **Je rentre**, ou un appui long sur l'icône de Hestia sur Android (rac
 - **La maison sur la carte** : **Réglages › La maison › Je suis à la maison : la placer ici** (une fois). Elle sert au
   chemin et à l'arrivée : à moins de 150 m de la maison (passé les 2 premières minutes), le trajet se termine tout seul.
 - En route : changer l'heure, ajouter un mot, couper le partage, « Je suis à la maison », ou annuler.
-- Chez les autres, l'écran d'accueil montre « Arthur arrive vers 17 h 30 », les minutes qui restent et le mot ; le
+- Chez les autres, l'écran d'accueil montre « Alex arrive vers 17 h 30 », les minutes qui restent et le mot ; le
   kiosque aussi, en haut. Un compte à rebours dans la notification elle-même n'est pas possible pour une app web.
 
 ## Absences : séjours et vacances
@@ -264,10 +264,11 @@ variable de dépôt GitHub `HESTIA_POSTER_SCALE` = `2` (Settings › Secrets and
   seulement le souper à partir de 16 h). Quand il ne reste plus rien à venir aujourd'hui, la carte du jour se réduit à
   une ligne (« Ce soir · Souper ») et une seconde carte montre **demain** (rendez-vous et menu) ; la colonne de droite
   commence alors au surlendemain. Dessous, deux lignes discrètes, sans étiquettes : les tâches du jour à ne pas oublier
-  (pas celles de tous les jours, comme la vaisselle), puis les anniversaires des trois semaines à venir (prénom et
-  initiale). À droite, les jours suivants : autant qu'il en tient en entier (une semaine calme en montre 4 ou 5, une
+  (pas celles qui reviennent presque chaque jour, 5 jours par semaine ou plus, comme la vaisselle ou la litière), puis
+  les anniversaires des trois semaines à venir (prénom et initiale). Chaque ligne garde ce qui tient en entier, jamais
+  un nom coupé par « … ». À droite, les jours suivants : autant qu'il en tient en entier (une semaine calme en montre 4 ou 5, une
   semaine chargée 2), jamais un jour coupé ; deux événements au plus par jour, puis dîner et souper.
-- **Quelqu'un rentre** (« Je rentre ») : une carte en verre plus claire, tout en haut, « Arthur arrive vers 17 h 30 »,
+- **Quelqu'un rentre** (« Je rentre ») : une carte en verre plus claire, tout en haut, « Alex arrive vers 17 h 30 »,
   avec le départ et son mot. L'image est refaite dès que la nouvelle part (45 s après le dernier ajustement), sans
   attendre la demi-heure ; la carte s'en va une demi-heure après l'heure annoncée (au passage suivant). Le logo en haut à gauche ; en haut à droite la date et les décomptes affichés sur le kiosque (« Noël dans
   33 jours »). Le bas de l'image reste vide : la télé l'assombrit (un dégradé) et y affiche son heure et sa météo. Les

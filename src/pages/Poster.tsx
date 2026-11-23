@@ -9,6 +9,7 @@ import { hhmm } from "../components/Away";
 import { Avatars } from "../components/ui";
 import { BIRTHDAY_ICON, KIND_ICON, STAY_ICON, addDays, birthdaysOn, cap, countdownsFrom, eventsOn, fmtDay, mealName, mealsOn, occurrencesOn,
   partsIn, startTime, stayLabel, stayOn, upcomingBirthdays } from "../lib/domain";
+import { nearlyDaily } from "@shared/schedule.ts";
 import { useHousehold, useMembers, useTable, useToday } from "../lib/hooks";
 import type { CalEvent, Meal } from "../lib/types";
 
@@ -29,10 +30,12 @@ function useDays(n: number) {
       lunch: mealsOn(meals, d, "lunch"), dinner: mealsOn(meals, d, "dinner"),
     };
   });
-  // The chores worth a reminder: not those done every single day (nobody forgets the dishes), the others
+  // The chores worth a reminder: not those that come back (almost) every day (nobody forgets the litter), the others,
+  // each once
   const rules = useTable("chores");
-  const everyDay = new Set(rules.filter((c) => c.schedule.type === "daily" && (c.schedule.every ?? 1) <= 1).map((c) => c.id));
-  const chores = occurrencesOn(occurrences, today, tz, today).filter((o) => o.status === "todo" && !(o.chore_id && everyDay.has(o.chore_id)));
+  const everyDay = new Set(rules.filter((c) => nearlyDaily(c.schedule)).map((c) => c.id));
+  const chores = occurrencesOn(occurrences, today, tz, today).filter((o) => o.status === "todo" && !(o.chore_id && everyDay.has(o.chore_id)))
+    .filter((o, i, all) => all.findIndex((x) => x.title === o.title) === i);
   const soon = [
     ...upcomingBirthdays(birthdaysAll, today).filter((b) => b.in >= n && b.in <= 30 && b.kind !== "memorial")
       .map((b) => ({ key: b.id, icon: BIRTHDAY_ICON[b.kind] ?? "cake", text: shortName(b.name), in: b.in })),
@@ -146,7 +149,7 @@ function Semaine() {
 
 // B: today in large, the next three days in a column beside it
 // B, the family's choice. The left column follows the time of day:
-//   - someone on the way home: a bright glass panel at the top ("Arthur arrive vers 17 h 30"), until half an hour after
+//   - someone on the way home: a bright glass panel at the top ("Alex arrive vers 17 h 30"), until half an hour after
 //     the time they gave (the picture is redrawn as soon as the news goes out: functions/notify asks GitHub for it);
 //   - today: what is still to come (past appointments leave), and the menu (lunch and dinner, only dinner from 16 h);
 //   - when nothing is left to come today, today keeps only its menu and a second panel shows tomorrow; the column on the
@@ -169,6 +172,23 @@ function fitDays(column: HTMLElement | null) {
   const shown = days.filter((d) => d.style.display !== "none");
   shown.forEach((d, i) => d.classList.toggle("last", i === shown.length - 1));
 }
+// The quiet lines under the panels (chores, birthdays): only the items that fit whole, never one cut by "…"; a line with
+// nothing that fits is left out
+function fitLines(box: HTMLElement | null) {
+  if (!box) return;
+  for (const line of box.querySelectorAll<HTMLElement>("p")) {
+    const items = [...line.querySelectorAll<HTMLElement>(".p-it")];
+    items.forEach((x) => { x.style.display = ""; });
+    line.style.display = "";
+    const right = (line.querySelector(".p-items") as HTMLElement).getBoundingClientRect().right;
+    let hide = false;
+    items.forEach((x) => {
+      if (!hide && x.getBoundingClientRect().right > right + 0.5) hide = true;
+      if (hide) x.style.display = "none";
+    });
+    if (items[0]?.style.display === "none") line.style.display = "none";
+  }
+}
 const notOver = (e: CalEvent, now: number) => e.all_day || (e.ends_at ? Date.parse(e.ends_at) : Date.parse(e.starts_at) + 3_600_000) > now;
 
 function Aujourdhui() {
@@ -182,8 +202,11 @@ function Aujourdhui() {
   const showTomorrow = !toCome.length && !t.stay;
   // As many next days as the column holds whole: a quiet week shows more of them, a busy one fewer (see fitDays)
   const next = showTomorrow ? days.slice(2, 10) : days.slice(1, 9);
-  const column = useRef<HTMLElement>(null);
-  useLayoutEffect(() => fitDays(column.current));
+  const column = useRef<HTMLElement>(null), aside = useRef<HTMLDivElement>(null);
+  const fit = () => { fitLines(aside.current); fitDays(column.current); };
+  useLayoutEffect(fit);
+  // Widths change once the fonts are in: fit again then (before the picture is taken, which waits for the same fonts)
+  useEffect(() => { document.fonts?.ready.then(fit); }, []);
   const when = (n: number) => (n === 0 ? "aujourd'hui" : n === 1 ? "demain" : `dans ${n} jours`);
   const menu = (l: Meal[], d: Meal[]) => (l.length || d.length) ? <div className="p-meals"><Meals list={l} dish={dish} label="Dîner" /><Meals list={d} dish={dish} label="Souper" /></div> : null;
   return (
@@ -223,9 +246,9 @@ function Aujourdhui() {
             </section>
           )}
           {/* Beneath, quieter: the day's chores and the birthdays to come, as plain lines */}
-          {(chores.length > 0 || birthdays.length > 0) && <div className="p-aside">
-            {chores.length > 0 && <p><Glyph name="list-checks" /><span>{chores.map((o) => o.title).join(" · ")}</span></p>}
-            {birthdays.length > 0 && <p><Glyph name="cake" /><span>{birthdays.map((x) => `${x.text} ${when(x.in)}`).join(" · ")}</span></p>}
+          {(chores.length > 0 || birthdays.length > 0) && <div className="p-aside" ref={aside}>
+            {chores.length > 0 && <p><Glyph name="list-checks" /><span className="p-items">{chores.map((o) => <span key={o.id} className="p-it">{o.title}</span>)}</span></p>}
+            {birthdays.length > 0 && <p><Glyph name="cake" /><span className="p-items">{birthdays.map((x) => <span key={x.key} className="p-it">{`${x.text} ${when(x.in)}`}</span>)}</span></p>}
           </div>}
         </div>
         <section className="p-next" ref={column}>

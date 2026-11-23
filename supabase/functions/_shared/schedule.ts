@@ -21,6 +21,14 @@ const monday = (day: string) => addDays(day, 1 - isoDow(day));
 const mod = (a: number, b: number) => ((a % b) + b) % b;
 const daysApart = (a: string, b: string) => Math.round((Date.parse(b + "T12:00:00Z") - Date.parse(a + "T12:00:00Z")) / 864e5);
 
+// Comes back (almost) every day: every day, or five days a week or more ("la litière", every day but garbage day).
+// The TV poster leaves these out: nobody needs reminding of them from across the room.
+export function nearlyDaily(s: Schedule): boolean {
+  const every = Math.max(1, ("every" in s && s.every) || 1);
+  if (every > 1) return false;
+  return s.type === "daily" || (s.type === "weekly" && new Set(s.weekdays || []).size >= 5);
+}
+
 // "tous les soirs", "le mercredi", "le samedi (sinon le lendemain)", "en mai", "le 1er samedi du mois"…
 export function describeSchedule(s: Schedule, timeOfDay = "anytime"): string {
   const when = TIMES_OF_DAY[timeOfDay] || "";

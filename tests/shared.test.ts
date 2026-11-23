@@ -2,7 +2,7 @@
 import { describe, expect, it } from "vitest";
 import { decodeBirthday, decodeTitle, encodeDescription, encodeTitle, sameName, stripFooter, type Person } from "../supabase/functions/_shared/calendar-codec.ts";
 import { ICON_KEYS, iconKey } from "../supabase/functions/_shared/icons.ts";
-import { describeSchedule, matches, nextDays, openUntil, scheduleError } from "../supabase/functions/_shared/schedule.ts";
+import { describeSchedule, matches, nearlyDaily, nextDays, openUntil, scheduleError } from "../supabase/functions/_shared/schedule.ts";
 import { addDays, daysBetween, fmtTime, instant, norm, parseWhen, partsIn } from "../supabase/functions/_shared/time.ts";
 
 const people: Person[] = [
@@ -52,6 +52,15 @@ describe("chore rhythms", () => {
     expect(openUntil({ type: "yearly", months: [5] }, "2027-05-01")).toBe("2027-05-31");
     expect(openUntil({ type: "weekly", weekdays: [6], grace_days: 1 }, "2026-11-14")).toBe("2026-11-15");
     expect(nextDays({ type: "weekly", weekdays: [6] }, "2026-01-01", "2026-11-14", 2)).toEqual(["2026-11-14", "2026-11-21"]);
+  });
+  it("tells the chores that come back (almost) every day", () => {
+    expect(nearlyDaily({ type: "daily" })).toBe(true);
+    expect(nearlyDaily({ type: "weekly", weekdays: [1, 2, 4, 5, 6, 7] })).toBe(true);
+    expect(nearlyDaily({ type: "weekly", weekdays: [1, 2, 3, 4, 5] })).toBe(true);
+    expect(nearlyDaily({ type: "daily", every: 2 })).toBe(false);
+    expect(nearlyDaily({ type: "weekly", weekdays: [1, 2, 3, 4, 5, 6, 7], every: 2 })).toBe(false);
+    expect(nearlyDaily({ type: "weekly", weekdays: [1, 3, 5, 7] })).toBe(false);
+    expect(nearlyDaily({ type: "monthly", days: [1] })).toBe(false);
   });
   it("refuses incomplete rules", () => {
     expect(scheduleError({ type: "weekly", weekdays: [] })).toMatch(/jour de la semaine/);
