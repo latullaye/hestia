@@ -264,8 +264,9 @@ variable de dépôt GitHub `HESTIA_POSTER_SCALE` = `2` (Settings › Secrets and
   seulement le souper à partir de 16 h). Quand il ne reste plus rien à venir aujourd'hui, la carte du jour se réduit à
   une ligne (« Ce soir · Souper ») et une seconde carte montre **demain** (rendez-vous et menu) ; la colonne de droite
   commence alors au surlendemain. Dessous, deux lignes discrètes, sans étiquettes : les tâches du jour à ne pas oublier
-  (pas celles de tous les jours, comme la vaisselle), puis les anniversaires des trois semaines à venir (prénom et initiale). À droite, les trois jours suivants (deux événements au
-  plus, puis dîner et souper).
+  (pas celles de tous les jours, comme la vaisselle), puis les anniversaires des trois semaines à venir (prénom et
+  initiale). À droite, les jours suivants : autant qu'il en tient en entier (une semaine calme en montre 4 ou 5, une
+  semaine chargée 2), jamais un jour coupé ; deux événements au plus par jour, puis dîner et souper.
 - **Quelqu'un rentre** (« Je rentre ») : une carte en verre plus claire, tout en haut, « Arthur arrive vers 17 h 30 »,
   avec le départ et son mot. L'image est refaite dès que la nouvelle part (45 s après le dernier ajustement), sans
   attendre la demi-heure ; la carte s'en va une demi-heure après l'heure annoncée (au passage suivant). Le logo en haut à gauche ; en haut à droite la date et les décomptes affichés sur le kiosque (« Noël dans
