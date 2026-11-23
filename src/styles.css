@@ -529,3 +529,5 @@ button.link { background: none; border: 0; padding: 4px 8px; margin: -4px 0; min
 .p-today.tomorrow .p-events.big { font-size: 32px; gap: 12px; }
 .p-today.tomorrow .p-meals.lines { gap: 4px; font-size: 28px; padding-top: 12px; }
 .p-next > .p-nextday { flex: none; } /* a day keeps its height: fitDays leaves out those that do not fit */
+/* An icon alone in a round badge: none of the margin that separates icons from text, so it sits in the middle */
+.p-arrival-icon .gi, .trip-home .gi { margin: 0; vertical-align: 0; opacity: 1; }
