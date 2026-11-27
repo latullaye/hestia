@@ -349,7 +349,7 @@ body.dragging * { cursor: grabbing !important; }
 .trip-map.dark img { filter: grayscale(1) invert(1) contrast(0.7) brightness(0.72); }
 /* The map in Hestia's colours: the grey tiles take the accent's hue, the lines keep their light and shade */
 .trip-tint { position: absolute; inset: 0; pointer-events: none; background: var(--accent); mix-blend-mode: color; opacity: 0.35; }
-.trip-map svg { position: absolute; inset: 0; pointer-events: none; }
+.trip-map > svg { position: absolute; inset: 0; pointer-events: none; } /* the route only, not the icons inside the markers */
 .trip-route { fill: none; stroke: var(--accent); stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; opacity: 0.85; }
 .trip-route.straight { stroke-width: 4; stroke-dasharray: 1 9; }
 .trip-home { position: absolute; transform: translate(-50%, -50%); width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center;
