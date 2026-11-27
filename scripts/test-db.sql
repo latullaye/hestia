@@ -370,11 +370,22 @@ do $$ begin
   -- At the door, just after saying "je rentre": not home yet
   assert private.record_location('10000000-0000-0000-0000-000000000002', 45.5005, -73.6, 5, now(), 'owntracks') = 'ok', 'not in the first minutes';
 end $$;
+-- For the stats: the time first announced is kept; nearing home by 200 m from where the trip started is the real
+-- departure, and a departure once known stays (the app may send the row without it)
+do $$ begin
+  assert (select first_eta is not null and first_eta <> eta from public.arrivals where id = '71000000-0000-0000-0000-000000000001'), 'the first time is kept';
+  assert (select departed_at is not null from public.arrivals where id = '71000000-0000-0000-0000-000000000001'), 'left: 200 m nearer home';
+  assert (select start_home_m > 10000 from public.arrival_locations where id = '71000000-0000-0000-0000-000000000001'), 'the start, as a distance';
+end $$;
+update public.arrivals set departed_at = null, first_eta = null where id = '71000000-0000-0000-0000-000000000001';
+do $$ begin
+  assert (select departed_at is not null and first_eta is not null from public.arrivals where id = '71000000-0000-0000-0000-000000000001'), 'kept by the server';
+end $$;
 -- The sharing switch is the trip's: off, the point is wiped and OwnTracks' points are not kept (no news for it)
 create temp table n0 as select count(*) as c from public.notifications where kind = 'arrival';
 update public.arrivals set share_location = false where id = '71000000-0000-0000-0000-000000000001';
 do $$ begin
-  assert (select lat is null and deleted_at is not null from public.arrival_locations where id = '71000000-0000-0000-0000-000000000001'), 'off: the point is wiped';
+  assert (select lat is null and deleted_at is not null and start_home_m is null from public.arrival_locations where id = '71000000-0000-0000-0000-000000000001'), 'off: the point is wiped';
   assert private.record_location('10000000-0000-0000-0000-000000000002', 45.8, -73.6, 5, now(), 'owntracks') = 'off', 'off: not kept';
   assert (select lat is null from public.arrival_locations where id = '71000000-0000-0000-0000-000000000001'), 'still nothing kept';
   assert (select count(*) from public.notifications where kind = 'arrival') = (select c from n0), 'the switch tells nobody';

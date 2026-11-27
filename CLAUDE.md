@@ -55,6 +55,7 @@ supabase/
   migrations/             le schéma, dans l'ordre
   functions/_shared/      code commun aux fonctions ET à l'app (sans dépendance à Deno, sauf runtime.ts)
     tools*.ts, registry.ts  les outils de Claude (MCP + interphone)
+    trips.ts              les chiffres des trajets (écran « Mes trajets » et outil trajets)
     gcal*.ts, calendar-codec.ts  le miroir Google Agenda
     schedule.ts           rythmes des tâches (même règle que private.chore_matches en SQL)
   functions/mcp|intercom|gcal-sync|notify|location|poster/   les six points d'entrée

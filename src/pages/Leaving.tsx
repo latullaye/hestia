@@ -56,6 +56,9 @@ function OnTheWay({ trip }: { trip: Arrival }) {
         <p className="muted" style={{ margin: 0 }}>{left > 0 ? `dans ${left} min` : "c'est l'heure"} · {told} {trip.notify_ids.filter((id) => id !== trip.member_id).length > 1 ? "le savent" : "le sait"}</p>
         <Stepper onMinus={() => move(-1)} onPlus={move} minusOff={shiftSlot(eta, -1, now) === eta} />
         <p className="tiny muted" style={{ margin: 0 }}>Les changements partent 45 secondes après le dernier : ajuste tranquillement.</p>
+        {/* The real departure, for "Mes trajets": found from the position, or said here when one warns before leaving */}
+        {trip.departed_at ? <p className="small muted" style={{ margin: 0 }}>Parti à {hhmm(trip.departed_at, household.tz)}</p>
+          : <button className="btn" onClick={() => store.put("arrivals", { ...trip, departed_at: new Date().toISOString() })}>Je pars maintenant</button>}
       </div>
       <Field label="Un mot pour eux">
         <div className="row">

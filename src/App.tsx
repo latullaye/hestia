@@ -18,6 +18,7 @@ import { Inbox, inboxOf } from "./pages/Inbox";
 import { Kiosk } from "./pages/Kiosk";
 import { Leaving } from "./pages/Leaving";
 import { Trip } from "./pages/Trip";
+import { Trips } from "./pages/Trips";
 import { Poster } from "./pages/Poster";
 import { TripSharer } from "./components/TripSharer";
 import { Login, NotLinked } from "./pages/Login";
@@ -83,6 +84,7 @@ function Routed() {
         <Route path="/gifts" element={<Gifts />} />
         <Route path="/leaving" element={<Leaving />} />
         <Route path="/trip/:id" element={<Trip />} />
+        <Route path="/trajets" element={<Trips />} />
         <Route path="/journal" element={<Journal />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/more" element={<More />} />

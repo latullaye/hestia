@@ -115,7 +115,19 @@ Plus › **Je rentre**, ou un appui long sur l'icône de Hestia sur Android (rac
   l'annulation, et une heure après l'heure annoncée.
 - **La maison sur la carte** : **Réglages › La maison › Je suis à la maison : la placer ici** (une fois). Elle sert au
   chemin et à l'arrivée : à moins de 150 m de la maison (passé les 2 premières minutes), le trajet se termine tout seul.
-- En route : changer l'heure, ajouter un mot, couper le partage, « Je suis à la maison », ou annuler.
+- En route : changer l'heure, ajouter un mot, couper le partage, « Je pars maintenant » (si on a prévenu avant de
+  partir), « Je suis à la maison », ou annuler.
+- **Mes trajets** (Plus › Mes trajets, `src/pages/Trips.tsx`) : l'évolution des trajets, sur 30 jours, 3 mois ou tout.
+  Pour chaque trajet, quatre heures : quand on a prévenu, quand on est vraiment parti, l'heure annoncée d'abord (et la
+  dernière si elle a changé), quand on est arrivé. En haut, le trajet habituel (médianes : prévenu, parti, annoncé,
+  arrivé, durée, écart avec l'heure annoncée) ; puis un graphique, une colonne par trajet (gris : ce qui était dit ;
+  bleu-vert : ce qui s'est passé, relié par le trajet), qu'on touche pour lire le détail ; puis la liste. Les autres
+  adultes ont aussi leurs trajets (onglets). Claude lit les mêmes chiffres (outil `trajets`, avec les médianes par
+  mois).
+  - Le **départ réel** vient de la position : le premier point à 200 m de plus près de la maison qu'au début du trajet
+    (seule cette distance est gardée, effacée avec le point) ; sinon du bouton « Je pars maintenant ». Partage coupé :
+    seul le bouton compte.
+  - L'**arrivée réelle** est l'heure du point près de la maison, ou du bouton « Je suis à la maison ».
 - Chez les autres, l'écran d'accueil montre « Alex arrive vers 17 h 30 », les minutes qui restent et le mot ; le
   kiosque aussi, en haut. Un compte à rebours dans la notification elle-même n'est pas possible pour une app web.
 

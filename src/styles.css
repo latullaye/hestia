@@ -363,6 +363,21 @@ body.dragging * { cursor: grabbing !important; }
 .trip-credit { position: absolute; right: 4px; bottom: 3px; font-size: 10px; color: var(--muted); padding: 0 5px; border-radius: 4px;
   background: color-mix(in srgb, var(--surface) 80%, transparent); }
 .trip-note { margin: 0; font-style: italic; }
+/* "Mes trajets" (src/pages/Trips.tsx): what was said is grey, what happened is the accent */
+.trip-usual { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.trip-usual > div { display: flex; flex-direction: column; gap: 2px; }
+.trip-usual b { font-family: var(--font-display); font-size: 1.25rem; font-weight: 500; font-variant-numeric: tabular-nums; }
+.trip-chart { display: block; overflow: visible; }
+.trip-chart g { cursor: pointer; }
+.tc-grid { stroke: var(--line); stroke-width: 1; }
+.tc-axis { fill: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+.tc-pick { fill: var(--group); opacity: 0.8; }
+.tc-ride { stroke: var(--accent); stroke-width: 2; opacity: 0.45; stroke-linecap: round; }
+.tc-told { stroke: var(--muted); stroke-width: 2; stroke-linecap: round; }
+.tc-planned { fill: var(--surface); stroke: var(--muted); stroke-width: 1.75; }
+.tc-left { fill: var(--accent); stroke: var(--surface); stroke-width: 1.5; }
+.tc-home { fill: var(--accent); stroke: var(--surface); stroke-width: 2; }
+.card.list > div.on { background: var(--group); }
 /* A small button that reads like a link (the usual trip's −5 / +5) */
 button.link { background: none; border: 0; padding: 4px 8px; margin: -4px 0; min-height: 32px; color: var(--accent); font-weight: 700; cursor: pointer; }
 

@@ -239,3 +239,18 @@ describe("birthdays, countdowns, overview, log", () => {
     expect(text).toContain("via intercom");
   });
 });
+
+describe("trips home", () => {
+  it("tells when one said it, left, announced and was home", async () => {
+    const text = await ok(sam, "trajets");
+    expect(text).toContain("## Trajets de Sam");
+    expect(text).toMatch(/prévenu \d+ h/);
+    expect(text).toMatch(/parti \d+ h/);       // found from the position (scripts/test-db.sql)
+    expect(text).toContain("(puis ");           // the time moved after it was first announced
+    expect(text).toMatch(/arrivé \d+ h/);
+    expect(await ok(c, "trajets", { qui: "Sam" })).toContain("## Trajets de Sam");
+    expect((await run(kiosk, "trajets")).error).toBe(true); // whose?
+    expect(await ok(c, "trajets")).toContain("Aucun trajet d'Alex");
+  });
+});
+

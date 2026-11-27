@@ -139,6 +139,17 @@ export function demoTables(): Partial<{ [T in keyof Tables]: Tables[T][] }> {
   ];
   const arrivals: Tables["arrivals"][] = [{ id: "a-1", member_id: sam, from_label: "du bureau", left_at: new Date(Date.now() - 12 * 60_000).toISOString(),
     eta: new Date(Math.ceil((Date.now() + 18 * 60_000) / 300_000) * 300_000).toISOString(), notify_ids: [alex], arrived_at: null, note: "Je passe chercher le pain" }];
+  // Alex's trips home on the weekdays of the last five weeks, for "Mes trajets": leaving a little earlier as weeks go by
+  const hm = (m: number) => `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
+  for (let k = -35; k <= -1; k++) {
+    const dow = new Date(d(k) + "T12:00:00Z").getUTCDay();
+    if (dow === 0 || dow === 6) continue;
+    const r = (n: number) => (((k * 7919 + n * 104729) % 97) + 97) % 97 / 97; // the same "random" every time
+    const told = 1035 + Math.round(k * 0.5 + r(1) * 14), left = told + 2 + Math.round(r(2) * 7);
+    const planned = Math.ceil((told + 30) / 5) * 5, last = r(3) > 0.8 ? planned + 5 : planned, home = left + 26 + Math.round(r(4) * 7);
+    arrivals.push({ id: `a-past${k}`, member_id: alex, from_label: "du bureau", left_at: at(k, hm(told)), created_at: at(k, hm(told)),
+      departed_at: at(k, hm(left)), first_eta: at(k, hm(planned)), eta: at(k, hm(last)), notify_ids: [sam], arrived_at: at(k, hm(home)), note: null });
+  }
   // Sam on the way, a little over 2 km from home (a park in the demo city, not a real address)
   const arrival_locations: Tables["arrival_locations"][] = [{ id: "a-1", lat: 45.5105, lng: -73.5570, accuracy: 12, located_at: new Date(Date.now() - 40_000).toISOString(), via: "app" }];
   const stays: Tables["stays"][] = [
