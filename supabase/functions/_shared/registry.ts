@@ -2,6 +2,7 @@
 // the Messages API (functions/intercom).
 import { type Ctx, type Row, type Tool, ToolError, addDays, daysBetween, family, fmtDay, fmtTime, namesOf, partsIn, today, tool, z } from "./tools.ts";
 import { birthdayLine, calendarTools, eventLine, eventsBetween, uncared, upcomingBirthdays } from "./tools-calendar.ts";
+import { tripTools } from "./tools-trips.ts";
 import { homeTools, mealLine, mealsBetween, occurrenceLine, occurrencesFor, recentDishes, shoppingLists, shoppingSections } from "./tools-home.ts";
 
 const overview = tool({
@@ -51,7 +52,7 @@ const overview = tool({
   },
 });
 
-export const tools: Tool[] = [overview, ...calendarTools, ...homeTools];
+export const tools: Tool[] = [overview, ...calendarTools, ...homeTools, ...tripTools];
 
 // What the model should know before using the tools (MCP "instructions", and the intercom's system prompt)
 export async function instructions(c: Ctx): Promise<string> {

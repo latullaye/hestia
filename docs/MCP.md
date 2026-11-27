@@ -56,6 +56,7 @@ L'adresse donne accès aux données de la famille : la traiter comme un mot de p
 | `anniversaire_enregistrer` | Ajoute ou complète (année, note, idées de cadeaux). |
 | `decompte_enregistrer` | Ajoute, modifie ou retire un décompte. |
 | `journal` | Qui a fait quoi : par domaine, action, personne, mots, période. |
+| `trajets` | Les trajets « Je rentre » d'une personne : prévenu, parti, annoncé, arrivé, durée et écart ; médianes de la période et par mois. |
 
 Règles communes : rien n'est supprimé pour de bon ; l'icône d'une tâche, d'une liste ou d'un décompte (« icone ») est un
 nom de la liste partagée (`cat`, `trash`, `umbrella`…), jamais un emoji ; les personnes se désignent par leur prénom (ou « moi », « tous »,

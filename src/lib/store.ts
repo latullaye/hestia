@@ -20,6 +20,7 @@ const SERVER_COLUMNS: Partial<Record<TableName, string[]>> & { all: string[] } =
   events: ["gcal_event_id", "gcal_etag", "gcal_recurring", "gcal_synced_at", "gcal_dirty", "birthday_id", "source", "created_by", "approval_requested_at", "stay_id"],
   shopping_items: ["name_key", "purchase_count", "needed_at"],
   dishes: ["name_key"],
+  arrivals: ["first_eta"],
   chore_occurrences: ["done_at", "created_by", "stay_id"],
   notifications: ["action_token", "pushed_at", "created_at", "send_after"],
   gifts: ["created_by"], // decides who may see the present: set by the server only
